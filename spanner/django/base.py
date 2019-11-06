@@ -15,8 +15,14 @@
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.utils.functional import cached_property
 from google.cloud import spanner_v1 as spanner
+from spanner.dbapi.parse_utils import extract_connection_params
 
-from .parse_utils import extract_connection_params
+from .client import DatabaseClient
+from .creation import DatabaseCreation
+from .features import DatabaseFeatures
+from .introspection import DatabaseIntrospection
+from .operations import DatabaseOperations
+from .schema import DatabaseSchemaEditor
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
@@ -92,6 +98,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             'istartswith': 'STARTS_WITH(%s, %s)',
             'iendswith': 'ENDS_WITH(%s, %s)',
     }
+
+    SchemaEditorClass = DatabaseSchemaEditor
+    creation_class = DatabaseCreation
+    features_class = DatabaseFeatures
+    introspection_class = DatabaseIntrospection
+    ops_class = DatabaseOperations
+    client_class = DatabaseClient
 
     def get_connection_params(self):
         return extract_connection_params(self.settings_dict)

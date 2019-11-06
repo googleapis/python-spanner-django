@@ -15,6 +15,7 @@
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.utils.functional import cached_property
 from google.cloud import spanner_v1 as spanner
+import spanner.dbapi as Database
 from spanner.dbapi.parse_utils import extract_connection_params
 
 from .client import DatabaseClient
@@ -99,6 +100,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             'iendswith': 'ENDS_WITH(%s, %s)',
     }
 
+    Database = Database
     SchemaEditorClass = DatabaseSchemaEditor
     creation_class = DatabaseCreation
     features_class = DatabaseFeatures

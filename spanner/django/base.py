@@ -14,7 +14,6 @@
 
 import spanner.dbapi as Database
 from django.db.backends.base.base import BaseDatabaseWrapper
-from django.utils.functional import cached_property
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -132,12 +131,4 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         raise Exception('unimplemented')
 
     def is_usable(self):
-        raise Exception('unimplemented')
-
-    @cached_property
-    def display_name(self):
-        return 'Spanner'
-
-    @cached_property
-    def data_type_check_constraints(self):
         raise Exception('unimplemented')

@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import spanner.dbapi as Database
 from django.db.backends.base.base import BaseDatabaseWrapper
 from django.utils.functional import cached_property
-from google.cloud import spanner_v1 as spanner
-import spanner.dbapi as Database
-from spanner.dbapi.parse_utils import extract_connection_params
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -109,20 +107,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     client_class = DatabaseClient
 
     def get_connection_params(self):
-        return extract_connection_params(self.settings_dict)
+        return {'spanner_url': self.settings_dict['SPANNER_URL']}
 
     def get_new_connection(self, conn_params):
-        kwargs = dict(
-            project=conn_params.get('project_id'),
-            user_agent='spanner-django/v1',
-        )
-        credentials_uri = conn_params.get('credentials_uri')
-        client = None
-        if credentials_uri:
-            client = spanner.Client.from_service_account_json(credentials_uri, **kwargs)
-        else:
-            client = spanner.Client(**kwargs)
-        return client
+        return Database.connect(**conn_params)
 
     def init_connection_state(self):
         pass

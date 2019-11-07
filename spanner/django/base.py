@@ -124,8 +124,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             client = spanner.Client(**kwargs)
         return client
 
+    def init_connection_state(self):
+        pass
+
     def create_cursor(self, name=None):
-        raise Exception('unimplemented')
+        return self.connection.cursor()
+
+    def _set_autocommit(self, autocommit):
+        with self.wrap_database_errors:
+            self.connection.autocommit = autocommit
 
     def disable_constraint_checking(self):
         raise Exception('unimplemented')

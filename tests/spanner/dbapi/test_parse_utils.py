@@ -17,7 +17,7 @@ from unittest import TestCase
 from spanner.dbapi.exceptions import Error
 from spanner.dbapi.parse_utils import (
     extract_connection_params, parse_spanner_url, reINSTANCE_CONFIG,
-    validate_instance_config,
+    unsupported_sql, validate_instance_config,
 )
 
 
@@ -160,3 +160,28 @@ class ParseUtilsTests(TestCase):
             config, want_err = tt
             got = validate_instance_config(config)
             self.assertEqual(got, want_err, "expected '%s' to error" % config)
+
+    def test_unsupported_sql_supported(self):
+        # All these statements are supported by Cloud Spanner. See:
+        #   https://cloud.google.com/spanner/docs/schema-updates#supported-updates
+        stmts = [
+                'ALTER TABLE Songwriters ALTER COLUMN FirstName STRING(10)',
+                'ALTER TABLE Songwriters ALTER COLUMN Nickname STRING(MAX) NOT NULL',
+                'ALTER TABLE Songwriters ALTER COLUMN OpaqueData STRING(MAX)',
+                'ALTER TABLE Albums ALTER COLUMN LastUpdateTime SET OPTIONS (allow_commit_timestamp = true)',
+        ]
+
+        for sql in stmts:
+            got = unsupported_sql(sql)
+            self.assertEqual(got, False, '`%s` is supported' % sql)
+
+    def test_unsupported_sql_unsupported(self):
+        # All these statements are supported by Cloud Spanner. See:
+        #   https://cloud.google.com/spanner/docs/schema-updates#supported-updates
+        stmts = [
+                'ALTER TABLE t ADD CONSTRAINT t_al_m UNIQUE (al, m)',
+        ]
+
+        for sql in stmts:
+            got = unsupported_sql(sql)
+            self.assertEqual(got, True, '`%s` is NOT supported' % sql)

@@ -15,9 +15,9 @@
 import google.api_core.exceptions as grpc_exceptions
 
 from .exceptions import (
-    Error, IntegrityError, OperationalError, ProgrammingError,
+    Error, IntegrityError, NotSupportedError, OperationalError, ProgrammingError,
 )
-from .parse_utils import STMT_DDL, STMT_NON_UPDATING, classify_stmt
+from .parse_utils import STMT_DDL, STMT_NON_UPDATING, classify_stmt, unsupported_sql
 
 _UNSET_COUNT = -1
 
@@ -66,6 +66,9 @@ class Cursor(object):
         """
         if not self.__session:
             raise ProgrammingError('Cursor is not connected to the database')
+
+        if unsupported_sql(sql):
+            raise NotSupportedError('`%s` is unsupported SQL by Cloud Spanner' % sql)
 
         # Classify whether this is a read-only SQL statement.
         try:

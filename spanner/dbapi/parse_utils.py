@@ -231,3 +231,29 @@ def classify_stmt(sql):
         return STMT_NON_UPDATING
     else:
         return STMT_UPDATING
+
+
+re_UNSUPPORTED_SQL = [
+        #   ALTER TABLE <TABLE_NAME> ADD CONSTRAINT <constraint_name> UNIQUE (columns)
+        # See Issue https://github.com/orijtech/spanner-orm/issues/37.
+        re.compile(r'ALTER.+ADD CONSTRAINT.+UNIQUE', re.UNICODE | re.IGNORECASE | re.DOTALL),
+        # TODO: Add other unsupported SQL patterns here.
+]
+
+
+def unsupported_sql(sql):
+    """
+    Report whether SQL statements have no equivalent in Google SQL
+    and are thus not supported by Cloud Spanner.
+
+    Args:
+        sql: a SQL statement string.
+
+    Returns:
+        True if the SQL is NOT supported by Cloud Spanner, otherwise False.
+    """
+    for regex in re_UNSUPPORTED_SQL:
+        if regex.match(sql):
+            return True
+
+    return False

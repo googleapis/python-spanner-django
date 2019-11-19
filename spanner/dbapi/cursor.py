@@ -86,11 +86,7 @@ class Cursor(object):
                     param_types=param_types,
                 )
             elif classification == STMT_INSERT:
-                self.__session.run_in_transaction(
-                    self.__do_execute_insert,
-                    sql,
-                    args if args else None,
-                )
+                return self.do_execute_insert(sql, args if args else None)
             else:
                 self.__session.run_in_transaction(
                     self.__do_execute_update,
@@ -116,27 +112,59 @@ class Cursor(object):
 
         return res
 
-    def __do_execute_insert(self, transaction, sql, params):
+    def do_execute_insert(self, sql, params):
+        # Try to perform an INSERT to Cloud Spanner.
+        # This function assumes the common case for Django, in which almost every table
+        # has an 'id' field and thus will need adding the 'id' column and a respectively
+        # generated random int64. If insertion with a generated id fails, we'll then try
+        # again with the original parameters and columns.
+
+        try:
+            # The common case: try to automatically force the 'id' parameter.
+            return self.__session.run_in_transaction(
+                self.__do_execute_insert,
+                sql,
+                params,
+                True,
+            )
+        except grpc_exceptions.NotFound:
+            # Rare case: try again without affixing and generating 'id'.
+            return self.__session.run_in_transaction(
+                self.__do_execute_insert,
+                sql,
+                params,
+                False,
+            )
+
+    def __do_execute_insert(self, transaction, sql, params, forcibly_insert_id):
         # There are 3 variants of an INSERT statement:
         # a) INSERT INTO <table> (columns...) VALUES (<inlined values>): no params
         # b) INSERT INTO <table> (columns...) SELECT_STMT:               no params
         # c) INSERT INTO <table> (columns...) VALUES (%s,...):           with params
-        if params:
-            # Case c)
+        if not params:
+            # Either of cases a) or b)
+            return transaction.execute_update(sql)
+        else:
             parts = parse_insert(sql)
-            columns, params = add_missing_id(parts.get('columns'), params,
-                                             gen_rand_int64,
-                                             parts.get('values_pyformat'),
-                                             )
+            columns = parts.get('columns')
+
+            if forcibly_insert_id:
+                columns, params = add_missing_id(columns, params,
+                                                 gen_rand_int64,
+                                                 parts.get('values_pyformat'),
+                                                 )
+            else:
+                # params cannot be passed in as
+                #   ('f13e4q6a32cxe1blqx75', 'FjYjQ5NM5YmYyYTQzYTp7fQ==', '2019-12-03 21:09:08.811502+00:00')
+                # but should be passed in as:
+                #   [('f13e4q6a32cxe1blqx75', 'FjYjQ5NM5YmYyYTQzYTp7fQ==', '2019-12-03 21:09:08.811502+00:00')]
+                params = [params]
 
             return transaction.insert_or_update(
                 table=parts.get('table'),
                 columns=columns,
                 values=params,
             )
-        else:
-            # Either of cases a) or b)
-            return transaction.execute_update(sql)
 
     def __do_execute_non_update(self, sql, params, **kwargs):
         # Reference

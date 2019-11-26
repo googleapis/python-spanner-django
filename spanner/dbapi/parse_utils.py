@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import re
+from datetime import datetime
 from urllib.parse import urlparse
 
 from .exceptions import Error
@@ -399,3 +400,20 @@ def sql_pyformat_args_to_spanner(sql, params):
             named_args[key] = params[i]
 
     return sql, named_args
+
+
+def parse_datetimefield_value(value):
+    if value is None:
+        return value
+
+    fmt, no_us_fmt = '%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S'
+    if value.count('+') > 0:
+        # Contains the timezone e.g.
+        #       2019-11-26 02:55:41.298430+00:00
+        fmt, no_us_fmt = '%Y-%m-%d %H:%M:%S.%f%z', '%Y-%m-%d %H:%M:%S%z'
+
+    try:
+        value = datetime.strptime(value, fmt)
+    except ValueError:  # time data does not match format (no microsecond?)
+        value = datetime.strptime(value, no_us_fmt)
+    return value

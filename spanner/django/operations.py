@@ -1,5 +1,4 @@
-from datetime import datetime
-
+import spanner.dbapi as Database
 from django.db.backends.base.operations import BaseDatabaseOperations
 
 
@@ -36,9 +35,4 @@ class DatabaseOperations(BaseDatabaseOperations):
         return converters
 
     def convert_datetimefield_value(self, value, expression, connection):
-        if value is not None:
-            try:
-                value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f')
-            except ValueError:  # time data does not match format (no microsecond?)
-                value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
-        return value
+        return Database.parse_datetimefield_value(value)

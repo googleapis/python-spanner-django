@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime, timezone
 from unittest import TestCase
 
 from spanner.dbapi.exceptions import Error
 from spanner.dbapi.parse_utils import (
     STMT_DDL, STMT_NON_UPDATING, classify_stmt, extract_connection_params,
-    parse_insert, parse_spanner_url, reINSTANCE_CONFIG,
-    rows_for_insert_or_update, sql_pyformat_args_to_spanner,
+    parse_datetimefield_value, parse_insert, parse_spanner_url,
+    reINSTANCE_CONFIG, rows_for_insert_or_update, sql_pyformat_args_to_spanner,
     validate_instance_config,
 )
 
@@ -313,3 +314,18 @@ class ParseUtilsTests(TestCase):
                 self.assertRaisesRegex(Error, 'pyformat_args mismatch',
                                        lambda: sql_pyformat_args_to_spanner(sql, params),
                                        )
+
+    def test_parse_datetimefield_value(self):
+        tzUTC = timezone.utc
+        cases = [
+            ('2019-11-26 02:55:41.298430+00:00', datetime(2019, 11, 26, 2, 55, 41, 298430, tzUTC)),
+            ('2019-11-26 02:55:41+00:00', datetime(2019, 11, 26, 2, 55, 41, 0, tzUTC)),
+            ('2019-11-26 02:55:41', datetime(2019, 11, 26, 2, 55, 41)),
+            ('2019-11-26 02:55:41.298430', datetime(2019, 11, 26, 2, 55, 41, 298430)),
+            (None, None),
+        ]
+
+        for (t_str, want) in cases:
+            with self.subTest(sql=t_str):
+                got = parse_datetimefield_value(t_str)
+                self.assertEqual(got, want)

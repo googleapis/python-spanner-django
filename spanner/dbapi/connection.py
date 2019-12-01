@@ -65,3 +65,12 @@ class Connection(object):
             google.api_core.operation.Operation
         """
         return self.__dbhandle.update_ddl(ddl_statements)
+
+    def drop_db(self):
+        """Drop the entire database."""
+        try:
+            return self.__dbhandle.drop()
+        except Exception:
+            raise
+        else:
+            self.close()

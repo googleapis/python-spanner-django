@@ -424,14 +424,42 @@ def infer_param_types(params, param_types):
     return param_types
 
 
+dummy_SQL_WHERE_1_EQUALS_1 = sqlparse.parse('WHERE 1=1')[0].tokens[0]
+dummy_SQL_WHITESPACE = sqlparse.parse(' ')[0].tokens[0]
+
+
 def ensure_where_clause(sql):
     """
     Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
     Add a dummy WHERE clause if necessary.
     """
-    if any(isinstance(token, sqlparse.sql.Where) for token in sqlparse.parse(sql)[0]):
-        return sql
-    return sql + ' WHERE 1=1'
+    statements = sqlparse.parse(sql)
+
+    for statement in statements:
+        has_where_clause = any(isinstance(token, sqlparse.sql.Where) for token in statement)
+        if has_where_clause:
+            continue
+
+        # Otherwise, we'll now have to rewrite the statement to affix ` WHERE 1=1`
+        # after the first punctuation ';', of which ';' is also a statement terminator.
+        punctuation_index = len(statement.tokens)
+        for i, token in enumerate(statement.tokens):
+            if token.ttype == sqlparse.sql.T.Punctuation:
+                punctuation_index = i
+                break
+
+        before, after = statement.tokens[:punctuation_index], statement.tokens[punctuation_index:]
+        all_tokens = before
+        all_tokens += [dummy_SQL_WHITESPACE, dummy_SQL_WHERE_1_EQUALS_1]
+        all_tokens += after
+        statement.tokens = all_tokens
+
+    # Now collect the various string representations of each statement.
+    strs = []
+    for statement in statements:
+        strs.append(str(statement))
+
+    return ''.join(strs)
 
 
 def insert_key_in_param_types(key, param_types, spanner_type):

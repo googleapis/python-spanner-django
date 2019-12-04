@@ -392,8 +392,20 @@ class ParseUtilsTests(TestCase):
                     'UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)',
                 ),
                 (
-                    'DELETE * FROM TABLE',
-                    'DELETE * FROM TABLE WHERE 1=1',
+                    'DELETE * FROM TABLE;',
+                    'DELETE * FROM TABLE WHERE 1=1;',
+                ),
+                (
+                    'DELETE * FROM TABLE; WHERE 1=1',
+                    'DELETE * FROM TABLE WHERE 1=1; WHERE 1=1',
+                ),
+                (
+                    'DELETE * /* all variables */ FROM TABLE /* foo */; -- other comments',
+                    'DELETE * /* all variables */ FROM TABLE /* foo */ WHERE 1=1; -- other comments',
+                ),
+                (
+                    'DELETE * /* all variables */ FROM TABLE /* foo */ WHERE 1=1; -- already has where',
+                    'DELETE * /* all variables */ FROM TABLE /* foo */ WHERE 1=1; -- already has where',
                 ),
         ]
 

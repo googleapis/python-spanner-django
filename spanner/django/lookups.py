@@ -14,6 +14,7 @@
 
 import re
 
+from django.db.models import CharField
 from django.db.models.lookups import (
     EndsWith, IContains, IEndsWith, IExact, IStartsWith, StartsWith,
 )
@@ -22,6 +23,8 @@ from django.db.models.lookups import (
 def icontains(self, compiler, connection):
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
+    if lhs_requires_cast_to_str(self.lhs.output_field):
+        lhs_sql = 'CAST(' + lhs_sql + ' AS STRING)'
     params.extend(rhs_params)
     rhs_sql = self.get_rhs_op(connection, rhs_sql)
     # Chop the leading and trailing percent signs that Django adds to the
@@ -34,6 +37,8 @@ def icontains(self, compiler, connection):
 def iexact(self, compiler, connection):
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
+    if lhs_requires_cast_to_str(self.lhs.output_field):
+        lhs_sql = 'CAST(' + lhs_sql + ' AS STRING)'
     params.extend(rhs_params)
     rhs_sql = self.get_rhs_op(connection, rhs_sql)
     # Wrap the parameter in ^ and $ to restrict the regex to an exact match.
@@ -48,6 +53,8 @@ def startswith_endswith(self, compiler, connection):
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
     params.extend(rhs_params)
     rhs_sql = self.get_rhs_op(connection, rhs_sql)
+    if lhs_requires_cast_to_str(self.lhs.output_field):
+        lhs_sql = 'CAST(' + lhs_sql + ' AS STRING)'
     # Chop the leading (endswith) or trailing (startswith) percent sign that
     # Django adds to the param since this isn't a LIKE query as Django expects.
     if 'endswith' in self.lookup_name:
@@ -61,6 +68,17 @@ def startswith_endswith(self, compiler, connection):
     # rhs_sql is e.g. 'STARTS_WITH(%s, %%s)' or REGEXP_CONTAINS(%s, %%s), and
     # lhs_sql is the column name.
     return rhs_sql % lhs_sql, params
+
+
+def lhs_requires_cast_to_str(lhs_field):
+    """
+    Report whether the Left Hand Side field will need a CAST <field> AS STRING
+    since string lookup operations are being performed on it.
+    See:
+    * Issue #138
+    * https://cloud.google.com/spanner/docs/functions-and-operators#casting
+    """
+    return not isinstance(lhs_field, CharField)
 
 
 def register_lookups():

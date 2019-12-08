@@ -25,11 +25,12 @@ _UNSET_COUNT = -1
 OP_INSERT = 'insert'
 OP_UPDATE = 'update'
 OP_DELETE = 'delete'
+AS_BATCH  = 'batch'
+AS_TRANSACTION = 'transaction'
 
 
 class Cursor(object):
-    def __init__(self, session, db_handle=None):
-        self.__session = session
+    def __init__(self, db_handle):
         self.__itr = None
         self.__res = None
         self.__row_count = _UNSET_COUNT
@@ -51,10 +52,8 @@ class Cursor(object):
         return self.__row_count
 
     def close(self):
-        self.__commit_preceding_batch()
-
-        self.__db_handle._done_with_session(self.__session)
-        self.__session = None
+        self.__db_handle.commit()
+        self.__db_handle = None
 
     def execute(self, sql, args=None):
         """
@@ -68,7 +67,7 @@ class Cursor(object):
         Returns:
             None
         """
-        if not self.__session:
+        if not self.__db_handle:
             raise ProgrammingError('Cursor is not connected to the database')
 
         # param_types doesn't seem required except as an empty dict to avoid
@@ -79,14 +78,13 @@ class Cursor(object):
         try:
             classification = classify_stmt(sql)
             if classification == STMT_DDL:
-                # Special case: since Spanner.Session won't execute DDL updates
-                # by invoking `execute_sql` or `execute_update`, we must run
-                # DDL updates on the database handle itself.
-                self.__do_update_ddl(sql)
+                # DDL updates must be run on the database handle itself.
+                self.__db_handle.update_ddl(sql)
             elif classification == STMT_NON_UPDATING:
                 self.__do_execute_non_update(
-                    sql, args or None,
-                    param_types=param_types,
+                    sql,
+                    args or None,
+                    param_types,
                 )
             elif classification == STMT_INSERT:
                 self.__handle_insert(
@@ -95,8 +93,7 @@ class Cursor(object):
                 )
 
             else:
-                self.__commit_preceding_batch()
-                self.__session.run_in_transaction(
+                self.__add_txn_op(
                     self.__do_execute_update,
                     sql, args or None,
                     param_types=param_types,
@@ -110,6 +107,16 @@ class Cursor(object):
 
         except grpc_exceptions.InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, 'details') else e)
+
+    def __add_txn_op(self, fn, sql, params, param_types, **kwargs):
+        self.__db_handle.append_to_batch_stack(
+            (AS_TRANSACTION, (fn, sql, params, param_types, kwargs)),
+        )
+
+    def __add_batch_op(self, op, sql, table, columns, values):
+        self.__db_handle.append_to_batch_stack(
+            (AS_BATCH, (op, sql, table, columns, values)),
+        )
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
         # BATCH TARGET!
@@ -139,52 +146,53 @@ class Cursor(object):
             parts = parse_insert(sql)
             columns = parts.get('columns')
             rows = rows_for_insert_or_update(columns, params, parts.get('values_pyformat'))
-            self.__db_handle.append_to_batch_stack(
+            self.__add_batch_op(
                 op=OP_INSERT,
+                sql=sql,
                 table=parts.get('table'),
                 columns=columns,
                 values=rows,
             )
         else:
             # Either of cases a) and b)
-            self.__commit_preceding_batch()
-            self.__session.run_in_transaction(
+            self.__add_txn_op(
                 self.__execute_insert_no_params,
                 sql,
+                None,
+                None,
             )
 
-    def __execute_insert_no_params(self, transaction, sql):
+    def __execute_insert_no_params(self, transaction, sql, *args):
         return transaction.execute_update(sql)
 
-    def __commit_preceding_batch(self):
+    def __do_execute_non_update(self, sql, params, param_types=None):
         self.__db_handle.commit()
 
-    def __do_execute_non_update(self, sql, params, param_types=None):
-        self.__commit_preceding_batch()
-
         # Reference
-        #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
+        #  https://googleapis.dev/python/spanner/latest/snapshot-usage.html#execute-a-sql-select-statement
         sql, params = sql_pyformat_args_to_spanner(sql, params)
         param_types = infer_param_types(params, param_types)
-        res = self.__session.execute_sql(sql, params=params, param_types=param_types)
-        if type(res) == int:
-            self.__row_count = res
-            self.__itr = None
-        else:
-            # Immediately using:
-            #   iter(response)
-            # here, because this Spanner API doesn't provide
-            # easy mechanisms to detect when only a single item
-            # is returned or many, yet mixing results that
-            # are for .fetchone() with those that would result in
-            # many items returns a RuntimeError if .fetchone() is
-            # invoked and vice versa.
-            self.__res = res
-            self.__itr = iter(self.__res)
 
-            # Unfortunately, Spanner doesn't seem to send back
-            # information about the number of rows available.
-            self.__row_count = _UNSET_COUNT
+        with self.__db_handle._snapshot() as snapshot:
+            res = snapshot.execute_sql(sql, params=params, param_types=param_types)
+            if type(res) == int:
+                self.__row_count = res
+                self.__itr = None
+            else:
+                # Immediately using:
+                #   iter(response)
+                # here, because this Spanner API doesn't provide
+                # easy mechanisms to detect when only a single item
+                # is returned or many, yet mixing results that
+                # are for .fetchone() with those that would result in
+                # many items returns a RuntimeError if .fetchone() is
+                # invoked and vice versa.
+                self.__res = res
+                self.__itr = iter(self.__res)
+
+                # Unfortunately, Spanner doesn't seem to send back
+                # information about the number of rows available.
+                self.__row_count = _UNSET_COUNT
 
     def __enter__(self):
         return self
@@ -193,9 +201,6 @@ class Cursor(object):
         self.close()
 
     def executemany(self, operation, seq_of_params):
-        if not self.__session:
-            raise ProgrammingError('Cursor is not connected to the database')
-
         raise ProgrammingError('Unimplemented')
 
     def __next__(self):
@@ -204,7 +209,7 @@ class Cursor(object):
         return next(self.__itr)
 
     def __iter__(self):
-        self.__commit_preceding_batch()
+        self.__db_handle.commit()
 
         if self.__itr is None:
             raise ProgrammingError('no results to return')
@@ -254,12 +259,6 @@ class Cursor(object):
 
     def setoutputsize(size, column=None):
         raise ProgrammingError('Unimplemented')
-
-    def __do_update_ddl(self, *ddl_statements):
-        if not self.__db_handle:
-            raise ProgrammingError('Trying to run an DDL update but no database handle')
-
-        return self.__db_handle.update_ddl(ddl_statements)
 
 
 class Column:

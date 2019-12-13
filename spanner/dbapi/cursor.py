@@ -34,6 +34,9 @@ class Cursor(object):
         self.__row_count = _UNSET_COUNT
         self.__db_handle = db_handle
 
+        self.__last_op = None
+        self.__update_ops = []
+
         # arraysize is a readable and writable property mandated
         # by PEP-0249 https://www.python.org/dev/peps/pep-0249/#arraysize
         # It determines the results of .fetchmany
@@ -137,6 +140,8 @@ class Cursor(object):
         return res
 
     def __handle_insert(self, sql, params):
+        self.__commit_preceding_batch(OP_INSERT)
+
         # There are 3 variants of an INSERT statement:
         # a) INSERT INTO <table> (columns...) VALUES (<inlined values>): no params
         # b) INSERT INTO <table> (columns...) SELECT_STMT:               no params
@@ -158,8 +163,18 @@ class Cursor(object):
     def __execute_insert_no_params(self, transaction, sql):
         return transaction.execute_update(sql)
 
-    def __commit_preceding_batch(self):
-        self.__db_handle.commit()
+    def __commit_preceding_batch(self, cur_op=None):
+        should_flush = cur_op is None or (self.__last_op is not None and cur_op != self.__last_op)
+        self.__last_op = cur_op
+        if not should_flush:
+            return
+
+        if self.__update_ops:
+            uops = self.__update_ops
+            self.__update_ops = []
+            self.__do_update_ddl(uops)
+        else:
+            self.__db_handle.commit()
 
     def __handle_DQL(self, sql, params, param_types=None):
         self.__commit_preceding_batch()
@@ -257,7 +272,14 @@ class Cursor(object):
     def setoutputsize(size, column=None):
         raise ProgrammingError('Unimplemented')
 
-    def __handle_update_ddl(self, *ddl_statements):
+    def __handle_update_ddl(self, sql):
+        if 'CREATE DATABASE ' in sql.upper():
+            return self.__do_update_ddl([sql])
+        else:
+            self.__commit_preceding_batch(OP_UPDATE)
+            self.__update_ops.append(sql)
+
+    def __do_update_ddl(self, ddl_statements):
         if not self.__db_handle:
             raise ProgrammingError('Trying to run an DDL update but no database handle')
 

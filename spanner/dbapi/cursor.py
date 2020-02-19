@@ -61,7 +61,7 @@ class Cursor(object):
     def __get_txn(self):
         return self.__connection.get_txn()
 
-    def execute(self, sql, args=None):
+    def execute(self, sql, args=None, current_retry_count=0):
         """
         Abstracts and implements execute SQL statements on Cloud Spanner.
 
@@ -103,8 +103,21 @@ class Cursor(object):
             raise ProgrammingError(e.details if hasattr(e, 'details') else e)
         except grpc_exceptions.InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, 'details') else e)
+        except Exception as e:
+            print('\033[31mSQL: %s\nArgs: %s\n\033[00m' % (sql, args))
+            raise e
 
-    def __handle_update(self, txn, sql, params, param_types=None):
+            # Perhaps the case of where the database has changed.
+            if current_retry_count > 1:
+                raise e
+
+            # Firstly discard any prior cached transacation.
+            self.__connection.discard_prior_transaction()
+
+            # Re-issue the prior command.
+            self.execute(sql, args, current_retry_count + 1)
+
+    def __handle_update(self, txn, sql, params, param_types=None, retry_count=0):
         sql = ensure_where_clause(sql)
         sql, params = sql_pyformat_args_to_spanner(sql, params)
 

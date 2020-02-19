@@ -95,6 +95,16 @@ class Connection(object):
 
         return self.__txn
 
+    def discard_cached_transaction(self):
+        """
+        Invoked in cases when a fresh transaction should always be ensured.
+        """
+        txn = self.__txn
+        self.__txn = None
+
+        if txn and hasattr(txn, 'stop'):
+            txn.stop()
+
     def append_ddl_statement(self, ddl_statement):
         self.__ddl_statements.append(ddl_statement)
 

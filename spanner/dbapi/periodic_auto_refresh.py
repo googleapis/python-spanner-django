@@ -102,6 +102,9 @@ class PeriodicAutoRefreshingTransaction:
         self.__par.stop()
         return res
 
+    def stop(self):
+        self.__par.stop()
+
     @property
     def committed(self):
         # For now it is alright to access Transaction._rolled_back

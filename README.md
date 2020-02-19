@@ -152,3 +152,15 @@ description (Column(name='date', type_code=5), Column(name='isoyear', type_code=
 [datetime.date(2016, 1, 9), 2016, 1, 2016, 1]
 Time spent  1.6195518970489502
 ```
+
+### Known issues
+Known issues:
+To guide feature implementation after the basics were done in early December 2019, we setup the project to run against Django’s test suite to explore the edge cases. To make working with these tests easy, we setup a couple of tests to run on continuous integration with Travis CI.
+Optimistic Transactions:
+DDL can't be run in a Transaction, thus prior Transactions need to be committed before running the DDL else we'll get a "409 Database schema might have changed" exception.
+Periodic Transaction refresh:
+Cloud Spanner kills Transaction that have been idle for 10 seconds or longer, and this means that we MUST implement a Transaction wrapper that sends ‘SELECT 1’ to Cloud Spanner every 8.5 seconds. Currently with Python’s concurrency primitives, this causes a >5X overhead.
+
+Optimistic Transactions mean that Django doesn’t see real Transactions:
+Due to the “Optimistic Transactions” problem, spanner-django can’t truly support a Transaction and thus Django’s tests can’t be submitted all at once in one shot.
+

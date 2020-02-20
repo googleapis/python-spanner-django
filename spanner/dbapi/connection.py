@@ -4,9 +4,13 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import time
+
 from .cursor import Cursor
 from .exceptions import Error
+from .parse_utils import STMT_DDL
 from .periodic_auto_refresh import PeriodicAutoRefreshingTransaction
+from .telemetry import record_connection_lifetime, timed_do
 
 
 class Connection(object):
@@ -16,6 +20,7 @@ class Connection(object):
             sess.create()
         self.__sess = sess
         self.__txn = None
+        self.__start_time = time.time()
         self.__dbhandle = db_handle
         self.__closed = False
         self.__ddl_statements = []
@@ -35,9 +40,10 @@ class Connection(object):
     def __enter__(self):
         return self
 
-    def __clear(self):
+    def __clear(self, exc=None):
         self.__dbhandle = None
         self.__sess.delete()
+        record_connection_lifetime(self.__start_time, exc)
 
     def __exit__(self, etype, value, traceback):
         self.__raise_if_already_closed()
@@ -114,6 +120,9 @@ class Connection(object):
         if not self.__ddl_statements:
             return
 
+        return timed_do(STMT_DDL, self._do_run_DDL_statements)
+
+    def _do_run_DDL_statements(self):
         # DDL and Transactions in Cloud Spanner don't mix thus before any DDL is executed,
         # any prior transaction MUST have been committed. This behavior is also present
         # on MySQL. Please see:

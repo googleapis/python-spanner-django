@@ -10,6 +10,8 @@ install_requires = [
     'sqlparse >= 0.3.0',
     'google-cloud >= 0.34.0',
     'google-cloud-spanner >= 1.8.0',
+    'opencensus >= 0.7.1',
+    'opencensus-ext-ocagent >= 0.7.1',
 ]
 
 setup(

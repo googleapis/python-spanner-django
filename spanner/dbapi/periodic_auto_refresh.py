@@ -69,6 +69,7 @@ class PeriodicAutoRefreshingTransaction:
 
     def __init__(self, txn):
         self.__txn = txn
+        self.__pingcount = 0
 
     def begin(self):
         res = self.__txn.begin()
@@ -80,7 +81,8 @@ class PeriodicAutoRefreshingTransaction:
             print('Already committed or rolledback so cannot ping Cloud Spanner')
             return
 
-        print('Pinging Cloud Spanner at %s' % time.time())
+        self.__pingcount += 1
+        print('Ping #%d to Cloud Spanner at %s' % (self.__pingcount, time.time()))
         res = self.__txn.execute_sql('SELECT 1')
         if res:
             for it in res:

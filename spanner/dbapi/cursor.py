@@ -4,6 +4,8 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import time
+
 import google.api_core.exceptions as grpc_exceptions
 
 from .exceptions import (
@@ -14,13 +16,16 @@ from .parse_utils import (
     ensure_where_clause, get_param_types, parse_insert,
     sql_pyformat_args_to_spanner,
 )
+from .telemetry import record_cursor_lifetime, register_all, timed_do
 
 _UNSET_COUNT = -1
+register_all('spanner.django')
 
 
 class Cursor(object):
     def __init__(self, db_handle):
         self.__itr = None
+        self.__start_time = time.time()
         self.__res = None
         self.__row_count = _UNSET_COUNT
         self.__connection = db_handle
@@ -80,9 +85,14 @@ class Cursor(object):
 
         self.__res = None
 
-        # Classify whether this is a read-only SQL statement.
+        # Classify the SQL statement.
+        classification = classify_stmt(sql)
+
+        # Collect metrics
+        return timed_do(classification, self.__execute, classification, sql, args)
+
+    def __execute(self, classification, sql, args):
         try:
-            classification = classify_stmt(sql)
             if classification == STMT_DDL:
                 self.__connection.append_ddl_statement(sql)
                 return
@@ -177,11 +187,12 @@ class Cursor(object):
         else:  # An exception occured within the context so rollback.
             self.__connection.rollback()
 
-        self.__clear()
+        self.__clear(value)
 
-    def __clear(self):
+    def __clear(self, exc=None):
         self.__connection = None
         self.__txn = None
+        record_cursor_lifetime(self.__start_time, exc)
 
     def executemany(self, operation, seq_of_params):
         if not self.__connection:

@@ -202,8 +202,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         'db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone',
         'db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_week_func',
         'db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_week_func_boundaries',
-        # using NULL with + crashes: https://github.com/orijtech/spanner-orm/issues/201
-        'annotations.tests.NonAggregateAnnotationTestCase.test_combined_annotation_commutative',
         # Spanner loses DecimalField precision due to conversion to float:
         # https://github.com/orijtech/spanner-orm/pull/133#pullrequestreview-328482925
         'aggregation.tests.AggregateTestCase.test_decimal_max_digits_has_no_effect',

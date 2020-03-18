@@ -212,6 +212,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         return 'INTERVAL %s MICROSECOND' % sql
 
     def combine_expression(self, connector, sub_expressions):
+        if connector == '+':
+            # Use IFNULL to avoid Spanner's restriction:
+            # "Operands of + cannot be literal NULL".
+            return "IFNULL(%s, 0) + IFNULL(%s, 0)" % tuple(sub_expressions)
         if connector == '%%':
             return 'MOD(%s)' % ', '.join(sub_expressions)
         return super().combine_expression(connector, sub_expressions)

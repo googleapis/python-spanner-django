@@ -7,56 +7,29 @@ env:
         - GOOGLE_APPLICATION_CREDENTIALS=~/creds.json
         - RUNNING_SPANNER_BACKEND_TESTS=1
     jobs:
-        - DJANGO_TEST_APPS="admin_changelist admin_custom_urls"
-        - DJANGO_TEST_APPS="admin_docs"
-        - DJANGO_TEST_APPS="admin_inlines admin_ordering"
-        - DJANGO_TEST_APPS="aggregation"
-        - DJANGO_TEST_APPS="aggregation_regress annotations"
+        - DJANGO_TEST_APPS="admin_changelist admin_custom_urls admin_docs admin_inlines"
+        - DJANGO_TEST_APPS="admin_ordering aggregation aggregation_regress annotations backends"
         # Commented out because they take longer 2hr and TravisCI unconditionally terminates them.
         # - DJANGO_TEST_APPS="auth_tests"
-        - DJANGO_TEST_APPS="backends basic"
-        - DJANGO_TEST_APPS="bulk_create choices custom_columns"
-        - DJANGO_TEST_APPS="cache"
-        - DJANGO_TEST_APPS="custom_methods custom_pk datatypes"
-        - DJANGO_TEST_APPS="dates datetimes defer"
-        - DJANGO_TEST_APPS="defer_regress"
-        - DJANGO_TEST_APPS="delete_regress"
-        - DJANGO_TEST_APPS="db_functions db_utils"
-        - DJANGO_TEST_APPS="distinct_on_fields empty"
-        - DJANGO_TEST_APPS="expressions expressions_window"
-        - DJANGO_TEST_APPS="field_defaults field_subclassing file_storage file_uploads"
-        - DJANGO_TEST_APPS="fixtures fixtures_model_package from_db_value"
-        - DJANGO_TEST_APPS="get_earliest_or_latest get_object_or_404"
-        - DJANGO_TEST_APPS="i18n"
-        - DJANGO_TEST_APPS="indexes inline_formsets introspection invalid_models_tests"
-        - DJANGO_TEST_APPS="known_related_objects lookup max_lengths m2m_and_m2o m2m_intermediary m2m_multiple"
-        - DJANGO_TEST_APPS="m2m_recursive m2m_regress m2m_signals m2m_through"
-        - DJANGO_TEST_APPS="m2m_through_regress m2o_recursive managers_regress many_to_many"
-        - DJANGO_TEST_APPS="many_to_one"
-        - DJANGO_TEST_APPS="many_to_one_null max_lengths"
-        - DJANGO_TEST_APPS="migrate_signals migration_test_data_persistence"
+        - DJANGO_TEST_APPS="basic bulk_create choices custom_columns cache custom_methods custom_pk datatypes dates datetimes"
+        - DJANGO_TEST_APPS="defer defer_regress delete_regress db_functions db_utils"
+        - DJANGO_TEST_APPS="distinct_on_fields empty expressions expressions_window field_defaults"
+        - DJANGO_TEST_APPS="field_subclassing file_storage file_uploads fixtures fixtures_model_package from_db_value get_earliest_or_latest get_object_or_404 i18n"
+        - DJANGO_TEST_APPS="indexes inline_formsets introspection invalid_models_tests known_related_objects lookup max_lengths m2m_and_m2o m2m_intermediary m2m_multiple m2m_recursive"
+        - DJANGO_TEST_APPS="m2m_regress m2m_signals m2m_through m2m_through_regress"
+        - DJANGO_TEST_APPS="m2o_recursive managers_regress many_to_many many_to_one many_to_one_null max_lengths"
+        - DJANGO_TEST_APPS="migrate_signals migration_test_data_persistence model_fields.test_binaryfield model_fields.test_booleanfield model_fields.test_charfield"
         # Run model_fields piecemeal because running it all at once takes
         # longer then 2 hours (Travis CI limit).
-        - DJANGO_TEST_APPS="model_fields.test_binaryfield model_fields.test_booleanfield model_fields.test_charfield"
-        - DJANGO_TEST_APPS="model_fields.test_datetimefield model_fields.test_decimalfield model_fields.test_durationfield"
-        - DJANGO_TEST_APPS="model_fields.test_field_flags model_fields.test_filefield model_fields.test_floatfield"
-        - DJANGO_TEST_APPS="model_fields.test_foreignkey model_fields.test_genericipaddressfield model_fields.test_imagefield"
-        - DJANGO_TEST_APPS="model_fields.test_integerfield model_fields.test_manytomanyfield model_fields.test_promises"
-        - DJANGO_TEST_APPS="model_fields.test_slugfield model_fields.test_textfield model_fields.test_uuid"
-        - DJANGO_TEST_APPS="null_fk null_fk_ordering null_queries one_to_one or_lookups ordering"
-        - DJANGO_TEST_APPS="queries.test_bulk_update queries.test_explain queries.test_iterator"
-        - DJANGO_TEST_APPS="queries.test_q queries.test_qs_combinators queries.test_query"
+        - DJANGO_TEST_APPS="model_fields.test_datetimefield model_fields.test_decimalfield model_fields.test_durationfield model_fields.test_field_flags model_fields.test_filefield"
+        - DJANGO_TEST_APPS="model_fields.test_floatfield model_fields.test_foreignkey model_fields.test_genericipaddressfield model_fields.test_imagefield model_fields.test_integerfield"
+        - DJANGO_TEST_APPS="model_fields.test_manytomanyfield model_fields.test_promises model_fields.test_slugfield model_fields.test_textfield model_fields.test_uuid null_fk null_fk_ordering"
+        - DJANGO_TEST_APPS="null_queries one_to_one or_lookups ordering queries.test_bulk_update queries.test_explain"
+        - DJANGO_TEST_APPS="queries.test_iterator queries.test_q queries.test_qs_combinators queries.test_query"
         # Commented out because they take longer 2hr and TravisCI unconditionally terminates them.
         # - DJANGO_TEST_APPS="queries.tests"
-        - DJANGO_TEST_APPS="raw_query redirects_tests reserved_names reverse_lookup"
-        - DJANGO_TEST_APPS="save_delete_hooks select_related"
-        - DJANGO_TEST_APPS="select_related_onetoone signing sitemaps_tests"
-        - DJANGO_TEST_APPS="string_lookup signals"
-        - DJANGO_TEST_APPS="test_utils"
-        - DJANGO_TEST_APPS="test_client test_client_regress timezones transactions"
-        - DJANGO_TEST_APPS="unmanaged_models update_only_fields"
-        - DJANGO_TEST_APPS="update"
-        - DJANGO_TEST_APPS="validation view_tests"
+        - DJANGO_TEST_APPS="raw_query redirects_tests reserved_names reverse_lookup save_delete_hooks select_related select_related_onetoone signing sitemaps_tests string_lookup signals"
+        - DJANGO_TEST_APPS="test_utils test_client test_client_regress timezones transactions unmanaged_models update_only_fields update validation view_tests"
 
 python:
     - "3.7"
@@ -67,4 +40,7 @@ script:
     - tox
     - flake8
     - isort --recursive --check-only --diff
-    - bash django_test_suite.sh
+    - pip3 install .
+    - mkdir -p django_tests && git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git django_tests/django
+    - cd django_tests/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+    - ./bin/parallelize_tests_linux

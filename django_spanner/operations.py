@@ -31,8 +31,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     # https://cloud.google.com/spanner/docs/functions-and-operators#extract
     extract_names = {
         'iso_year': 'isoyear',
-        'week_day': 'dayofweek',
         'week': 'isoweek',
+        'week_day': 'dayofweek',
     }
 
     def max_name_length(self):

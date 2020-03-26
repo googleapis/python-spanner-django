@@ -198,8 +198,16 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         'cache.tests.CreateCacheTableForDBCacheTests',
         'cache.tests.DBCacheTests',
         'cache.tests.DBCacheWithTimeZoneTests',
-        # A rollback failed and should be investigated:
+        # Tests that require savepoints.
         # https://github.com/orijtech/django-spanner/issues/299
+        'get_or_create.tests.GetOrCreateTests.test_get_or_create_invalid_params',
+        'get_or_create.tests.GetOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key',
+        'get_or_create.tests.GetOrCreateTestsWithManualPKs.test_get_or_create_raises_IntegrityError_plus_traceback', # noqa
+        'get_or_create.tests.GetOrCreateTestsWithManualPKs.test_savepoint_rollback',
+        'get_or_create.tests.GetOrCreateThroughManyToMany.test_something',
+        'get_or_create.tests.UpdateOrCreateTests.test_integrity',
+        'get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test',
+        'get_or_create.tests.UpdateOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key',
         'test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction',
         # Spanner doesn't support views.
         'inspectdb.tests.InspectDBTransactionalTests.test_include_views',

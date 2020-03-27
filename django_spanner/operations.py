@@ -231,6 +231,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             return 'MOD(%s)' % ', '.join(sub_expressions)
         elif connector == '^':
             return 'POWER(%s)' % ', '.join(sub_expressions)
+        elif connector == '>>':
+            lhs, rhs = sub_expressions
+            # The '>>' operator on Cloud Spanner is only meant to produce INT64
+            # results or BYTE, thus the CAST(... AS INTEGER) is appropriate.
+            # https://cloud.google.com/spanner/docs/functions-and-operators#bitwise_operators
+            return 'CAST(FLOOR(%(lhs)s / POW(2, %(rhs)s)) AS INT64)' % {'lhs': lhs, 'rhs': rhs}
         return super().combine_expression(connector, sub_expressions)
 
     def combine_duration_expression(self, connector, sub_expressions):

@@ -144,11 +144,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # functions:
         'aggregation.test_filter_argument.FilteredAggregateTests.test_filtered_numerical_aggregates',
         'aggregation_regress.tests.AggregationTests.test_stddev',
-        # SELECT list expression references <column> which is neither grouped
-        # nor aggregated: https://github.com/orijtech/spanner-orm/issues/245
-        'aggregation_regress.tests.AggregationTests.test_annotated_conditional_aggregate',
-        'aggregation_regress.tests.AggregationTests.test_annotation_with_value',
-        'expressions.tests.BasicExpressionsTests.test_filtering_on_annotate_that_uses_q',
         # "No matching signature for operator" crash when comparing TIMESTAMP
         # and DATE: https://github.com/orijtech/django-spanner/issues/255
         'expressions.tests.BasicExpressionsTests.test_outerref_mixed_case_table_name',

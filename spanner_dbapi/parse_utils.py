@@ -344,15 +344,24 @@ def sql_pyformat_args_to_spanner(sql, params):
     #   SQL:      'SELECT * from t where f1=%s, f2=%s, f3=%s'
     #   Params:   ('a', 23, '888***')
     # Case b) Params is a dict and the matches are %(value)s'
+
+    # For some queries like aggregations, the named arguments
+    # passed into the GROUP BY clause MUST match exactly those in
+    # the SELECT clause, thus we must memoize them by resolved value.
+    uniq_named_keys = {}
+
     for i, pyfmt in enumerate(found_pyformat_placeholders):
-        key = 'a%d' % i
-        sql = sql.replace(pyfmt, '@'+key, 1)
+        resolved_value = None
         if params_is_dict:
             # The '%(key)s' case, so interpolate it.
             resolved_value = pyfmt % params
-            named_args[key] = resolved_value
         else:
-            named_args[key] = cast_for_spanner(params[i])
+            resolved_value = cast_for_spanner(params[i])
+
+        uniq_key = '%s-%s' % (type(resolved_value), resolved_value)
+        key = uniq_named_keys.setdefault(uniq_key, 'a%d' % len(uniq_named_keys))
+        sql = sql.replace(pyfmt, '@'+key, 1)
+        named_args[key] = resolved_value
 
     return sanitize_literals_for_upload(sql), named_args
 

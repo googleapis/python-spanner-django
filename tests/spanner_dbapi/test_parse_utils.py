@@ -268,6 +268,46 @@ class ParseUtilsTests(TestCase):
                 ('SELECT (an.p + %s) AS np FROM an WHERE (an.p + %s) = %s', (1, 1.0, decimal.Decimal('31'),)),
                 ('SELECT (an.p + @a0) AS np FROM an WHERE (an.p + @a1) = @a2', {'a0': 1, 'a1': 1.0, 'a2': 31.0}),
             ),
+            (
+                (
+                    'SELECT (an.p + %s) AS np, %s, %s, %s, %s FROM an WHERE (an.p + %s) = %s',
+                    (1, True, False, 0, 1.0, decimal.Decimal('31'), decimal.Decimal('31')),
+                ),
+                (
+                    'SELECT (an.p + @a0) AS np, @a1, @a2, @a3, @a4 FROM an WHERE (an.p + @a5) = @a5',
+                    {'a0': 1, 'a1': True, 'a2': False, 'a3': 0, 'a4': 1.0, 'a5': 31.0},
+                ),
+            ),
+            (
+                (
+                    '''
+                    SELECT
+                        AVG(CASE WHEN c1 < %s THEN dp ELSE 2 END)
+                    FROM (
+                        SELECT
+                            a.id AS Col1,
+                            (a.p * %s) AS dp, a.pg as c1
+                        FROM
+                            a
+                        GROUP BY
+                            a.id, a.p * %s, a.pg
+                    ) subquery''', (400, 0.75, 0.75),
+                ),
+                (
+                    '''
+                    SELECT
+                        AVG(CASE WHEN c1 < @a0 THEN dp ELSE 2 END)
+                    FROM (
+                        SELECT
+                            a.id AS Col1,
+                            (a.p * @a1) AS dp, a.pg as c1
+                        FROM
+                            a
+                        GROUP BY
+                            a.id, a.p * @a1, a.pg
+                    ) subquery''', {'a0': 400, 'a1': 0.75},
+                ),
+            ),
         ]
         for ((sql_in, params), sql_want) in cases:
             with self.subTest(sql=sql_in):

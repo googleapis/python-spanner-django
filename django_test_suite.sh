@@ -15,7 +15,7 @@ TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a")
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
 TEST_APPS=${DJANGO_TEST_APPS:-basic}
 INSTANCE=${SPANNER_TEST_INSTANCE:-django-tests}
-PROJECT=${SPANNER_TEST_PROJECT:-appdev-soda-spanner-staging}
+PROJECT=${PROJECT_ID:-appdev-soda-spanner-staging}
 SETTINGS_FILE="$TEST_DBNAME-settings"
 
 checkout_django() {

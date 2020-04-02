@@ -46,5 +46,6 @@ mkdir -p django_tests && git clone --depth 1 --single-branch --branch spanner-2.
 # cd django_tests/django && pip3 install -e .; cd ../../
 
 # Install dependencies for Django tests.
+apt-get install libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
 cd django_tests/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 ./bin/parallelize_tests_linux

@@ -39,5 +39,5 @@ python3.6 -m flake8
 
 # Run with the Django test apps.
 export RUNNING_SPANNER_BACKEND_TESTS=1
-export DJANGO_TEST_APPS="backends basic bulk_create choices custom_columns"
+export DJANGO_TEST_APPS="admin_changelist admin_custom_urls admin_docs admin_inlines admin_ordering aggregation aggregation_regress annotations backends basic bulk_create cache choices custom_columns"
 bash django_test_suite.sh

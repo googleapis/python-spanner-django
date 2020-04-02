@@ -49,13 +49,16 @@ func main() {
 	defer wg.Wait()
 
 	// The number of Django apps to run per goroutine.
-	nAppsPerG := 2
-	if nAppsPerG <= len(testApps) {
-		nAppsPerG = len(testApps) / nAppsPerG
+	nAppsPerG := 4
+	if len(testApps) <= nAppsPerG {
+		nAppsPerG = 1
+	} else {
+		nAppsPerG = len(testApps) / (nAppsPerG * nProcs)
 	}
+	println("apps per G: ", nAppsPerG)
 
 	if nAppsPerG == 0 {
-		nAppsPerG = 1
+		nAppsPerG = 2
 	}
 
 	sema := make(chan bool, nProcs)

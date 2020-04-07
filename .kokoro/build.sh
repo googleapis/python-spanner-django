@@ -33,7 +33,7 @@ export PROJECT_ID=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 python3.6 -m pip install --upgrade --quiet tox flake8 isort
 python3.6 -m tox --version
 
-python3.6 -m tox
+# Run code style checks
 python3.6 -m isort --recursive --check-only --diff
 python3.6 -m flake8
 
@@ -46,7 +46,6 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 #    Python and other dynamic languages.
 export USE_SPANNER_EMULATOR=0
 
-pip3 install .
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"
@@ -56,6 +55,9 @@ mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch spann
 sudo apt-get update
 apt-get install -y libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
 cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+
+# Install django-spanner
+pip3 install .
 
 if [[ $USE_SPANNER_EMULATOR != 1 ]]
 then
@@ -76,5 +78,8 @@ else
     tar zxvf cloud-spanner-emulator_linux_amd64-${VERSION}.tar.gz 2&>/dev/null
     chmod +x emulator_main
 fi
+
+# Run tests
+python3.6 -m tox
 
 ./bin/parallelize_tests_linux

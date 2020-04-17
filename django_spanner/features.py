@@ -278,9 +278,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # This test isn't isolated on databases like Spanner that don't
         # support transactions: https://code.djangoproject.com/ticket/31413
         'migrations.test_loader.LoaderTests.test_loading_squashed',
-        # Migrations data  persistance issue to be investigated:
-        # https://github.com/googleapis/python-spanner-django/issues/408
-        'migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence',
     )
     # Kokoro-specific skips.
     if os.environ.get('KOKORO_JOB_NAME'):

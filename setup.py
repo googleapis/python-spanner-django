@@ -15,7 +15,7 @@ install_requires = [
 ]
 
 setup(
-        name='django-spanner',
+        name='django-google-spanner',
         # Duplicate version here rather than using
         # __import__('django_spanner').__version__ because that file imports
         # django and google.cloud which may not be installed.

@@ -10,7 +10,6 @@ version = '2.2a0'
 
 install_requires = [
     'sqlparse >= 0.3.0',
-    'google-cloud >= 0.34.0',
     'google-cloud-spanner >= 1.8.0',
 ]
 

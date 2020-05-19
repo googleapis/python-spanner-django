@@ -35,9 +35,6 @@ with io.open(readme_filename, encoding="utf-8") as readme_file:
 
 setup(
         name=name,
-        # Duplicate version here rather than using
-        # __import__('django_spanner').__version__ because that file imports
-        # django and google.cloud which may not be installed.
         version=version,
         description=description,
         long_description=readme,

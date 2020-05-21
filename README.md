@@ -20,6 +20,7 @@ ORM plugin for using Cloud Spanner as a database for Django.
 - [How it works](#how-it-works)
     - [Overall design](#overall-design)
     - [Internals](#internals)
+- [Versioning](#versioning)
 
 
 ## Installing it
@@ -199,5 +200,15 @@ NULL ...
 
 ### Internals
 ![](./assets/internals.png)
+
+## Versioning
+The release version of django-spanner in [setup.py](./setup.py) must follow this form
+```python
+version = '<DJANGO_VERSION><RELEASE_MODE><RELEASE_VERSION>'
+```
+for example, if this package supports Django version 2.2.X, and we are in alpha release mode, while this application's release is version 0, our version will be
+```python
+version = '2.2a0'
+```
 
 # 🚨THIS CODE IS STILL UNDER DEVELOPMENT🚨

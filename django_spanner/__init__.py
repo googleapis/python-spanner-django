@@ -5,6 +5,8 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 import datetime
+import pkg_resources
+
 # Monkey-patch AutoField to generate a random value since Cloud Spanner can't
 # do that.
 from uuid import uuid4

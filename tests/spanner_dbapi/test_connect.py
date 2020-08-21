@@ -23,23 +23,22 @@ def _make_credentials():
 
 class Testconnect(unittest.TestCase):
     def _callFUT(self, *args, **kw):
-        from google.cloud.spanner_dbapi import connect
+        from spanner_dbapi import connect
 
         return connect(*args, **kw)
 
     def test_connect(self):
         from google.api_core.gapic_v1.client_info import ClientInfo
-        from google.cloud.spanner_dbapi.connection import Connection
+        from spanner_dbapi.connection import Connection
 
         PROJECT = "test-project"
         USER_AGENT = "user-agent"
         CREDENTIALS = _make_credentials()
         CLIENT_INFO = ClientInfo(user_agent=USER_AGENT)
 
-        with mock.patch("google.cloud.spanner_dbapi.spanner_v1.Client") as client_mock:
+        with mock.patch("spanner_dbapi.spanner_v1.Client") as client_mock:
             with mock.patch(
-                "google.cloud.spanner_dbapi.google_client_info",
-                return_value=CLIENT_INFO,
+                "spanner_dbapi.google_client_info", return_value=CLIENT_INFO
             ) as client_info_mock:
 
                 connection = self._callFUT(
@@ -54,7 +53,7 @@ class Testconnect(unittest.TestCase):
             )
 
     def test_instance_not_found(self):
-        from google.cloud.spanner_dbapi.exceptions import ProgrammingError
+        from spanner_dbapi.exceptions import ProgrammingError
 
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=False
@@ -66,7 +65,7 @@ class Testconnect(unittest.TestCase):
             exists_mock.assert_called_once()
 
     def test_database_not_found(self):
-        from google.cloud.spanner_dbapi.exceptions import ProgrammingError
+        from spanner_dbapi.exceptions import ProgrammingError
 
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
@@ -81,7 +80,7 @@ class Testconnect(unittest.TestCase):
                 exists_mock.assert_called_once()
 
     def test_connect_instance_id(self):
-        from google.cloud.spanner_dbapi.connection import Connection
+        from spanner_dbapi.connection import Connection
 
         INSTANCE = "test-instance"
 
@@ -95,7 +94,7 @@ class Testconnect(unittest.TestCase):
         self.assertIsInstance(connection, Connection)
 
     def test_connect_database_id(self):
-        from google.cloud.spanner_dbapi.connection import Connection
+        from spanner_dbapi.connection import Connection
 
         DATABASE = "test-database"
 

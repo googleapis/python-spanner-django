@@ -6,8 +6,8 @@
 
 """connect() module function unit tests."""
 
-import mock
 import unittest
+from unittest import mock
 
 
 def _make_credentials():

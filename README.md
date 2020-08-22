@@ -41,7 +41,7 @@ After [installing it](#installing-it), you'll need to edit your Django `settings
 * Add `django_spanner` as the very first entry in the `INSTALLED_APPS` setting
 ```python
 INSTALLED_APPS = [
-    'django_spanner',
+    'spanner_django',
     ...
 ]
 ```
@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'spanner_django',
         'PROJECT': '<project_id>',
         'INSTANCE': '<instance_id>',
         'NAME': '<database_name>',
@@ -72,7 +72,7 @@ For example:
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'spanner_django',
         'PROJECT': 'appdev-soda-spanner-staging', # Or the GCP project-id
         'INSTANCE': 'django-dev1', # Or the Cloud Spanner instance
         'NAME': 'db1', # Or the Cloud Spanner database to use

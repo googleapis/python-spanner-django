@@ -23,7 +23,7 @@ def run_django_tests():
 
 
 def main():
-    run_unittests('tests.spanner_dbapi')
+    run_unittests('tests.unit')
 
 
 if __name__ == '__main__':

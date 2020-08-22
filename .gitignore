@@ -1,8 +1,51 @@
-*.egg-info
-*.py[co]
-build/
+*.py[cod]
 *.sw[op]
-.tox/
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+bin
+.tox
 MANIFEST
-dist/
 django_tests
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.nox
+.cache
+.pytest_cache
+
+
+# Mac
+.DS_Store
+
+# JetBrains
+.idea
+
+# VS Code
+.vscode
+
+# emacs
+*~
+
+# Built documentation
+docs/_build
+bigquery/docs/generated
+
+# Virtual environment
+env/
+coverage.xml
+sponge_log.xml
+
+# System test environment variables.
+system_tests/local_test_setup
+
+# Make sure a generated file isn't accidentally committed.
+pylintrc
+pylintrc.test

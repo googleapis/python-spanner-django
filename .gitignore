@@ -6,3 +6,6 @@ build/
 MANIFEST
 dist/
 django_tests
+
+# JetBrains
+.idea

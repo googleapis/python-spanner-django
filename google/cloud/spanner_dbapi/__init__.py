@@ -48,12 +48,15 @@ paramstyle = "format"
 # are working properly, we'll update the threadsafety level.
 threadsafety = 1
 
+# [@mf2199] TODO: These are not defined but used in the tests
+DEFAULT_USER_AGENT = None
+TimeStampStr = None
+
 
 def connect(
     project=None, instance=None, database=None, credentials_uri=None, user_agent=None
 ):
-    """
-    Connect to Cloud Spanner.
+    """Connect to Cloud Spanner.
 
     Args:
         project: The id of a project that already exists.

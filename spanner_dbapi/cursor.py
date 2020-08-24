@@ -63,13 +63,11 @@ class Cursor:
             sql: A SQL statement
             *args: variadic argument list
             **kwargs: key worded arguments
-        Returns:
-            None
         """
         self._raise_if_already_closed()
 
         if not self._connection:
-            raise ProgrammingError("Cursor is not connected to the database")
+            raise ProgrammingError("Cursor is not connected to a database")
 
         self._res = None
 
@@ -82,14 +80,14 @@ class Cursor:
 
             # For every other operation, we've got to ensure that
             # any prior DDL statements were run.
-            self._run_prior_DDL_statements()
+            self._run_prior_ddl_statements()
 
             if classification == STMT_NON_UPDATING:
-                self.__handle_DQL(sql, args or None)
+                self._handle_dql(sql, args)
             elif classification == STMT_INSERT:
-                self.__handle_insert(sql, args or None)
+                self._handle_insert(sql, args)
             else:
-                self.__handle_update(sql, args or None)
+                self._handle_update(sql, args)
         except (grpc_exceptions.AlreadyExists, grpc_exceptions.FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except grpc_exceptions.InvalidArgument as e:
@@ -97,11 +95,11 @@ class Cursor:
         except grpc_exceptions.InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
-    def __handle_update(self, sql, params):
+    def _handle_update(self, sql, params):
         self._connection.in_transaction(self.__do_execute_update, sql, params)
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
-        sql = ensure_where_clause(sql)
+        ensure_where_clause(sql)
         sql, params = sql_pyformat_args_to_spanner(sql, params)
 
         res = transaction.execute_update(
@@ -113,7 +111,7 @@ class Cursor:
 
         return res
 
-    def __handle_insert(self, sql, params):
+    def _handle_insert(self, sql, params):
         parts = parse_insert(sql, params)
 
         # The split between the two styles exists because:
@@ -159,7 +157,7 @@ class Cursor:
         values = parts.get("values")
         return transaction.insert(table, columns, values)
 
-    def __handle_DQL(self, sql, params):
+    def _handle_dql(self, sql, params):
         with self._connection.read_snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
@@ -314,7 +312,7 @@ class Cursor:
     def setoutputsize(size, column=None):
         raise ProgrammingError("Unimplemented")
 
-    def _run_prior_DDL_statements(self):
+    def _run_prior_ddl_statements(self):
         return self._connection.run_prior_DDL_statements()
 
     def list_tables(self):

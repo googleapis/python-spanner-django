@@ -4,9 +4,10 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import spanner_dbapi as Database
 from django.db.backends.base.base import BaseDatabaseWrapper
 from google.cloud import spanner_v1 as spanner
+
+import spanner_dbapi as Database
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -18,62 +19,62 @@ from .validation import DatabaseValidation
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
-    vendor = 'spanner'
-    display_name = 'Cloud Spanner'
+    vendor = "spanner"
+    display_name = "Cloud Spanner"
 
     # Mapping of Field objects to their column types.
     # https://cloud.google.com/spanner/docs/data-types#date-type
     data_types = {
-        'AutoField': 'INT64',
-        'BigAutoField': 'INT64',
-        'BinaryField': 'BYTES(MAX)',
-        'BooleanField': 'BOOL',
-        'CharField': 'STRING(%(max_length)s)',
-        'DateField': 'DATE',
-        'DateTimeField': 'TIMESTAMP',
-        'DecimalField': 'FLOAT64',
-        'DurationField': 'INT64',
-        'EmailField': 'STRING(%(max_length)s)',
-        'FileField': 'STRING(%(max_length)s)',
-        'FilePathField': 'STRING(%(max_length)s)',
-        'FloatField': 'FLOAT64',
-        'IntegerField': 'INT64',
-        'BigIntegerField': 'INT64',
-        'IPAddressField': 'STRING(15)',
-        'GenericIPAddressField': 'STRING(39)',
-        'NullBooleanField': 'BOOL',
-        'OneToOneField': 'INT64',
-        'PositiveIntegerField': 'INT64',
-        'PositiveSmallIntegerField': 'INT64',
-        'SlugField': 'STRING(%(max_length)s)',
-        'SmallAutoField': 'INT64',
-        'SmallIntegerField': 'INT64',
-        'TextField': 'STRING(MAX)',
-        'TimeField': 'TIMESTAMP',
-        'UUIDField': 'STRING(32)',
+        "AutoField": "INT64",
+        "BigAutoField": "INT64",
+        "BinaryField": "BYTES(MAX)",
+        "BooleanField": "BOOL",
+        "CharField": "STRING(%(max_length)s)",
+        "DateField": "DATE",
+        "DateTimeField": "TIMESTAMP",
+        "DecimalField": "FLOAT64",
+        "DurationField": "INT64",
+        "EmailField": "STRING(%(max_length)s)",
+        "FileField": "STRING(%(max_length)s)",
+        "FilePathField": "STRING(%(max_length)s)",
+        "FloatField": "FLOAT64",
+        "IntegerField": "INT64",
+        "BigIntegerField": "INT64",
+        "IPAddressField": "STRING(15)",
+        "GenericIPAddressField": "STRING(39)",
+        "NullBooleanField": "BOOL",
+        "OneToOneField": "INT64",
+        "PositiveIntegerField": "INT64",
+        "PositiveSmallIntegerField": "INT64",
+        "SlugField": "STRING(%(max_length)s)",
+        "SmallAutoField": "INT64",
+        "SmallIntegerField": "INT64",
+        "TextField": "STRING(MAX)",
+        "TimeField": "TIMESTAMP",
+        "UUIDField": "STRING(32)",
     }
     operators = {
-        'exact': '= %s',
-        'iexact': 'REGEXP_CONTAINS(%s, %%%%s)',
+        "exact": "= %s",
+        "iexact": "REGEXP_CONTAINS(%s, %%%%s)",
         # contains uses REGEXP_CONTAINS instead of LIKE to allow
         # DatabaseOperations.prep_for_like_query() to do regular expression
         # escaping. prep_for_like_query() is called for all the lookups that
         # use REGEXP_CONTAINS except regex/iregex (see
         # django.db.models.lookups.PatternLookup).
-        'contains':  'REGEXP_CONTAINS(%s, %%%%s)',
-        'icontains': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'gt': '> %s',
-        'gte': '>= %s',
-        'lt': '< %s',
-        'lte': '<= %s',
+        "contains": "REGEXP_CONTAINS(%s, %%%%s)",
+        "icontains": "REGEXP_CONTAINS(%s, %%%%s)",
+        "gt": "> %s",
+        "gte": ">= %s",
+        "lt": "< %s",
+        "lte": "<= %s",
         # Using REGEXP_CONTAINS instead of STARTS_WITH and ENDS_WITH for the
         # same reasoning as described above for 'contains'.
-        'startswith': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'endswith': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'istartswith': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'iendswith': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'regex': 'REGEXP_CONTAINS(%s, %%%%s)',
-        'iregex': 'REGEXP_CONTAINS(%s, %%%%s)',
+        "startswith": "REGEXP_CONTAINS(%s, %%%%s)",
+        "endswith": "REGEXP_CONTAINS(%s, %%%%s)",
+        "istartswith": "REGEXP_CONTAINS(%s, %%%%s)",
+        "iendswith": "REGEXP_CONTAINS(%s, %%%%s)",
+        "regex": "REGEXP_CONTAINS(%s, %%%%s)",
+        "iregex": "REGEXP_CONTAINS(%s, %%%%s)",
     }
 
     # pattern_esc is used to generate SQL pattern lookup clauses when the
@@ -85,12 +86,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
     # lookups.
     pattern_ops = {
-        'contains': '',
-        'icontains': '',
-        'startswith': '',
-        'istartswith': '',
-        'endswith': '',
-        'iendswith': '',
+        "contains": "",
+        "icontains": "",
+        "startswith": "",
+        "istartswith": "",
+        "endswith": "",
+        "iendswith": "",
     }
 
     Database = Database
@@ -104,19 +105,21 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @property
     def instance(self):
-        return spanner.Client().instance(self.settings_dict['INSTANCE'])
+        return spanner.Client().instance(self.settings_dict["INSTANCE"])
 
     @property
     def _nodb_connection(self):
-        raise NotImplementedError('Spanner does not have a "no db" connection.')
+        raise NotImplementedError(
+            'Spanner does not have a "no db" connection.'
+        )
 
     def get_connection_params(self):
         return {
-            'project': self.settings_dict['PROJECT'],
-            'instance': self.settings_dict['INSTANCE'],
-            'database': self.settings_dict['NAME'],
-            'user_agent': 'django_spanner/0.0.1',
-            **self.settings_dict['OPTIONS'],
+            "project": self.settings_dict["PROJECT"],
+            "instance": self.settings_dict["INSTANCE"],
+            "database": self.settings_dict["NAME"],
+            "user_agent": "django_spanner/0.0.1",
+            **self.settings_dict["OPTIONS"],
         }
 
     def get_new_connection(self, conn_params):
@@ -137,7 +140,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return False
         try:
             # Use a cursor directly, bypassing Django's utilities.
-            self.connection.cursor().execute('SELECT 1')
+            self.connection.cursor().execute("SELECT 1")
         except Database.Error:
             return False
         else:

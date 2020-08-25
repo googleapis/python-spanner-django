@@ -10,7 +10,7 @@ django_tests
 
 # Unit test / coverage reports
 .coverage
-.tox
+.nox
 
 # JetBrains
 .idea

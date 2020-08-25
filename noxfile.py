@@ -27,7 +27,7 @@ def default(session):
     )
 
 
-@nox.session(python=["2.7", "3.5", "3.6", "3.7", "3.8"])
+@nox.session(python=["3.5", "3.6", "3.7", "3.8"])
 def unit(session):
     """Run the unit test suite."""
     default(session)

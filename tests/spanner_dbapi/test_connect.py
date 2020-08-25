@@ -21,7 +21,7 @@ def _make_credentials():
     return mock.Mock(spec=_CredentialsWithScopes)
 
 
-class Testconnect(unittest.TestCase):
+class Test_connect(unittest.TestCase):
     def _callFUT(self, *args, **kw):
         from spanner_dbapi import connect
 
@@ -53,20 +53,16 @@ class Testconnect(unittest.TestCase):
             )
 
     def test_instance_not_found(self):
-        from spanner_dbapi.exceptions import ProgrammingError
-
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=False
         ) as exists_mock:
 
-            with self.assertRaises(ProgrammingError):
+            with self.assertRaises(ValueError):
                 self._callFUT("test-instance", "test-database")
 
             exists_mock.assert_called_once()
 
     def test_database_not_found(self):
-        from spanner_dbapi.exceptions import ProgrammingError
-
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
         ):
@@ -74,7 +70,7 @@ class Testconnect(unittest.TestCase):
                 "google.cloud.spanner_v1.database.Database.exists", return_value=False
             ) as exists_mock:
 
-                with self.assertRaises(ProgrammingError):
+                with self.assertRaises(ValueError):
                     self._callFUT("test-instance", "test-database")
 
                 exists_mock.assert_called_once()
@@ -109,7 +105,3 @@ class Testconnect(unittest.TestCase):
                 database_mock.assert_called_once_with(DATABASE, pool=mock.ANY)
 
         self.assertIsInstance(connection, Connection)
-
-
-if __name__ == "__main__":
-    unittest.main()

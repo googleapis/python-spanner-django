@@ -4,10 +4,9 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import spanner_dbapi as Database
 from django.db.backends.base.base import BaseDatabaseWrapper
 from google.cloud import spanner_v1 as spanner
-
-import spanner_dbapi as Database
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -82,7 +81,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # expression or the result of a bilateral transformation). In those cases,
     # special characters for REGEXP_CONTAINS operators (e.g. \, *, _) must be
     # escaped on database side.
-    pattern_esc = r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"), "_", r"\_")'
+    pattern_esc = (
+        r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"),"_", r"\_")'
+    )
     # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
     # lookups.
     pattern_ops = {

@@ -27,7 +27,8 @@ re_NON_UPDATE = re.compile(r"^\s*(SELECT)", re.IGNORECASE)
 
 re_WITH = re.compile(r"^\s*(WITH)", re.IGNORECASE)
 
-# DDL statements follow https://cloud.google.com/spanner/docs/data-definition-language
+# DDL statements follow
+# https://cloud.google.com/spanner/docs/data-definition-language
 re_DDL = re.compile(r"^\s*(CREATE|ALTER|DROP)", re.IGNORECASE | re.DOTALL)
 
 re_IS_INSERT = re.compile(r"^\s*(INSERT)", re.IGNORECASE | re.DOTALL)
@@ -43,7 +44,8 @@ def classify_stmt(sql):
     elif re_WITH.match(sql):
         # As of Fri-13th-March-2020, Cloud Spanner only supports WITH for DQL
         # statements and doesn't yet support WITH for DML statements.
-        # When WITH for DML is added, we'll need to update this classifier accordingly.
+        # When WITH for DML is added, we'll need to update this classifier
+        # accordingly.
         return STMT_NON_UPDATING
     else:
         return STMT_UPDATING
@@ -57,7 +59,7 @@ re_INSERT = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
-re_VALUES_TILL_END = re.compile(r"VALUES\s*\(.+$", re.IGNORECASE | re.DOTALL,)
+re_VALUES_TILL_END = re.compile(r"VALUES\s*\(.+$", re.IGNORECASE | re.DOTALL)
 
 re_VALUES_PYFORMAT = re.compile(
     # To match: (%s, %s,....%s)
@@ -132,7 +134,7 @@ def parse_insert(insert_sql, params):
                     ('INSERT INTO T (f1, f2) VALUES (UPPER(%s), %s)', ('c', 'd',))
                 ],
             }
-    """
+    """  # noqa
     match = re_INSERT.search(insert_sql)
 
     if not match:
@@ -144,9 +146,7 @@ def parse_insert(insert_sql, params):
     if not after_values_sql:
         # Case b)
         insert_sql = sanitize_literals_for_upload(insert_sql)
-        return {
-            "sql_params_list": [(insert_sql, None,)],
-        }
+        return {"sql_params_list": [(insert_sql, None)]}
 
     if not params:
         # Case a) perhaps?
@@ -161,9 +161,7 @@ def parse_insert(insert_sql, params):
         # Confirmed case of:
         # SQL: INSERT INTO T (a1, a2) VALUES (1, 2)
         # Params: None
-        return {
-            "sql_params_list": [(insert_sql, None,)],
-        }
+        return {"sql_params_list": [(insert_sql, None)]}
 
     values_str = after_values_sql[0]
     _, values = parse_values(values_str)
@@ -185,11 +183,9 @@ def parse_insert(insert_sql, params):
         rows_list = rows_for_insert_or_update(columns, params, values_pyformat)
         insert_sql_preamble = sanitize_literals_for_upload(insert_sql_preamble)
         for row in rows_list:
-            sql_params_list.append((insert_sql_preamble, row,))
+            sql_params_list.append((insert_sql_preamble, row))
 
-        return {
-            "sql_params_list": sql_params_list,
-        }
+        return {"sql_params_list": sql_params_list}
 
     # Case d)
     # insert_sql is of the form:
@@ -201,7 +197,7 @@ def parse_insert(insert_sql, params):
     if args_len != len(params):
         raise ProgrammingError(
             "Invalid length: VALUES(...) len: %d != len(params): %d"
-            % (args_len, len(params)),
+            % (args_len, len(params))
         )
 
     trim_index = insert_sql.find(values_str)
@@ -215,11 +211,9 @@ def parse_insert(insert_sql, params):
             tuple(params[0 : len(token_arg)]),
             params[len(token_arg) :],
         )
-        sql_param_tuples.append((row_sql, row_params,))
+        sql_param_tuples.append((row_sql, row_params))
 
-    return {
-        "sql_params_list": sql_param_tuples,
-    }
+    return {"sql_params_list": sql_param_tuples}
 
 
 def rows_for_insert_or_update(columns, params, pyformat_args=None):
@@ -232,7 +226,7 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
 
     We'll have to convert both params types into:
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
-    """
+    """  # noqa
 
     if not pyformat_args:
         # This is the case where we have for example:
@@ -268,13 +262,15 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
             n_stride = len(columns)
     else:
         # This is the case where we have for example:
-        # SQL:      'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s)'
+        # SQL:      'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s),
+        #           (%s, %s, %s), (%s, %s, %s)'
         # Params:   [1, 2, 3, 4, 5, 6, 7, 8, 9]
         #    which should become
         # Columns:      (f1, f2, f3)
         # new_params:   [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
 
-        # Sanity check 1: all the pyformat_values should have the exact same length.
+        # Sanity check 1: all the pyformat_values should have the exact same
+        # length.
         first, rest = pyformat_args[0], pyformat_args[1:]
         n_stride = first.count("%s")
         for pyfmt_value in rest:
@@ -285,7 +281,8 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
                     % (first, n_stride, pyfmt_value, n)
                 )
 
-        # Sanity check 2: len(params) MUST be a multiple of n_stride aka len(count of %s).
+        # Sanity check 2: len(params) MUST be a multiple of n_stride aka
+        # len(count of %s).
         # so that we can properly group for example:
         #  Given pyformat args:
         #   (%s, %s, %s)
@@ -295,14 +292,14 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
         #   [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
         if (len(params) % n_stride) != 0:
             raise ProgrammingError(
-                "Invalid length: len(params)=%d MUST be a multiple of len(pyformat_args)=%d"
-                % (len(params), n_stride),
+                "Invalid length: len(params)=%d MUST be a multiple of "
+                "len(pyformat_args)=%d" % (len(params), n_stride)
             )
 
     # Now chop up the strides.
     strides = []
     for step in range(0, len(params), n_stride):
-        stride = tuple(params[step : step + n_stride :])
+        stride = tuple(params[step: step + n_stride:])
         strides.append(stride)
 
     return strides
@@ -393,9 +390,9 @@ def get_param_types(params):
             param_types[key] = spanner.param_types.FLOAT64
         elif isinstance(value, int):
             param_types[key] = spanner.param_types.INT64
-        elif isinstance(value, (TimestampStr, datetime.datetime,)):
+        elif isinstance(value, (TimestampStr, datetime.datetime)):
             param_types[key] = spanner.param_types.TIMESTAMP
-        elif isinstance(value, (DateStr, datetime.date,)):
+        elif isinstance(value, (DateStr, datetime.date)):
             param_types[key] = spanner.param_types.DATE
         elif isinstance(value, str):
             param_types[key] = spanner.param_types.STRING

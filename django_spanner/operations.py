@@ -246,7 +246,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         # Cloud Spanner doesn't have a function for converting
         # TIMESTAMP to another time zone.
         return (
-            "TIMESTAMP(FORMAT_TIMESTAMP('%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))"
+            "TIMESTAMP(FORMAT_TIMESTAMP("
+            "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))"
             % (field_name, tzname,)
         )
 
@@ -263,11 +264,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             return "POWER(%s)" % ", ".join(sub_expressions)
         elif connector == ">>":
             lhs, rhs = sub_expressions
-            # Use an alternate computation because Cloud Sapnner's '>>' operator does not do
-            # sign bit extension with a signed type (i.e. produces different results for
-            # negative numbers than what Django's tests expect). Cast float result as INT64 to
-            # allow assigning to both INT64 and FLOAT64 columns (otherwise the FLOAT result
-            # couldn't be assigned to INT64 columns).
+            # Use an alternate computation because Cloud Sapnner's '>>'
+            # operator does not do sign bit extension with a signed type (i.e.
+            # produces different results for negative numbers than what
+            # Django's tests expect). Cast float result as INT64 to allow
+            # assigning to both INT64 and FLOAT64 columns (otherwise the FLOAT
+            # result couldn't be assigned to INT64 columns).
             return "CAST(FLOOR(%(lhs)s / POW(2, %(rhs)s)) AS INT64)" % {
                 "lhs": lhs,
                 "rhs": rhs,
@@ -285,7 +287,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             )
 
     def lookup_cast(self, lookup_type, internal_type=None):
-        # Cast text lookups to string to allow things like filter(x__contains=4)
+        # Cast text lookups to string to allow things like
+        # filter(x__contains=4)
         if lookup_type in (
             "contains",
             "icontains",

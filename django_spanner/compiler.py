@@ -38,11 +38,13 @@ class SQLCompiler(BaseSQLCompiler):
             for query, compiler in zip(self.query.combined_queries, compilers):
                 if query.low_mark or query.high_mark:
                     raise DatabaseError(
-                        "LIMIT/OFFSET not allowed in subqueries of compound statements."
+                        "LIMIT/OFFSET not allowed in subqueries of compound "
+                        "statements."
                     )
                 if compiler.get_order_by():
                     raise DatabaseError(
-                        "ORDER BY not allowed in subqueries of compound statements."
+                        "ORDER BY not allowed in subqueries of compound "
+                        "statements."
                     )
         parts = ()
         for compiler in compilers:

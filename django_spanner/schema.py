@@ -26,7 +26,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     # Cloud Spanner requires when changing if a column is NULLABLE,
     # that it should get redefined with its type and size.
-    # See https://cloud.google.com/spanner/docs/schema-updates#updates-that-require-validation
+    # See
+    # https://cloud.google.com/spanner/docs/schema-updates#updates-that-require-validation  # noqa
     sql_alter_column_null = "ALTER COLUMN %(column)s %(type)s"
     sql_alter_column_not_null = "ALTER COLUMN %(column)s %(type)s NOT NULL"
     sql_alter_column_type = "ALTER COLUMN %(column)s %(type)s"
@@ -108,10 +109,12 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             )
             if tablespace_sql:
                 sql += " " + tablespace_sql
-        # Prevent using [] as params, in the case a literal '%' is used in the definition
+        # Prevent using [] as params, in the case a literal '%' is used in the
+        # definition
         self.execute(sql, params or None)
 
-        # Add any field index and index_together's (deferred as SQLite _remake_table needs it)
+        # Add any field index and index_together's (deferred as SQLite
+        # _remake_table needs it)
         self.deferred_sql.extend(self._model_indexes_sql(model))
 
         # Make M2M tables

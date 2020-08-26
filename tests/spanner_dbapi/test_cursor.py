@@ -9,12 +9,11 @@
 import unittest
 from unittest import mock
 
+from spanner_dbapi import connect, InterfaceError
+
 
 class TestCursor(unittest.TestCase):
     def test_close(self):
-        from spanner_dbapi import connect
-        from spanner_dbapi.exceptions import InterfaceError
-
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
         ):
@@ -31,9 +30,6 @@ class TestCursor(unittest.TestCase):
             cursor.execute("SELECT * FROM database")
 
     def test_connection_closed(self):
-        from spanner_dbapi import connect
-        from spanner_dbapi.exceptions import InterfaceError
-
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
         ):
@@ -48,7 +44,3 @@ class TestCursor(unittest.TestCase):
         self.assertTrue(cursor.is_closed)
         with self.assertRaises(InterfaceError):
             cursor.execute("SELECT * FROM database")
-
-
-if __name__ == "__main__":
-    unittest.main()

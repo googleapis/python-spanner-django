@@ -50,7 +50,7 @@ class Cursor:
     def __init__(self, connection):
         self._itr = None
         self._res = None
-        self._row_count = _UNSET_COUNT
+        self._rowcount = _UNSET_COUNT
         self._connection = connection
         self._is_closed = False
 
@@ -96,10 +96,10 @@ class Cursor:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
     def _handle_update(self, sql, params):
+        ensure_where_clause(sql)
         self._connection.in_transaction(self.__do_execute_update, sql, params)
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
-        ensure_where_clause(sql)
         sql, params = sql_pyformat_args_to_spanner(sql, params)
 
         res = transaction.execute_update(
@@ -107,7 +107,7 @@ class Cursor:
         )
         self._itr = None
         if type(res) == int:
-            self._row_count = res
+            self._rowcount = res
 
         return res
 
@@ -166,7 +166,7 @@ class Cursor:
                 sql, params=params, param_types=get_param_types(params)
             )
             if type(res) == int:
-                self._row_count = res
+                self._rowcount = res
                 self._itr = None
             else:
                 # Immediately using:
@@ -183,7 +183,7 @@ class Cursor:
                 self._itr = PeekIterator(self._res)
                 # Unfortunately, Spanner doesn't seem to send back
                 # information about the number of rows available.
-                self._row_count = _UNSET_COUNT
+                self._rowcount = _UNSET_COUNT
 
     def __enter__(self):
         return self
@@ -216,7 +216,7 @@ class Cursor:
 
     @property
     def rowcount(self):
-        return self._row_count
+        return self._rowcount
 
     @property
     def is_closed(self):

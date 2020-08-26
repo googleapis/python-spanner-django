@@ -9,10 +9,12 @@
 import unittest
 from unittest import mock
 
+import google.auth.credentials
+from google.api_core.gapic_v1.client_info import ClientInfo
+from spanner_dbapi import connect, Connection
+
 
 def _make_credentials():
-    import google.auth.credentials
-
     class _CredentialsWithScopes(
         google.auth.credentials.Credentials, google.auth.credentials.Scoped
     ):
@@ -22,15 +24,7 @@ def _make_credentials():
 
 
 class Test_connect(unittest.TestCase):
-    def _callFUT(self, *args, **kw):
-        from spanner_dbapi import connect
-
-        return connect(*args, **kw)
-
     def test_connect(self):
-        from google.api_core.gapic_v1.client_info import ClientInfo
-        from spanner_dbapi.connection import Connection
-
         PROJECT = "test-project"
         USER_AGENT = "user-agent"
         CREDENTIALS = _make_credentials()
@@ -41,7 +35,7 @@ class Test_connect(unittest.TestCase):
                 "spanner_dbapi.google_client_info", return_value=CLIENT_INFO
             ) as client_info_mock:
 
-                connection = self._callFUT(
+                connection = connect(
                     "test-instance", "test-database", PROJECT, CREDENTIALS, USER_AGENT
                 )
 
@@ -58,7 +52,7 @@ class Test_connect(unittest.TestCase):
         ) as exists_mock:
 
             with self.assertRaises(ValueError):
-                self._callFUT("test-instance", "test-database")
+                connect("test-instance", "test-database")
 
             exists_mock.assert_called_once()
 
@@ -71,27 +65,23 @@ class Test_connect(unittest.TestCase):
             ) as exists_mock:
 
                 with self.assertRaises(ValueError):
-                    self._callFUT("test-instance", "test-database")
+                    connect("test-instance", "test-database")
 
                 exists_mock.assert_called_once()
 
     def test_connect_instance_id(self):
-        from spanner_dbapi.connection import Connection
-
         INSTANCE = "test-instance"
 
         with mock.patch(
             "google.cloud.spanner_v1.client.Client.instance"
         ) as instance_mock:
-            connection = self._callFUT(INSTANCE, "test-database")
+            connection = connect(INSTANCE, "test-database")
 
             instance_mock.assert_called_once_with(INSTANCE)
 
         self.assertIsInstance(connection, Connection)
 
     def test_connect_database_id(self):
-        from spanner_dbapi.connection import Connection
-
         DATABASE = "test-database"
 
         with mock.patch(
@@ -100,7 +90,7 @@ class Test_connect(unittest.TestCase):
             with mock.patch(
                 "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
             ):
-                connection = self._callFUT("test-instance", DATABASE)
+                connection = connect("test-instance", DATABASE)
 
                 database_mock.assert_called_once_with(DATABASE, pool=mock.ANY)
 

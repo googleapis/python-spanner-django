@@ -54,7 +54,7 @@ class Test_connect(unittest.TestCase):
             with self.assertRaises(ValueError):
                 connect("test-instance", "test-database")
 
-            exists_mock.assert_called_once()
+            exists_mock.assert_called_once_with()
 
     def test_database_not_found(self):
         with mock.patch(
@@ -67,7 +67,7 @@ class Test_connect(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     connect("test-instance", "test-database")
 
-                exists_mock.assert_called_once()
+                exists_mock.assert_called_once_with()
 
     def test_connect_instance_id(self):
         INSTANCE = "test-instance"

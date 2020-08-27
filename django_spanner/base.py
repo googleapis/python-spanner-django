@@ -82,7 +82,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # special characters for REGEXP_CONTAINS operators (e.g. \, *, _) must be
     # escaped on database side.
     pattern_esc = (
-        r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"),"_", r"\_")'
+        r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"), "_", r"\_")'
     )
     # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
     # lookups.
@@ -117,8 +117,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def get_connection_params(self):
         return {
             "project": self.settings_dict["PROJECT"],
-            "instance": self.settings_dict["INSTANCE"],
-            "database": self.settings_dict["NAME"],
+            "instance_id": self.settings_dict["INSTANCE"],
+            "database_id": self.settings_dict["NAME"],
             "user_agent": "django_spanner/0.0.1",
             **self.settings_dict["OPTIONS"],
         }

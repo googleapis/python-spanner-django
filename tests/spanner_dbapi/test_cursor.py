@@ -23,6 +23,8 @@ class TestCursor(unittest.TestCase):
                 connection = connect("test-instance", "test-database")
 
         cursor = connection.cursor()
+        self.assertFalse(cursor.is_closed)
+
         cursor.close()
 
         self.assertTrue(cursor.is_closed)
@@ -39,6 +41,8 @@ class TestCursor(unittest.TestCase):
                 connection = connect("test-instance", "test-database")
 
         cursor = connection.cursor()
+        self.assertFalse(cursor.is_closed)
+
         connection.close()
 
         self.assertTrue(cursor.is_closed)

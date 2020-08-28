@@ -34,7 +34,7 @@ def unit(session):
     default(session)
 
 
-@nox.session(python="3.7")
+@nox.session(python="3.8")
 def docs(session):
     """Build the docs for this library."""
 

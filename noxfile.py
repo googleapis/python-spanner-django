@@ -33,4 +33,6 @@ def unit(session):
 @nox.session(python=["3.7"])
 def django(session):
     """Run the Django tests."""
+    session.install("Django")
+
     session.run("bash", "django_test_suite.sh", external=True)

@@ -20,10 +20,7 @@ def default(session):
 
     # Run py.test against the unit tests.
     session.run(
-        "py.test",
-        "--quiet",
-        os.path.join("tests", "spanner_dbapi"),
-        *session.posargs,
+        "py.test", "--quiet", os.path.join("tests", "spanner_dbapi"), *session.posargs
     )
 
 
@@ -31,3 +28,9 @@ def default(session):
 def unit(session):
     """Run the unit test suite."""
     default(session)
+
+
+@nox.session(python=["3.7"])
+def django(session):
+    """Run the Django tests."""
+    session.run("bash", "django_test_suite.sh")

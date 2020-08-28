@@ -195,6 +195,7 @@ func main() {
 		// Add as much jitter as possible.
 		<-time.After(871 * time.Millisecond)
 	}
+	wg.Wait()
 }
 
 func runTests(ctx context.Context, instanceName string, djangoApps []string, testSuiteScriptPath string, genEmulatorHost func() string) error {

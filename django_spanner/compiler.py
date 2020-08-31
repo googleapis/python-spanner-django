@@ -32,11 +32,13 @@ class SQLCompiler(BaseSQLCompiler):
             for query, compiler in zip(self.query.combined_queries, compilers):
                 if query.low_mark or query.high_mark:
                     raise DatabaseError(
-                        "LIMIT/OFFSET not allowed in subqueries of compound statements."
+                        "LIMIT/OFFSET not allowed in subqueries of compound "
+                        "statements."
                     )
                 if compiler.get_order_by():
                     raise DatabaseError(
-                        "ORDER BY not allowed in subqueries of compound statements."
+                        "ORDER BY not allowed in subqueries of compound "
+                        "statements."
                     )
         parts = ()
         for compiler in compilers:
@@ -44,7 +46,10 @@ class SQLCompiler(BaseSQLCompiler):
                 # If the columns list is limited, then all combined queries
                 # must have the same columns list. Set the selects defined on
                 # the query on all combined queries, if not already set.
-                if not compiler.query.values_select and self.query.values_select:
+                if (
+                    not compiler.query.values_select
+                    and self.query.values_select
+                ):
                     compiler.query.set_values(
                         (
                             *self.query.extra_select,
@@ -66,14 +71,18 @@ class SQLCompiler(BaseSQLCompiler):
             except EmptyResultSet:
                 # Omit the empty queryset with UNION and with DIFFERENCE if the
                 # first queryset is nonempty.
-                if combinator == "union" or (combinator == "difference" and parts):
+                if combinator == "union" or (
+                    combinator == "difference" and parts
+                ):
                     continue
                 raise
         if not parts:
             raise EmptyResultSet
         combinator_sql = self.connection.ops.set_operators[combinator]
         combinator_sql += " ALL" if all else " DISTINCT"
-        braces = "({})" if features.supports_slicing_ordering_in_compound else "{}"
+        braces = (
+            "({})" if features.supports_slicing_ordering_in_compound else "{}"
+        )
         sql_parts, args_parts = zip(
             *((braces.format(sql), args) for sql, args in parts)
         )

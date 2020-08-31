@@ -86,7 +86,9 @@ class Connection:
         self.run_prior_DDL_statements()
 
         with self._dbhandle.snapshot() as snapshot:
-            res = snapshot.execute_sql(sql, params=params, param_types=param_types)
+            res = snapshot.execute_sql(
+                sql, params=params, param_types=param_types
+            )
             return list(res)
 
     def get_table_column_schema(self, table_name):

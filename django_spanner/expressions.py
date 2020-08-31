@@ -15,7 +15,9 @@ def order_by(self, compiler, connection, **extra_context):
         template = "%(expression)s IS NULL, %(expression)s %(ordering)s"
     elif self.nulls_first:
         template = "%(expression)s IS NOT NULL, %(expression)s %(ordering)s"
-    return self.as_sql(compiler, connection, template=template, **extra_context)
+    return self.as_sql(
+        compiler, connection, template=template, **extra_context
+    )
 
 
 def register_expressions():

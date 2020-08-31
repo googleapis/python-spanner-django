@@ -36,7 +36,9 @@ def cast(self, compiler, connection, **extra_context):
         template = "SUBSTR(" + self.template + ", 0, %s)" % max_length
     else:
         template = self.template
-    return self.as_sql(compiler, connection, template=template, **extra_context)
+    return self.as_sql(
+        compiler, connection, template=template, **extra_context
+    )
 
 
 def chr_(self, compiler, connection, **extra_context):
@@ -60,7 +62,10 @@ def concatpair(self, compiler, connection, **extra_context):
 
 def cot(self, compiler, connection, **extra_context):
     return self.as_sql(
-        compiler, connection, template="(1 / TAN(%(expressions)s))", **extra_context
+        compiler,
+        connection,
+        template="(1 / TAN(%(expressions)s))",
+        **extra_context
     )
 
 
@@ -95,7 +100,9 @@ def ord_(self, compiler, connection, **extra_context):
 
 
 def pi(self, compiler, connection, **extra_context):
-    return self.as_sql(compiler, connection, template=str(math.pi), **extra_context)
+    return self.as_sql(
+        compiler, connection, template=str(math.pi), **extra_context
+    )
 
 
 def radians(self, compiler, connection, **extra_context):
@@ -108,11 +115,15 @@ def radians(self, compiler, connection, **extra_context):
 
 
 def strindex(self, compiler, connection, **extra_context):
-    return self.as_sql(compiler, connection, function="STRPOS", **extra_context)
+    return self.as_sql(
+        compiler, connection, function="STRPOS", **extra_context
+    )
 
 
 def substr(self, compiler, connection, **extra_context):
-    return self.as_sql(compiler, connection, function="SUBSTR", **extra_context)
+    return self.as_sql(
+        compiler, connection, function="SUBSTR", **extra_context
+    )
 
 
 def register_functions():

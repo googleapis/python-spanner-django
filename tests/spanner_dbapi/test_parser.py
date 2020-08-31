@@ -45,7 +45,9 @@ class ParserTests(TestCase):
         for text, wantException in cases:
             with self.subTest(text=text):
                 self.assertRaisesRegex(
-                    ProgrammingError, wantException, lambda: expect(text, TERMINAL)
+                    ProgrammingError,
+                    wantException,
+                    lambda: expect(text, TERMINAL),
                 )
 
     def test_func(self):
@@ -69,7 +71,10 @@ class ParserTests(TestCase):
                                     [
                                         pyfmt_str,
                                         pyfmt_str,
-                                        func("TAN", a_args([pyfmt_str, pyfmt_str])),
+                                        func(
+                                            "TAN",
+                                            a_args([pyfmt_str, pyfmt_str]),
+                                        ),
                                     ]
                                 ),
                             ),
@@ -111,7 +116,11 @@ class ParserTests(TestCase):
                 "(%s,%s, f1(%s, %s))",
                 "",
                 a_args(
-                    [pyfmt_str, pyfmt_str, func("f1", a_args([pyfmt_str, pyfmt_str]))]
+                    [
+                        pyfmt_str,
+                        pyfmt_str,
+                        func("f1", a_args([pyfmt_str, pyfmt_str])),
+                    ]
                 ),
             ),
         ]
@@ -162,7 +171,10 @@ class ParserTests(TestCase):
                 "VALUES (UPPER(%s)), (%s)",
                 "",
                 values(
-                    [a_args([func("UPPER", a_args([pyfmt_str]))]), a_args([pyfmt_str])]
+                    [
+                        a_args([func("UPPER", a_args([pyfmt_str]))]),
+                        a_args([pyfmt_str]),
+                    ]
                 ),
             ),
         ]
@@ -186,5 +198,7 @@ class ParserTests(TestCase):
         for text, wantException in cases:
             with self.subTest(text=text):
                 self.assertRaisesRegex(
-                    ProgrammingError, wantException, lambda: expect(text, VALUES)
+                    ProgrammingError,
+                    wantException,
+                    lambda: expect(text, VALUES),
                 )

@@ -124,7 +124,8 @@ def startswith_endswith(self, compiler, connection):
             sql += ", '$'"
         sql += ")"
         return (
-            "REGEXP_CONTAINS(%s, %s)" % (lhs_sql, connection.pattern_esc.format(sql)),
+            "REGEXP_CONTAINS(%s, %s)"
+            % (lhs_sql, connection.pattern_esc.format(sql)),
             params,
         )
 

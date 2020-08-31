@@ -27,7 +27,8 @@ re_NON_UPDATE = re.compile(r"^\s*(SELECT)", re.IGNORECASE)
 
 re_WITH = re.compile(r"^\s*(WITH)", re.IGNORECASE)
 
-# DDL statements follow https://cloud.google.com/spanner/docs/data-definition-language
+# DDL statements follow
+# https://cloud.google.com/spanner/docs/data-definition-language
 re_DDL = re.compile(r"^\s*(CREATE|ALTER|DROP)", re.IGNORECASE | re.DOTALL)
 
 re_IS_INSERT = re.compile(r"^\s*(INSERT)", re.IGNORECASE | re.DOTALL)
@@ -43,7 +44,8 @@ def classify_stmt(sql):
     elif re_WITH.match(sql):
         # As of Fri-13th-March-2020, Cloud Spanner only supports WITH for DQL
         # statements and doesn't yet support WITH for DML statements.
-        # When WITH for DML is added, we'll need to update this classifier accordingly.
+        # When WITH for DML is added, we'll need to update this classifier
+        # accordingly.
         return STMT_NON_UPDATING
     else:
         return STMT_UPDATING
@@ -132,7 +134,7 @@ def parse_insert(insert_sql, params):
                     ('INSERT INTO T (f1, f2) VALUES (UPPER(%s), %s)', ('c', 'd',))
                 ],
             }
-    """
+    """  # noqa
     match = re_INSERT.search(insert_sql)
 
     if not match:
@@ -168,7 +170,8 @@ def parse_insert(insert_sql, params):
         # Case c)
 
         columns = [
-            strip_backticks(mi.strip()) for mi in match.group("columns").split(",")
+            strip_backticks(mi.strip())
+            for mi in match.group("columns").split(",")
         ]
         sql_params_list = []
         insert_sql_preamble = "INSERT INTO %s (%s) VALUES %s" % (
@@ -204,7 +207,10 @@ def parse_insert(insert_sql, params):
     for token_arg in values.argv:
         row_sql = before_values_sql + " VALUES%s" % token_arg
         row_sql = sanitize_literals_for_upload(row_sql)
-        row_params, params = tuple(params[0 : len(token_arg)]), params[len(token_arg) :]
+        row_params, params = (
+            tuple(params[0 : len(token_arg)]),
+            params[len(token_arg) :],
+        )
         sql_param_tuples.append((row_sql, row_params))
 
     return {"sql_params_list": sql_param_tuples}
@@ -220,7 +226,7 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
 
     We'll have to convert both params types into:
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
-    """
+    """  # noqa
 
     if not pyformat_args:
         # This is the case where we have for example:
@@ -256,13 +262,15 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
             n_stride = len(columns)
     else:
         # This is the case where we have for example:
-        # SQL:      'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s)'
+        # SQL:      'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s),
+        #           (%s, %s, %s), (%s, %s, %s)'
         # Params:   [1, 2, 3, 4, 5, 6, 7, 8, 9]
         #    which should become
         # Columns:      (f1, f2, f3)
         # new_params:   [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
 
-        # Sanity check 1: all the pyformat_values should have the exact same length.
+        # Sanity check 1: all the pyformat_values should have the exact same
+        # length.
         first, rest = pyformat_args[0], pyformat_args[1:]
         n_stride = first.count("%s")
         for pyfmt_value in rest:
@@ -273,7 +281,8 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
                     % (first, n_stride, pyfmt_value, n)
                 )
 
-        # Sanity check 2: len(params) MUST be a multiple of n_stride aka len(count of %s).
+        # Sanity check 2: len(params) MUST be a multiple of n_stride aka
+        # len(count of %s).
         # so that we can properly group for example:
         #  Given pyformat args:
         #   (%s, %s, %s)
@@ -283,8 +292,8 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
         #   [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
         if (len(params) % n_stride) != 0:
             raise ProgrammingError(
-                "Invalid length: len(params)=%d MUST be a multiple of len(pyformat_args)=%d"
-                % (len(params), n_stride)
+                "Invalid length: len(params)=%d MUST be a multiple of "
+                "len(pyformat_args)=%d" % (len(params), n_stride)
             )
 
     # Now chop up the strides.
@@ -397,7 +406,10 @@ def ensure_where_clause(sql):
     Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
     Add a dummy WHERE clause if necessary.
     """
-    if any(isinstance(token, sqlparse.sql.Where) for token in sqlparse.parse(sql)[0]):
+    if any(
+        isinstance(token, sqlparse.sql.Where)
+        for token in sqlparse.parse(sql)[0]
+    ):
         return sql
     return sql + " WHERE 1=1"
 

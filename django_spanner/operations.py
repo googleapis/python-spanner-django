@@ -26,7 +26,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     # Django's lookup names that require a different name in Spanner's
     # EXTRACT() function.
     # https://cloud.google.com/spanner/docs/functions-and-operators#extract
-    extract_names = {"iso_year": "isoyear", "week": "isoweek", "week_day": "dayofweek"}
+    extract_names = {
+        "iso_year": "isoyear",
+        "week": "isoweek",
+        "week_day": "dayofweek",
+    }
 
     def max_name_length(self):
         # https://cloud.google.com/spanner/quotas#tables
@@ -60,7 +64,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                 style.SQL_KEYWORD("FROM"),
             )
             return [
-                delete_sql % style.SQL_FIELD(self.quote_name(table)) for table in tables
+                delete_sql % style.SQL_FIELD(self.quote_name(table))
+                for table in tables
             ]
         else:
             return []
@@ -87,7 +92,9 @@ class DatabaseOperations(BaseDatabaseOperations):
                 )
         return TimestampStr(value.isoformat(timespec="microseconds") + "Z")
 
-    def adapt_decimalfield_value(self, value, max_digits=None, decimal_places=None):
+    def adapt_decimalfield_value(
+        self, value, max_digits=None, decimal_places=None
+    ):
         """
         Convert value from decimal.Decimal into float, for a direct mapping
         and correct serialization with RPCs to Cloud Spanner.
@@ -146,7 +153,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             value.microsecond,
         )
         return (
-            timezone.make_aware(dt, self.connection.timezone) if settings.USE_TZ else dt
+            timezone.make_aware(dt, self.connection.timezone)
+            if settings.USE_TZ
+            else dt
         )
 
     def convert_decimalfield_value(self, value, expression, connection):
@@ -181,7 +190,10 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def time_extract_sql(self, lookup_type, field_name):
         # Time is stored as TIMESTAMP with UTC time zone.
-        return 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (lookup_type, field_name)
+        return 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (
+            lookup_type,
+            field_name,
+        )
 
     def date_trunc_sql(self, lookup_type, field_name):
         # https://cloud.google.com/spanner/docs/functions-and-operators#date_trunc
@@ -189,7 +201,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             # Spanner truncates to Sunday but Django expects Monday. First,
             # subtract a day so that a Sunday will be truncated to the previous
             # week...
-            field_name = "DATE_SUB(CAST(" + field_name + " AS DATE), INTERVAL 1 DAY)"
+            field_name = (
+                "DATE_SUB(CAST(" + field_name + " AS DATE), INTERVAL 1 DAY)"
+            )
         sql = "DATE_TRUNC(CAST(%s AS DATE), %s)" % (field_name, lookup_type)
         if lookup_type == "week":
             # ...then add a day to get from Sunday to Monday.
@@ -204,7 +218,11 @@ class DatabaseOperations(BaseDatabaseOperations):
             # subtract a day so that a Sunday will be truncated to the previous
             # week...
             field_name = "TIMESTAMP_SUB(" + field_name + ", INTERVAL 1 DAY)"
-        sql = 'TIMESTAMP_TRUNC(%s, %s, "%s")' % (field_name, lookup_type, tzname)
+        sql = 'TIMESTAMP_TRUNC(%s, %s, "%s")' % (
+            field_name,
+            lookup_type,
+            tzname,
+        )
         if lookup_type == "week":
             # ...then add a day to get from Sunday to Monday.
             sql = "TIMESTAMP_ADD(" + sql + ", INTERVAL 1 DAY)"
@@ -223,9 +241,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         tzname = tzname if settings.USE_TZ else "UTC"
         # Cloud Spanner doesn't have a function for converting
         # TIMESTAMP to another time zone.
-        return "TIMESTAMP(FORMAT_TIMESTAMP('%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))" % (
-            field_name,
-            tzname,
+        return (
+            "TIMESTAMP(FORMAT_TIMESTAMP("
+            "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))" % (field_name, tzname)
         )
 
     def date_interval_sql(self, timedelta):
@@ -241,11 +259,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             return "POWER(%s)" % ", ".join(sub_expressions)
         elif connector == ">>":
             lhs, rhs = sub_expressions
-            # Use an alternate computation because Cloud Sapnner's '>>' operator does not do
-            # sign bit extension with a signed type (i.e. produces different results for
-            # negative numbers than what Django's tests expect). Cast float result as INT64 to
-            # allow assigning to both INT64 and FLOAT64 columns (otherwise the FLOAT result
-            # couldn't be assigned to INT64 columns).
+            # Use an alternate computation because Cloud Sapnner's '>>'
+            # operator does not do sign bit extension with a signed type (i.e.
+            # produces different results for negative numbers than what
+            # Django's tests expect). Cast float result as INT64 to allow
+            # assigning to both INT64 and FLOAT64 columns (otherwise the FLOAT
+            # result couldn't be assigned to INT64 columns).
             return "CAST(FLOOR(%(lhs)s / POW(2, %(rhs)s)) AS INT64)" % {
                 "lhs": lhs,
                 "rhs": rhs,
@@ -258,10 +277,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif connector == "-":
             return "TIMESTAMP_SUB(" + ", ".join(sub_expressions) + ")"
         else:
-            raise DatabaseError("Invalid connector for timedelta: %s." % connector)
+            raise DatabaseError(
+                "Invalid connector for timedelta: %s." % connector
+            )
 
     def lookup_cast(self, lookup_type, internal_type=None):
-        # Cast text lookups to string to allow things like filter(x__contains=4)
+        # Cast text lookups to string to allow things like
+        # filter(x__contains=4)
         if lookup_type in (
             "contains",
             "icontains",

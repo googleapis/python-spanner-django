@@ -47,7 +47,9 @@ class TypesTests(TestCase):
             datetime.datetime(2019, 11, 4, tzUTC).date(),
         )
         matches = got in want
-        self.assertTrue(matches, "`%s` not present in any of\n`%s`" % (got, want))
+        self.assertTrue(
+            matches, "`%s` not present in any of\n`%s`" % (got, want)
+        )
 
     def test_TimeFromTicks(self):
         epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
@@ -60,7 +62,9 @@ class TypesTests(TestCase):
             datetime.datetime(2019, 11, 4, 7, 14, 22, tzUTC).time(),
         )
         matches = got in want
-        self.assertTrue(matches, "`%s` not present in any of\n`%s`" % (got, want))
+        self.assertTrue(
+            matches, "`%s` not present in any of\n`%s`" % (got, want)
+        )
 
     def test_TimestampFromTicks(self):
         epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
@@ -73,7 +77,9 @@ class TypesTests(TestCase):
             datetime.datetime(2019, 11, 4, 7, 14, 22, tzUTC),
         )
         matches = got in want
-        self.assertTrue(matches, "`%s` not present in any of\n`%s`" % (got, want))
+        self.assertTrue(
+            matches, "`%s` not present in any of\n`%s`" % (got, want)
+        )
 
     def test_PeekIterator(self):
         cases = [

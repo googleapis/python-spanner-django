@@ -40,7 +40,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         interface.
         """
         cursor.execute(
-            "SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name)
+            "SELECT * FROM %s LIMIT 1"
+            % self.connection.ops.quote_name(table_name)
         )
         column_details = cursor.get_table_column_schema(table_name)
         descriptions = []
@@ -209,7 +210,13 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 table=quoted_table_name
             )
         )
-        for index_name, column_name, ordering, index_type, is_unique in indexes:
+        for (
+            index_name,
+            column_name,
+            ordering,
+            index_type,
+            is_unique,
+        ) in indexes:
             if index_name not in constraints:
                 constraints[index_name] = {
                     "check": False,

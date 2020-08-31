@@ -18,7 +18,9 @@ class UtilsTests(TestCase):
         pit = PeekIterator([["a"], ["b"], ["c"], ["d"], ["e"]])
         got = list(pit)
         want = [("a",), ("b",), ("c",), ("d",), ("e",)]
-        self.assertEqual(got, want, "Rows of type list must be returned as tuples")
+        self.assertEqual(
+            got, want, "Rows of type list must be returned as tuples"
+        )
 
         seventeen = PeekIterator([[17]])
         self.assertEqual(list(seventeen), [(17,)])

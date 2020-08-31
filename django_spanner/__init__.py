@@ -13,7 +13,8 @@ from uuid import uuid4
 import pkg_resources
 from django.db.models.fields import AutoField, Field
 
-# Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against datetime.datetime.
+# Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
+# datetime.datetime.
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
 from .expressions import register_expressions
@@ -42,7 +43,9 @@ def autofield_init(self, *args, **kwargs):
 
 AutoField.__init__ = autofield_init
 
-old_datetimewithnanoseconds_eq = getattr(DatetimeWithNanoseconds, "__eq__", None)
+old_datetimewithnanoseconds_eq = getattr(
+    DatetimeWithNanoseconds, "__eq__", None
+)
 
 
 def datetimewithnanoseconds_eq(self, other):

@@ -23,7 +23,11 @@ class DatabaseCreation(BaseDatabaseCreation):
             if test_app in settings.INSTALLED_APPS:
                 test_case = import_string(test_case_name)
                 method = getattr(test_case, method_name)
-                setattr(test_case, method_name, skip("unsupported by Spanner")(method))
+                setattr(
+                    test_case,
+                    method_name,
+                    skip("unsupported by Spanner")(method),
+                )
 
     def create_test_db(self, *args, **kwargs):
         # This environment variable is set by the Travis build script or
@@ -67,7 +71,9 @@ class DatabaseCreation(BaseDatabaseCreation):
                     self._destroy_test_db(test_database_name, verbosity)
                     self._execute_create_test_db(None, test_db_params, keepdb)
                 except Exception as e:
-                    self.log("Got an error recreating the test database: %s" % e)
+                    self.log(
+                        "Got an error recreating the test database: %s" % e
+                    )
                     sys.exit(2)
             else:
                 self.log("Tests cancelled.")

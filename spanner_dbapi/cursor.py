@@ -93,7 +93,10 @@ class Cursor:
                 self.__handle_insert(sql, args or None)
             else:
                 self.__handle_update(sql, args or None)
-        except (grpc_exceptions.AlreadyExists, grpc_exceptions.FailedPrecondition) as e:
+        except (
+            grpc_exceptions.AlreadyExists,
+            grpc_exceptions.FailedPrecondition,
+        ) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except grpc_exceptions.InvalidArgument as e:
             raise ProgrammingError(e.details if hasattr(e, "details") else e)
@@ -150,7 +153,9 @@ class Cursor:
         for sql, params in sql_params_list:
             sql, params = sql_pyformat_args_to_spanner(sql, params)
             param_types = get_param_types(params)
-            res = transaction.execute_sql(sql, params=params, param_types=param_types)
+            res = transaction.execute_sql(
+                sql, params=params, param_types=param_types
+            )
             # TODO: File a bug with Cloud Spanner and the Python client maintainers
             # about a lost commit when res isn't read from.
             _ = list(res)
@@ -365,9 +370,13 @@ class Column:
                     None
                     if not self.internal_size
                     else "internal_size=%d" % self.internal_size,
-                    None if not self.precision else "precision='%s'" % self.precision,
+                    None
+                    if not self.precision
+                    else "precision='%s'" % self.precision,
                     None if not self.scale else "scale='%s'" % self.scale,
-                    None if not self.null_ok else "null_ok='%s'" % self.null_ok,
+                    None
+                    if not self.null_ok
+                    else "null_ok='%s'" % self.null_ok,
                 ]
                 if field
             ]

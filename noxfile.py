@@ -14,7 +14,7 @@ import os
 import shutil
 
 
-BLACK_VERSION = "black==19.3b0"
+BLACK_VERSION = "black==19.10b0"
 BLACK_PATHS = [
     "django_spanner",
     "docs",
@@ -25,7 +25,7 @@ BLACK_PATHS = [
 ]
 
 
-@nox.session(python="3.7")
+@nox.session(python="3.8")
 def lint(session):
     """Run linters.
 
@@ -37,7 +37,7 @@ def lint(session):
     session.run("flake8", "django_spanner", "spanner_dbapi", "tests")
 
 
-@nox.session(python="3.6")
+@nox.session(python="3.8")
 def blacken(session):
     """Run black.
 
@@ -51,7 +51,7 @@ def blacken(session):
     session.run("black", *BLACK_PATHS)
 
 
-@nox.session(python="3.7")
+@nox.session(python="3.8")
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
     session.install("docutils", "pygments")

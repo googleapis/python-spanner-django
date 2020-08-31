@@ -55,7 +55,9 @@ def blacken(session):
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
     session.install("docutils", "pygments")
-    session.run("python", "setup.py", "check", "--restructuredtext", "--strict")
+    session.run(
+        "python", "setup.py", "check", "--restructuredtext", "--strict"
+    )
 
 
 def default(session):
@@ -65,7 +67,10 @@ def default(session):
 
     # Run py.test against the unit tests.
     session.run(
-        "py.test", "--quiet", os.path.join("tests", "spanner_dbapi"), *session.posargs
+        "py.test",
+        "--quiet",
+        os.path.join("tests", "spanner_dbapi"),
+        *session.posargs
     )
 
 

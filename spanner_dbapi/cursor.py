@@ -68,7 +68,8 @@ class Cursor:
         self._connection = connection
         self._is_closed = False
 
-        self.arraysize = 1  # the number of rows to fetch at a time with fetchmany()
+        # the number of rows to fetch at a time with fetchmany()
+        self.arraysize = 1
 
     def execute(self, sql, args=None):
         """
@@ -397,9 +398,13 @@ class Column:
                     None
                     if not self.internal_size
                     else "internal_size=%d" % self.internal_size,
-                    None if not self.precision else "precision='%s'" % self.precision,
+                    None
+                    if not self.precision
+                    else "precision='%s'" % self.precision,
                     None if not self.scale else "scale='%s'" % self.scale,
-                    None if not self.null_ok else "null_ok='%s'" % self.null_ok,
+                    None
+                    if not self.null_ok
+                    else "null_ok='%s'" % self.null_ok,
                 ]
                 if field
             ]

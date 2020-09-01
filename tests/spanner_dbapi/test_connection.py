@@ -15,10 +15,12 @@ from spanner_dbapi import connect, InterfaceError
 class TestConnection(unittest.TestCase):
     def test_close(self):
         with mock.patch(
-            "google.cloud.spanner_v1.instance.Instance.exists", return_value=True
+            "google.cloud.spanner_v1.instance.Instance.exists",
+            return_value=True,
         ):
             with mock.patch(
-                "google.cloud.spanner_v1.database.Database.exists", return_value=True
+                "google.cloud.spanner_v1.database.Database.exists",
+                return_value=True,
             ):
                 connection = connect("test-instance", "test-database")
 

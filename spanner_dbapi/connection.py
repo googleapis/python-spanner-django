@@ -12,7 +12,7 @@ import time
 from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
-from .exceptions import InterfaceError, Warning
+from .exceptions import InterfaceError, Warning, ProgrammingError
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
@@ -137,7 +137,7 @@ class Connection(object):
     def run_prior_ddl_statements(self):
         if self.read_only:
             self.__ddl_statements = []
-            raise Warning("Connection is in 'read_only' mode")
+            raise ProgrammingError("Connection is in 'read_only' mode")
 
         if not self.__ddl_statements:
             return

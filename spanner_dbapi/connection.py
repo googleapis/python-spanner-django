@@ -5,66 +5,141 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from collections import namedtuple
+from enum import Enum
+from functools import wraps
 
 from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
-from .exceptions import InterfaceError
+from .exceptions import InterfaceError, Warning
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
-class Connection:
-    def __init__(self, db_handle):
-        self._dbhandle = db_handle
-        self._closed = False
-        self._ddl_statements = []
+class TransactionModes(Enum):
+    read_only = "READ_ONLY"
+    read_write = "READ_WRITE"
 
-    def cursor(self):
-        self.__raise_if_already_closed()
 
-        return Cursor(self)
+class AutocommitDMLModes(Enum):
+    transactional = "TRANSACTIONAL"
+    partitioned_non_atomic = "PARTITIONED_NON_ATOMIC"
 
-    def __raise_if_already_closed(self):
-        """
-        Raise an exception if attempting to use an already closed connection.
-        """
-        if self._closed:
-            raise InterfaceError("connection already closed")
 
+def _is_conn_closed_check(func):
+    """
+    Raise an exception if attempting to use an already closed connection.
+    """
+
+    @wraps(func)
+    def wrapped(self, *args, **kwargs):
+        if self.__is_closed:
+            raise InterfaceError("connection is already closed")
+        return func(self, *args, **kwargs)
+
+    return wrapped
+
+
+class Connection(object):
+    """This is a wrap-around object for the existing `Database` and the
+    corresponding `Instance` objects.
+
+    :type database: :class:`~google.cloud.spanner_v1.database.Database`
+    :param database: Corresponding Database
+
+    :type instance: :class:`~google.cloud.spanner_v1.instance.Instance`
+    :param instance: The instance that owns the database.
+
+    :type autocommit: bool
+    :param autocommit: (Optional) When changed to True, all the pending
+                       transactions must be committed.
+
+    :type read_only: bool
+    :param read_only: (Optional) Indicates if the Connection is intended to be
+                      used for read-only transactions.
+    """
+
+    def __init__(self, database, instance, autocommit=True, read_only=False):
+        self.database = database
+        self.instance = instance
+        self.autocommit = autocommit
+        self.read_only = read_only
+        self.transaction_mode = (
+            TransactionModes.read_only
+            if self.read_only
+            else TransactionModes.read_write
+        )
+        self.autocommit_dml_mode = AutocommitDMLModes.transactional
+        self.__is_closed = False
+        self.__inside_transaction = not autocommit
+        self.__transaction_started = False
+        self.__ddl_statements = []
+        self.read_only_staleness = {}
+
+    @property
+    def is_closed(self):
+        return self.__is_closed
+
+    @property
+    def inside_transaction(self):
+        return self.__inside_transaction
+
+    @property
+    def transaction_started(self):
+        return self.__transaction_started
+
+    @property
+    def _ddl_statements(self):
+        return self.__ddl_statements
+
+    @_ddl_statements.setter
+    def _ddl_statements(self, dll):
+        self._change_transaction_started(True)
+
+        self.__ddl_statements = dll
+        if self.autocommit:
+            self.commit()
+
+    def _change_transaction_started(self, val: bool):
+        if self.__inside_transaction:
+            self.__transaction_started = val
+
+    @_is_conn_closed_check
     def __handle_update_ddl(self, ddl_statements):
         """
-        Run the list of Data Definition Language (DDL) statements on the underlying
-        database. Each DDL statement MUST NOT contain a semicolon.
+        Run the list of Data Definition Language (DDL) statements on the
+        underlying database. Each DDL statement MUST NOT contain a semicolon.
         Args:
             ddl_statements: a list of DDL statements, each without a semicolon.
         Returns:
             google.api_core.operation.Operation.result()
         """
-        self.__raise_if_already_closed()
         # Synchronously wait on the operation's completion.
-        return self._dbhandle.update_ddl(ddl_statements).result()
+        return self.database.update_ddl(ddl_statements).result()
 
+    @_is_conn_closed_check
     def read_snapshot(self):
-        self.__raise_if_already_closed()
-        return self._dbhandle.snapshot()
+        return self.database.snapshot()
 
+    @_is_conn_closed_check
     def in_transaction(self, fn, *args, **kwargs):
-        self.__raise_if_already_closed()
-        return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
+        return self.database.run_in_transaction(fn, *args, **kwargs)
 
+    @_is_conn_closed_check
     def append_ddl_statement(self, ddl_statement):
-        self.__raise_if_already_closed()
-        self._ddl_statements.append(ddl_statement)
+        self.__ddl_statements.append(ddl_statement)
 
-    def run_prior_DDL_statements(self):
-        self.__raise_if_already_closed()
+    @_is_conn_closed_check
+    def run_prior_ddl_statements(self):
+        if self.read_only:
+            self.__ddl_statements = []
+            raise Warning("Connection is in 'read_only' mode")
 
-        if not self._ddl_statements:
+        if not self.__ddl_statements:
             return
 
-        ddl_statements = self._ddl_statements
-        self._ddl_statements = []
+        ddl_statements = self.__ddl_statements
+        self.__ddl_statements = []
 
         return self.__handle_update_ddl(ddl_statements)
 
@@ -81,11 +156,12 @@ class Connection:
         )
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
-        # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
-        # hence this method exists to circumvent that limit.
-        self.run_prior_DDL_statements()
+        # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in
+        # read-write transactions hence this method exists to circumvent that
+        # limit.
+        self.run_prior_ddl_statements()
 
-        with self._dbhandle.snapshot() as snapshot:
+        with self.database.snapshot() as snapshot:
             res = snapshot.execute_sql(
                 sql, params=params, param_types=param_types
             )
@@ -114,22 +190,31 @@ class Connection:
 
     def close(self):
         self.rollback()
-        self.__dbhandle = None
-        self._closed = True
+        self.__is_closed = True
 
-    def commit(self):
-        self.__raise_if_already_closed()
+    @_is_conn_closed_check
+    def cursor(self):
+        return Cursor(self)
 
-        self.run_prior_DDL_statements()
-
+    @_is_conn_closed_check
     def rollback(self):
-        self.__raise_if_already_closed()
+        self.__ddl_statements = []
+        self._change_transaction_started(False)
 
-        # TODO: to be added.
+    @_is_conn_closed_check
+    def commit(self):
+        if self.autocommit:
+            raise Warning("'autocommit' is set to 'True'")
+
+        self.run_prior_ddl_statements()
+        self._change_transaction_started(False)
 
     def __enter__(self):
         return self
 
-    def __exit__(self, etype, value, traceback):
-        self.commit()
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_value:
+            self.rollback()
+        elif not self.autocommit:
+            self.commit()
         self.close()

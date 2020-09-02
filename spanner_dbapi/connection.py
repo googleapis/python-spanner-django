@@ -12,7 +12,12 @@ import time
 from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
-from .exceptions import InterfaceError, Warning, ProgrammingError
+from .exceptions import (
+    InterfaceError,
+    Warning,
+    ProgrammingError
+)
+
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
@@ -27,12 +32,11 @@ class AutocommitDMLModes(Enum):
     partitioned_non_atomic = "PARTITIONED_NON_ATOMIC"
 
 
-def _is_conn_closed_check(func):
+def _connection_closed_check(func):
     """Raise an exception if attempting to use an already closed connection."""
-
     @wraps(func)
     def wrapped(self, *args, **kwargs):
-        if self.__is_closed:
+        if self._is_closed:
             raise InterfaceError("connection is already closed")
         return func(self, *args, **kwargs)
 
@@ -57,7 +61,6 @@ class Connection(object):
     :param read_only: (Optional) Indicates if the Connection is intended to be
                       used for read-only transactions.
     """
-
     def __init__(self, database, instance, autocommit=True, read_only=False):
         self.database = database
         self.instance = instance
@@ -72,42 +75,42 @@ class Connection(object):
         self.timeout_secs = 0
         self.read_timestamp = None
         self.commit_timestamp = None
-        self.__is_closed = False
-        self.__inside_transaction = not autocommit
-        self.__transaction_started = False
-        self.__ddl_statements = []
+        self._is_closed = False
+        self._inside_transaction = not autocommit
+        self._transaction_started = False
+        self._ddl_statements = []
         self.read_only_staleness = {}
 
     @property
     def is_closed(self):
-        return self.__is_closed
+        return self._is_closed
 
     @property
     def inside_transaction(self):
-        return self.__inside_transaction
+        return self._inside_transaction
 
     @property
     def transaction_started(self):
-        return self.__transaction_started
+        return self._transaction_started
 
     @property
     def _ddl_statements(self):
-        return self.__ddl_statements
+        return self._ddl_statements
 
     @_ddl_statements.setter
     def _ddl_statements(self, dll):
         self._change_transaction_started(True)
 
-        self.__ddl_statements = dll
+        self._ddl_statements = dll
         if self.autocommit:
             self.commit()
 
     def _change_transaction_started(self, val: bool):
-        if self.__inside_transaction:
-            self.__transaction_started = val
+        if self._inside_transaction:
+            self._transaction_started = val
 
-    @_is_conn_closed_check
-    def __handle_update_ddl(self, ddl_statements):
+    @_connection_closed_check
+    def _handle_update_ddl(self, ddl_statements):
         """Run the list of Data Definition Language (DDL) statements on the
         underlying database. Each DDL statement MUST NOT contain a semicolon.
 
@@ -121,49 +124,47 @@ class Connection(object):
         # Synchronously wait on the operation's completion.
         return self.database.update_ddl(ddl_statements).result()
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def read_snapshot(self):
         return self.database.snapshot()
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def in_transaction(self, fn, *args, **kwargs):
         return self.database.run_in_transaction(fn, *args, **kwargs)
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def append_ddl_statement(self, ddl_statement):
-        self.__ddl_statements.append(ddl_statement)
+        self._ddl_statements.append(ddl_statement)
 
-    @_is_conn_closed_check
-    def run_prior_ddl_statements(self):
+    @_connection_closed_check
+    def _run_prior_ddl_statements(self):
         if self.read_only:
-            self.__ddl_statements = []
+            self._ddl_statements = []
             raise ProgrammingError("Connection is in 'read_only' mode")
 
-        if not self.__ddl_statements:
+        if not self._ddl_statements:
             return
 
-        ddl_statements = self.__ddl_statements
-        self.__ddl_statements = []
+        ddl_statements = self._ddl_statements
+        self._ddl_statements = []
 
-        return self.__handle_update_ddl(ddl_statements)
+        return self._handle_update_ddl(ddl_statements)
 
     def list_tables(self):
         return self.run_sql_in_snapshot(
-            """
-            SELECT
-              t.table_name
+            """SELECT
+                t.table_name
             FROM
-              information_schema.tables AS t
+                information_schema.tables AS t
             WHERE
-              t.table_catalog = '' and t.table_schema = ''
-            """
+                t.table_catalog = '' and t.table_schema = ''"""
         )
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in
         # read-write transactions hence this method exists to circumvent that
         # limit.
-        self.run_prior_ddl_statements()
+        self._run_prior_ddl_statements()
 
         with self.database.snapshot() as snapshot:
             res = snapshot.execute_sql(
@@ -195,26 +196,26 @@ class Connection(object):
     def close(self):
         """Closing database connection"""
         self.rollback()
-        self.__is_closed = True
+        self._is_closed = True
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def cursor(self):
         """Returns cursor for current database"""
         return Cursor(self)
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def rollback(self):
         """Roll back a transaction"""
-        self.__ddl_statements = []
+        self._ddl_statements = []
         self._change_transaction_started(False)
 
-    @_is_conn_closed_check
+    @_connection_closed_check
     def commit(self):
         """Commit mutations to the database."""
         if self.autocommit:
             raise Warning("'autocommit' is set to 'True'")
 
-        self.run_prior_ddl_statements()
+        self._run_prior_ddl_statements()
         self.commit_timestamp = time.time()
         self._change_transaction_started(False)
 

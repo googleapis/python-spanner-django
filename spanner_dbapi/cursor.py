@@ -307,7 +307,7 @@ class Cursor:
         raise ProgrammingError("Unimplemented")
 
     def _run_prior_DDL_statements(self):
-        return self._connection.run_prior_ddl_statements()
+        return self._connection._run_prior_ddl_statements()
 
     def list_tables(self):
         return self._connection.list_tables()

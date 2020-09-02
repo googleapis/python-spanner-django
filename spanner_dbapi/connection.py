@@ -7,6 +7,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import wraps
+import time
 
 from google.cloud import spanner_v1 as spanner
 
@@ -70,6 +71,9 @@ class Connection(object):
             else TransactionModes.read_write
         )
         self.autocommit_dml_mode = AutocommitDMLModes.transactional
+        self.timeout_secs = 0
+        self.read_timestamp = None
+        self.commit_timestamp = None
         self.__is_closed = False
         self.__inside_transaction = not autocommit
         self.__transaction_started = False
@@ -189,6 +193,9 @@ class Connection(object):
         return column_details
 
     def close(self):
+        """
+        Closing database connection
+        """
         self.rollback()
         self.__is_closed = True
 
@@ -207,6 +214,7 @@ class Connection(object):
             raise Warning("'autocommit' is set to 'True'")
 
         self.run_prior_ddl_statements()
+        self.commit_timestamp = time.time()
         self._change_transaction_started(False)
 
     def __enter__(self):

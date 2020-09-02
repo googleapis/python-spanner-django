@@ -94,11 +94,11 @@ class Connection(object):
         return self._transaction_started
 
     @property
-    def _ddl_statements(self):
+    def ddl_statements(self):
         return self._ddl_statements
 
-    @_ddl_statements.setter
-    def _ddl_statements(self, dll):
+    @ddl_statements.setter
+    def ddl_statements(self, dll):
         self._change_transaction_started(True)
 
         self._ddl_statements = dll

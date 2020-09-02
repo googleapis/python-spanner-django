@@ -28,9 +28,7 @@ class AutocommitDMLModes(Enum):
 
 
 def _is_conn_closed_check(func):
-    """
-    Raise an exception if attempting to use an already closed connection.
-    """
+    """Raise an exception if attempting to use an already closed connection."""
 
     @wraps(func)
     def wrapped(self, *args, **kwargs):
@@ -110,13 +108,15 @@ class Connection(object):
 
     @_is_conn_closed_check
     def __handle_update_ddl(self, ddl_statements):
-        """
-        Run the list of Data Definition Language (DDL) statements on the
+        """Run the list of Data Definition Language (DDL) statements on the
         underlying database. Each DDL statement MUST NOT contain a semicolon.
-        Args:
-            ddl_statements: a list of DDL statements, each without a semicolon.
-        Returns:
-            google.api_core.operation.Operation.result()
+
+        :type ddl_statements: list
+        :param ddl_statements: A list of DDL statements, each without a
+                               semicolon.
+
+        :rtype: :class:`google.api_core.operation.Operation`
+        :returns: an operation instance
         """
         # Synchronously wait on the operation's completion.
         return self.database.update_ddl(ddl_statements).result()
@@ -193,23 +193,24 @@ class Connection(object):
         return column_details
 
     def close(self):
-        """
-        Closing database connection
-        """
+        """Closing database connection"""
         self.rollback()
         self.__is_closed = True
 
     @_is_conn_closed_check
     def cursor(self):
+        """Returns cursor for current database"""
         return Cursor(self)
 
     @_is_conn_closed_check
     def rollback(self):
+        """Roll back a transaction"""
         self.__ddl_statements = []
         self._change_transaction_started(False)
 
     @_is_conn_closed_check
     def commit(self):
+        """Commit mutations to the database."""
         if self.autocommit:
             raise Warning("'autocommit' is set to 'True'")
 

@@ -57,7 +57,9 @@ class ParseUtilsTests(TestCase):
             sql, want_classification = tt
             got_classification = classify_stmt(sql)
             self.assertEqual(
-                got_classification, want_classification, "Classification mismatch"
+                got_classification,
+                want_classification,
+                "Classification mismatch",
             )
 
     def test_parse_insert(self):
@@ -202,7 +204,9 @@ class ParseUtilsTests(TestCase):
         for sql, params, wantException in cases:
             with self.subTest(sql=sql):
                 self.assertRaisesRegex(
-                    ProgrammingError, wantException, lambda: parse_insert(sql, params)
+                    ProgrammingError,
+                    wantException,
+                    lambda: parse_insert(sql, params),
                 )
 
     def test_rows_for_insert_or_update(self):
@@ -234,6 +238,9 @@ class ParseUtilsTests(TestCase):
                 ],
                 None,
                 [
+                    ("ap", "n", (45, "nested"), "ll"),
+                    ("bp", "m", "f2", "mt"),
+                    ("fp", "cp", "o", "f3"),
                 ],
             ),
             (
@@ -242,7 +249,6 @@ class ParseUtilsTests(TestCase):
                 None,
                 [("ap", "n", "f1")],
             ),
-            (["app", "name", "fn"], ["ap", "n", "f1"], None, [("ap", "n", "f1")]),
         ]
 
         for i, (columns, params, pyformat_args, want) in enumerate(cases):
@@ -442,29 +448,18 @@ class ParseUtilsTests(TestCase):
                 self.assertEqual(got_param_types, want_param_types)
 
     def test_ensure_where_clause(self):
-        cases = [
-            (
-                "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
-                "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
-            ),
-            (
-                "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5",
-                "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5 WHERE 1=1",
-            ),
-            (
-                "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
-                "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
-            ),
-            (
-                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
-                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
-            ),
-            (
-                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
-                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
-            ),
-            ("DELETE * FROM TABLE", "DELETE * FROM TABLE WHERE 1=1"),
-        ]
+        cases = (
+            "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
+            "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
+            "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
+        )
+        err_cases = (
+            "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5",
+            "DELETE * FROM TABLE",
+        )
+        for sql in cases:
+            with self.subTest(sql=sql):
+                ensure_where_clause(sql)
 
         for sql in err_cases:
             with self.subTest(sql=sql):

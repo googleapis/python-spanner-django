@@ -380,7 +380,7 @@ def get_param_types(params):
     """
     Return a dictionary of spanner.param_types for a dictionary of parameters.
     """
-    if params is None:
+    if not params:
         return None
     param_types = {}
     for key, value in params.items():

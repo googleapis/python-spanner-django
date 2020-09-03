@@ -116,9 +116,18 @@ class ParseUtilsTests(TestCase):
                 (1, 2, 3, 4, 5, 6, 7, 8, 9),
                 {
                     "sql_params_list": [
-                        ("INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)", (1, 2, 3)),
-                        ("INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)", (4, 5, 6)),
-                        ("INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)", (7, 8, 9)),
+                        (
+                            "INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)",
+                            (1, 2, 3),
+                        ),
+                        (
+                            "INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)",
+                            (4, 5, 6),
+                        ),
+                        (
+                            "INSERT INTO ap (n, ct, cn) VALUES (%s, %s, %s)",
+                            (7, 8, 9),
+                        ),
                     ]
                 },
             ),
@@ -136,7 +145,11 @@ class ParseUtilsTests(TestCase):
             (
                 "INSERT INTO T (f1, f2) VALUES (1, 2)",
                 None,
-                {"sql_params_list": [("INSERT INTO T (f1, f2) VALUES (1, 2)", None)]},
+                {
+                    "sql_params_list": [
+                        ("INSERT INTO T (f1, f2) VALUES (1, 2)", None)
+                    ]
+                },
             ),
             (
                 "INSERT INTO `no` (`yes`, tiff) VALUES (%s, LOWER(%s)), (%s, %s), (%s, %s)",
@@ -147,8 +160,14 @@ class ParseUtilsTests(TestCase):
                             "INSERT INTO `no` (`yes`, tiff)  VALUES(%s, LOWER(%s))",
                             (1, "FOO"),
                         ),
-                        ("INSERT INTO `no` (`yes`, tiff)  VALUES(%s, %s)", (5, 10)),
-                        ("INSERT INTO `no` (`yes`, tiff)  VALUES(%s, %s)", (11, 29)),
+                        (
+                            "INSERT INTO `no` (`yes`, tiff)  VALUES(%s, %s)",
+                            (5, 10),
+                        ),
+                        (
+                            "INSERT INTO `no` (`yes`, tiff)  VALUES(%s, %s)",
+                            (11, 29),
+                        ),
                     ]
                 },
             ),
@@ -157,7 +176,9 @@ class ParseUtilsTests(TestCase):
         for sql, params, want in cases:
             with self.subTest(sql=sql):
                 got = parse_insert(sql, params)
-                self.assertEqual(got, want, "Mismatch with parse_insert of `%s`" % sql)
+                self.assertEqual(
+                    got, want, "Mismatch with parse_insert of `%s`" % sql
+                )
 
     def test_parse_insert_invalid(self):
         cases = [
@@ -213,10 +234,13 @@ class ParseUtilsTests(TestCase):
                 ],
                 None,
                 [
-                    ("ap", "n", (45, "nested"), "ll"),
-                    ("bp", "m", "f2", "mt"),
-                    ("fp", "cp", "o", "f3"),
                 ],
+            ),
+            (
+                ["app", "name", "fn"],
+                ["ap", "n", "f1"],
+                None,
+                [("ap", "n", "f1")],
             ),
             (["app", "name", "fn"], ["ap", "n", "f1"], None, [("ap", "n", "f1")]),
         ]
@@ -260,7 +284,10 @@ class ParseUtilsTests(TestCase):
             ),
             (
                 # Intentionally using a dict with more keys than will be resolved.
-                ("SELECT * from t WHERE f1=%(f1)s", {"f1": "app", "f2": "name"}),
+                (
+                    "SELECT * from t WHERE f1=%(f1)s",
+                    {"f1": "app", "f2": "name"},
+                ),
                 ("SELECT * from t WHERE f1=@a0", {"a0": "app"}),
             ),
             (
@@ -282,7 +309,9 @@ class ParseUtilsTests(TestCase):
         ]
         for ((sql_in, params), sql_want) in cases:
             with self.subTest(sql=sql_in):
-                got_sql, got_named_args = sql_pyformat_args_to_spanner(sql_in, params)
+                got_sql, got_named_args = sql_pyformat_args_to_spanner(
+                    sql_in, params
+                )
                 want_sql, want_named_args = sql_want
                 self.assertEqual(got_sql, want_sql, "SQL does not match")
                 self.assertEqual(
@@ -413,18 +442,29 @@ class ParseUtilsTests(TestCase):
                 self.assertEqual(got_param_types, want_param_types)
 
     def test_ensure_where_clause(self):
-        cases = (
-            "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
-            "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
-            "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
-        )
-        err_cases = (
-            "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5",
-            "DELETE * FROM TABLE",
-        )
-        for sql in cases:
-            with self.subTest(sql=sql):
-                ensure_where_clause(sql)
+        cases = [
+            (
+                "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
+                "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
+            ),
+            (
+                "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5",
+                "UPDATE (SELECT * FROM A JOIN c ON ai.id = c.id WHERE cl.ci = 1) SET d=5 WHERE 1=1",
+            ),
+            (
+                "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
+                "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",
+            ),
+            (
+                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
+                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
+            ),
+            (
+                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
+                "UPDATE T SET r=r*0.9 WHERE id IN (SELECT id FROM items WHERE r / w >= 1.3 AND q > 100)",
+            ),
+            ("DELETE * FROM TABLE", "DELETE * FROM TABLE WHERE 1=1"),
+        ]
 
         for sql in err_cases:
             with self.subTest(sql=sql):

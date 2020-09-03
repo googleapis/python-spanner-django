@@ -4,7 +4,14 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import google.api_core.exceptions as grpc_exceptions
+"""Database cursor API."""
+
+from google.api_core.exceptions import (
+    AlreadyExists,
+    FailedPrecondition,
+    InternalServerError,
+    InvalidArgument,
+)
 from google.cloud.spanner_v1 import param_types
 
 from .exceptions import (
@@ -47,6 +54,13 @@ code_to_display_size = {
 
 
 class Cursor:
+    """
+    Database cursor to manage the context of a fetch operation.
+
+    :type connection: :class:`spanner_dbapi.connection.Connection`
+    :param connection: Parent connection object for this Cursor.
+    """
+
     def __init__(self, connection):
         self._itr = None
         self._res = None
@@ -54,7 +68,8 @@ class Cursor:
         self._connection = connection
         self._is_closed = False
 
-        self.arraysize = 1  # the number of rows to fetch at a time with fetchmany()
+        # the number of rows to fetch at a time with fetchmany()
+        self.arraysize = 1
 
     def execute(self, sql, args=None):
         """
@@ -64,7 +79,7 @@ class Cursor:
             *args: variadic argument list
             **kwargs: key worded arguments
         """
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         if not self._connection:
             raise ProgrammingError("Cursor is not connected to a database")
@@ -89,14 +104,15 @@ class Cursor:
             else:
                 self._handle_update(sql, args)
         except (grpc_exceptions.AlreadyExists, grpc_exceptions.FailedPrecondition) as e:
+                self.__handle_update(sql, args or None)
+        except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
-        except grpc_exceptions.InvalidArgument as e:
+        except InvalidArgument as e:
             raise ProgrammingError(e.details if hasattr(e, "details") else e)
-        except grpc_exceptions.InternalServerError as e:
+        except InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
-    def _handle_update(self, sql, params):
-        ensure_where_clause(sql)
+    def __handle_update(self, sql, params):
         self._connection.in_transaction(self.__do_execute_update, sql, params)
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
@@ -145,7 +161,9 @@ class Cursor:
         for sql, params in sql_params_list:
             sql, params = sql_pyformat_args_to_spanner(sql, params)
             param_types = get_param_types(params)
-            res = transaction.execute_sql(sql, params=params, param_types=param_types)
+            res = transaction.execute_sql(
+                sql, params=params, param_types=param_types
+            )
             # TODO: File a bug with Cloud Spanner and the Python client maintainers
             # about a lost commit when res isn't read from.
             _ = list(res)
@@ -222,14 +240,13 @@ class Cursor:
     def is_closed(self):
         """The cursor close indicator.
 
-        Returns:
-            bool:
-                True if this cursor or it's parent connection
-                is closed, False otherwise.
+        :rtype: :class:`bool`
+        :returns: True if this cursor or it's parent connection is closed, False
+                  otherwise.
         """
         return self._is_closed or self._connection.is_closed
 
-    def _raise_if_already_closed(self):
+    def _raise_if_closed(self):
         """Raise an exception if this cursor is closed.
 
         Helper to check this cursor's state before running a
@@ -242,6 +259,10 @@ class Cursor:
             raise InterfaceError("cursor is already closed")
 
     def close(self):
+        """Close this cursor.
+
+        The cursor will be unusable from this point forward.
+        """
         self.__clear()
         self._is_closed = True
 
@@ -263,7 +284,7 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         try:
             return next(self)
@@ -271,7 +292,7 @@ class Cursor:
             return None
 
     def fetchall(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         return list(self.__iter__())
 
@@ -288,7 +309,7 @@ class Cursor:
             Error if the previous call to .execute*() did not produce any result set
             or if no call was issued yet.
         """
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         if size is None:
             size = self.arraysize
@@ -376,9 +397,13 @@ class Column:
                     None
                     if not self.internal_size
                     else "internal_size=%d" % self.internal_size,
-                    None if not self.precision else "precision='%s'" % self.precision,
+                    None
+                    if not self.precision
+                    else "precision='%s'" % self.precision,
                     None if not self.scale else "scale='%s'" % self.scale,
-                    None if not self.null_ok else "null_ok='%s'" % self.null_ok,
+                    None
+                    if not self.null_ok
+                    else "null_ok='%s'" % self.null_ok,
                 ]
                 if field
             ]

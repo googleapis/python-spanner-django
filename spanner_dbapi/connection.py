@@ -22,11 +22,11 @@ class Connection:
         self.is_closed = False
 
     def cursor(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         return Cursor(self)
 
-    def _raise_if_already_closed(self):
+    def _raise_if_closed(self):
         """Raise an exception if this connection is closed.
 
         Helper to check the connection state before
@@ -46,24 +46,24 @@ class Connection:
         Returns:
             google.api_core.operation.Operation.result()
         """
-        self._raise_if_already_closed()
+        self._raise_if_closed()
         # Synchronously wait on the operation's completion.
         return self._dbhandle.update_ddl(ddl_statements).result()
 
     def read_snapshot(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
         return self._dbhandle.snapshot()
 
     def in_transaction(self, fn, *args, **kwargs):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
         self._ddl_statements.append(ddl_statement)
 
     def run_prior_DDL_statements(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         if not self._ddl_statements:
             return
@@ -91,7 +91,9 @@ class Connection:
         self.run_prior_DDL_statements()
 
         with self._dbhandle.snapshot() as snapshot:
-            res = snapshot.execute_sql(sql, params=params, param_types=param_types)
+            res = snapshot.execute_sql(
+                sql, params=params, param_types=param_types
+            )
             return list(res)
 
     def get_table_column_schema(self, table_name):
@@ -116,17 +118,21 @@ class Connection:
         return column_details
 
     def close(self):
+        """Close this connection.
+
+        The connection will be unusable from this point forward.
+        """
         self.rollback()
         self.__dbhandle = None
         self.is_closed = True
 
     def commit(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         self.run_prior_DDL_statements()
 
     def rollback(self):
-        self._raise_if_already_closed()
+        self._raise_if_closed()
 
         # TODO: to be added.
 

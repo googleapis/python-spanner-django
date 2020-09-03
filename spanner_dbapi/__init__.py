@@ -48,7 +48,9 @@ paramstyle = "format"  # ANSI C printf format codes, e.g. ...WHERE name=%s.
 threadsafety = 1
 
 
-def connect(instance_id, database_id, project=None, credentials=None, user_agent=None):
+def connect(
+    instance_id, database_id, project=None, credentials=None, user_agent=None
+):
     """
     Create a connection to Cloud Spanner database.
 
@@ -72,7 +74,7 @@ def connect(instance_id, database_id, project=None, credentials=None, user_agent
     :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
     :returns: Connection object associated with the given Cloud Spanner resource.
 
-    :raises: :class:`ProgrammingError` in case of given instance/database
+    :raises: :class:`ValueError` in case of given instance/database
              doesn't exist.
     """
     client = spanner_v1.Client(
@@ -83,11 +85,13 @@ def connect(instance_id, database_id, project=None, credentials=None, user_agent
 
     instance = client.instance(instance_id)
     if not instance.exists():
-        raise ProgrammingError("instance '%s' does not exist." % instance_id)
+        raise ValueError("instance '%s' does not exist." % instance_id)
 
-    database = instance.database(database_id, pool=spanner_v1.pool.BurstyPool())
+    database = instance.database(
+        database_id, pool=spanner_v1.pool.BurstyPool()
+    )
     if not database.exists():
-        raise ProgrammingError("database '%s' does not exist." % database_id)
+        raise ValueError("database '%s' does not exist." % database_id)
 
     return Connection(database)
 

@@ -1,8 +1,19 @@
-*.egg-info
 *.py[co]
-build/
 *.sw[op]
-.tox/
+
+# Packages
+*.egg-info
+build
 MANIFEST
-dist/
+dist
 django_tests
+
+# Unit test / coverage reports
+.coverage
+.nox
+
+# JetBrains
+.idea
+
+# Built documentation
+docs/_build

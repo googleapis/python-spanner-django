@@ -98,11 +98,11 @@ class Cursor:
             self._run_prior_ddl_statements()
 
             if classification == STMT_NON_UPDATING:
-                self._handle_dql(sql, args)
+                self._handle_dql(sql, args or None)
             elif classification == STMT_INSERT:
-                self._handle_insert(sql, args)
+                self._handle_insert(sql, args or None)
             else:
-                self._handle_update(sql, args)
+                self._handle_update(sql, args or None)
         except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except (AlreadyExists, FailedPrecondition) as e:

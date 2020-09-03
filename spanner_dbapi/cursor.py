@@ -104,7 +104,9 @@ class Cursor:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
     def __handle_update(self, sql, params):
-        self._connection.in_transaction(self.__do_execute_update, sql, params)
+        self._connection.run_in_transaction(
+            self.__do_execute_update, sql, params
+        )
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
         sql = ensure_where_clause(sql)
@@ -138,14 +140,14 @@ class Cursor:
         if parts.get("homogenous"):
             # The common case of multiple values being passed in
             # non-complex pyformat args and need to be uploaded in one RPC.
-            return self._connection.in_transaction(
+            return self._connection.run_in_transaction(
                 self.__do_execute_insert_homogenous, parts
             )
         else:
             # All the other cases that are esoteric and need
             #   transaction.execute_sql
             sql_params_list = parts.get("sql_params_list")
-            return self._connection.in_transaction(
+            return self._connection.run_in_transaction(
                 self.__do_execute_insert_heterogenous, sql_params_list
             )
 
@@ -168,7 +170,7 @@ class Cursor:
         return transaction.insert(table, columns, values)
 
     def __handle_DQL(self, sql, params):
-        with self._connection.read_snapshot() as snapshot:
+        with self._connection.snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
             sql, params = sql_pyformat_args_to_spanner(sql, params)

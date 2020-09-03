@@ -12,23 +12,19 @@ import time
 from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
-from .exceptions import (
-    InterfaceError,
-    Warning,
-    ProgrammingError
-)
+from .exceptions import InterfaceError, Warning, ProgrammingError
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
 class TransactionModes(Enum):
-    read_only = "READ_ONLY"
-    read_write = "READ_WRITE"
+    READ_ONLY = "READ_ONLY"
+    READ_WRITE = "READ_WRITE"
 
 
 class AutocommitDMLModes(Enum):
-    transactional = "TRANSACTIONAL"
-    partitioned_non_atomic = "PARTITIONED_NON_ATOMIC"
+    TRANSACTIONAL = "TRANSACTIONAL"
+    PARTITIONED_NON_ATOMIC = "PARTITIONED_NON_ATOMIC"
 
 
 def _connection_closed_check(func):
@@ -52,31 +48,24 @@ class Connection(object):
 
     :type instance: :class:`~google.cloud.spanner_v1.instance.Instance`
     :param instance: The instance that owns the database.
-
-    :type autocommit: bool
-    :param autocommit: (Optional) When changed to True, all the pending
-                       transactions must be committed.
-
-    :type read_only: bool
-    :param read_only: (Optional) Indicates if the Connection is intended to be
-                      used for read-only transactions.
     """
-    def __init__(self, database, instance, autocommit=True, read_only=False):
+
+    def __init__(self, database, instance):
         self.database = database
         self.instance = instance
-        self.autocommit = autocommit
-        self.read_only = read_only
+        self.autocommit = True
+        self.read_only = False
         self.transaction_mode = (
-            TransactionModes.read_only
+            TransactionModes.READ_ONLY
             if self.read_only
-            else TransactionModes.read_write
+            else TransactionModes.READ_WRITE
         )
-        self.autocommit_dml_mode = AutocommitDMLModes.transactional
+        self.autocommit_dml_mode = AutocommitDMLModes.TRANSACTIONAL
         self.timeout_secs = 0
         self.read_timestamp = None
         self.commit_timestamp = None
         self._is_closed = False
-        self._inside_transaction = not autocommit
+        self._inside_transaction = not self.autocommit
         self._transaction_started = False
         self._ddl_statements = []
         self.read_only_staleness = {}
@@ -93,33 +82,26 @@ class Connection(object):
     def transaction_started(self):
         return self._transaction_started
 
-    @property
-    def ddl_statements(self):
-        return self._ddl_statements
-
-    @ddl_statements.setter
-    def ddl_statements(self, dll):
-        self._change_transaction_started(True)
-
-        self._ddl_statements = dll
-        if self.autocommit:
-            self.commit()
-
     def _change_transaction_started(self, val: bool):
         if self._inside_transaction:
             self._transaction_started = val
 
     @_connection_closed_check
-    def read_snapshot(self):
+    def snapshot(self):
         return self.database.snapshot()
 
     @_connection_closed_check
-    def in_transaction(self, fn, *args, **kwargs):
+    def run_in_transaction(self, fn, *args, **kwargs):
         return self.database.run_in_transaction(fn, *args, **kwargs)
 
     @_connection_closed_check
     def append_ddl_statement(self, ddl_statement):
+        self._change_transaction_started(True)
+
         self._ddl_statements.append(ddl_statement)
+
+        if self.autocommit:
+            self.commit()
 
     @_connection_closed_check
     def _run_prior_ddl_statements(self):
@@ -208,10 +190,14 @@ class Connection(object):
     def commit(self):
         """Commit mutations to the database."""
         if self.autocommit:
-            raise Warning("'autocommit' is set to 'True'")
+            raise Warning(
+                "This connection is in autocommit mode - manual committing is off."
+            )
 
         self._run_prior_ddl_statements()
-        self.commit_timestamp = time.time()
+        if self.transaction_mode == TransactionModes.READ_WRITE:
+            self.commit_timestamp = time.time()
+
         self._change_transaction_started(False)
 
     def __enter__(self):

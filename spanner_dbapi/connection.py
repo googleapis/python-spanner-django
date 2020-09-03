@@ -5,7 +5,6 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from collections import namedtuple
-from enum import Enum
 from functools import wraps
 import time
 
@@ -13,18 +12,9 @@ from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
 from .exceptions import InterfaceError, Warning, ProgrammingError
+from .enums import AutocommitDMLModes, TransactionModes
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
-
-
-class TransactionModes(Enum):
-    READ_ONLY = "READ_ONLY"
-    READ_WRITE = "READ_WRITE"
-
-
-class AutocommitDMLModes(Enum):
-    TRANSACTIONAL = "TRANSACTIONAL"
-    PARTITIONED_NON_ATOMIC = "PARTITIONED_NON_ATOMIC"
 
 
 def _connection_closed_check(func):

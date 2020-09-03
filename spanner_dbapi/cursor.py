@@ -112,7 +112,7 @@ class Cursor:
         except InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
-    def __handle_update(self, sql, params):
+    def _handle_update(self, sql, params):
         ensure_where_clause(sql)
         self._connection.in_transaction(self.__do_execute_update, sql, params)
 

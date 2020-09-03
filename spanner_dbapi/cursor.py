@@ -103,11 +103,8 @@ class Cursor:
                 self._handle_insert(sql, args)
             else:
                 self._handle_update(sql, args)
-        except (
-            grpc_exceptions.AlreadyExists,
-            grpc_exceptions.FailedPrecondition,
-        ) as e:
-            self.__handle_update(sql, args or None)
+        except (AlreadyExists, FailedPrecondition) as e:
+            raise IntegrityError(e.details if hasattr(e, "details") else e)
         except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except InvalidArgument as e:
@@ -116,6 +113,7 @@ class Cursor:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
     def __handle_update(self, sql, params):
+        ensure_where_clause(sql)
         self._connection.in_transaction(self.__do_execute_update, sql, params)
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):

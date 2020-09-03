@@ -78,14 +78,17 @@ class Connection(object):
 
     @_connection_closed_check
     def snapshot(self):
+        """Return an object which wraps a snapshot."""
         return self.database.snapshot()
 
     @_connection_closed_check
     def run_in_transaction(self, fn, *args, **kwargs):
+        """Perform a unit of work in a transaction, retrying on abort."""
         return self.database.run_in_transaction(fn, *args, **kwargs)
 
     @_connection_closed_check
     def append_ddl_statement(self, ddl_statement):
+        """Appending ddl statement"""
         self._change_transaction_started(True)
 
         self._ddl_statements.append(ddl_statement)

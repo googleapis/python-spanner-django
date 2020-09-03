@@ -18,7 +18,6 @@ from .exceptions import (
     ProgrammingError
 )
 
-
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
@@ -34,6 +33,7 @@ class AutocommitDMLModes(Enum):
 
 def _connection_closed_check(func):
     """Raise an exception if attempting to use an already closed connection."""
+
     @wraps(func)
     def wrapped(self, *args, **kwargs):
         if self._is_closed:
@@ -48,7 +48,7 @@ class Connection(object):
     corresponding `Instance` objects.
 
     :type database: :class:`~google.cloud.spanner_v1.database.Database`
-    :param database: Corresponding Database
+    :param database: Corresponding Database.
 
     :type instance: :class:`~google.cloud.spanner_v1.instance.Instance`
     :param instance: The instance that owns the database.
@@ -110,21 +110,6 @@ class Connection(object):
             self._transaction_started = val
 
     @_connection_closed_check
-    def _handle_update_ddl(self, ddl_statements):
-        """Run the list of Data Definition Language (DDL) statements on the
-        underlying database. Each DDL statement MUST NOT contain a semicolon.
-
-        :type ddl_statements: list
-        :param ddl_statements: A list of DDL statements, each without a
-                               semicolon.
-
-        :rtype: :class:`google.api_core.operation.Operation`
-        :returns: an operation instance
-        """
-        # Synchronously wait on the operation's completion.
-        return self.database.update_ddl(ddl_statements).result()
-
-    @_connection_closed_check
     def read_snapshot(self):
         return self.database.snapshot()
 
@@ -138,6 +123,13 @@ class Connection(object):
 
     @_connection_closed_check
     def _run_prior_ddl_statements(self):
+        """Run the list of Data Definition Language (DDL) statements on the
+        underlying database. Each DDL statement MUST NOT contain a semicolon.
+
+        :rtype: :class:`google.api_core.operation.Operation`
+        :returns: an operation instance
+        """
+        # Synchronously wait on the operation's completion.
         if self.read_only:
             self._ddl_statements = []
             raise ProgrammingError("Connection is in 'read_only' mode")
@@ -148,8 +140,9 @@ class Connection(object):
         ddl_statements = self._ddl_statements
         self._ddl_statements = []
 
-        return self._handle_update_ddl(ddl_statements)
+        return self.database.update_ddl(ddl_statements).result()
 
+    @_connection_closed_check
     def list_tables(self):
         return self.run_sql_in_snapshot(
             """SELECT
@@ -160,6 +153,7 @@ class Connection(object):
                 t.table_catalog = '' and t.table_schema = ''"""
         )
 
+    @_connection_closed_check
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in
         # read-write transactions hence this method exists to circumvent that
@@ -172,6 +166,7 @@ class Connection(object):
             )
             return list(res)
 
+    @_connection_closed_check
     def get_table_column_schema(self, table_name):
         rows = self.run_sql_in_snapshot(
             """SELECT

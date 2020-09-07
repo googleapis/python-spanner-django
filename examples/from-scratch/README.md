@@ -28,7 +28,7 @@ After we have a Cloud Spanner database created, we'll need a few variables:
 
 Once in, please edit the file `hc/local_settings.py`, and:
 
-a) add `django_spanner` as the very first entry to your `INSTALLED_APPS`
+a) add `spanner_django` as the very first entry to your `INSTALLED_APPS`
 ```python
 INSTALLED_APPS = [
     'spanner_django',  # Must be listed first.

@@ -1,4 +1,4 @@
-django-spanner
+spanner-django
 ==============
 
 ORM plugin for using Cloud Spanner as a database for Django.
@@ -54,7 +54,7 @@ Using it
 After `installing it <#installing-it>`__, you'll need to edit your
 Django ``settings.py`` file:
 
--  Add ``django_spanner`` as the very first entry in the
+-  Add ``spanner_django`` as the very first entry in the
    ``INSTALLED_APPS`` setting
 
    .. code:: python

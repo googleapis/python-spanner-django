@@ -13,11 +13,12 @@ from unittest import mock
 class TestConnection(unittest.TestCase):
     def setUp(self) -> None:
         from spanner_dbapi.connection import Connection
+
         with mock.patch(
-                'google.cloud.spanner_v1.database.Database'
+            "google.cloud.spanner_v1.database.Database"
         ) as database_mock:
             with mock.patch(
-                    'google.cloud.spanner_v1.instance.Instance'
+                "google.cloud.spanner_v1.instance.Instance"
             ) as instance_mock:
                 self.connection = Connection(database_mock, instance_mock)
 
@@ -29,13 +30,17 @@ class TestConnection(unittest.TestCase):
             self.connection.cursor()
         self.assertTrue(self.connection._is_closed)
 
+    def test_connection_close_check_if_open(self):
+        self.connection.cursor()
+        self.assertFalse(self.connection._is_closed)
+
     def test_is_closed(self):
         self.assertEqual(self.connection._is_closed, self.connection.is_closed)
 
     def test_inside_transaction(self):
         self.assertEqual(
             self.connection._inside_transaction,
-            self.connection.inside_transaction
+            self.connection.inside_transaction,
         )
 
     def test_transaction_started(self):

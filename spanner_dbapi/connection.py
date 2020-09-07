@@ -6,12 +6,9 @@
 
 from collections import namedtuple
 from functools import wraps
-import time
-
-from google.cloud import spanner_v1 as spanner
 
 from .cursor import Cursor
-from .exceptions import InterfaceError, Warning, ProgrammingError
+from .exceptions import InterfaceError, Warning
 from .enums import AutocommitDMLModes, TransactionModes
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])

@@ -22,7 +22,7 @@ from spanner_dbapi.parse_utils import DateStr, TimestampStr, escape_name
 class DatabaseOperations(BaseDatabaseOperations):
     cast_data_types = {"CharField": "STRING", "TextField": "STRING"}
     cast_char_field_without_max_length = "STRING"
-    compiler_module = "django_spanner.compiler"
+    compiler_module = "spanner_django.compiler"
     # Django's lookup names that require a different name in Spanner's
     # EXTRACT() function.
     # https://cloud.google.com/spanner/docs/functions-and-operators#extract

@@ -41,7 +41,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # No Django transaction management in Spanner.
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
-        # django_spanner monkey patches AutoField to have a default value.
+        # spanner_django monkey patches AutoField to have a default value.
         "basic.tests.ModelTest.test_hash",
         "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
         "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
@@ -218,7 +218,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",
         "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",
         "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
-        # Tests that by-pass using django_spanner and generate
+        # Tests that by-pass using spanner_django and generate
         # invalid DDL: https://github.com/orijtech/django-spanner/issues/298
         "cache.tests.CreateCacheTableForDBCacheTests",
         "cache.tests.DBCacheTests",

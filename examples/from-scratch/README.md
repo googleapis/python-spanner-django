@@ -31,7 +31,7 @@ Once in, please edit the file `hc/local_settings.py`, and:
 a) add `django_spanner` as the very first entry to your `INSTALLED_APPS`
 ```python
 INSTALLED_APPS = [
-    'django_spanner',  # Must be listed first.
+    'spanner_django',  # Must be listed first.
     ...
 ]
 ```
@@ -40,7 +40,7 @@ b) update `DATABASES` into the following:
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'spanner_django',
         'PROJECT': PROJECT_ID,
         'INSTANCE': SPANNER_INSTANCE,
         'NAME': SPANNER_DATABASE_NAME,
@@ -59,7 +59,7 @@ which when filled out, will look like this
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'spanner_django',
         'PROJECT': 'spanner-appdev',
         'INSTANCE': 'instance',
         'NAME': 'healthchecks_db',

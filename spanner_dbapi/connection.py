@@ -57,7 +57,6 @@ class Connection(object):
         self._is_closed = False
         self._inside_transaction = not self.autocommit
         self._transaction_started = False
-        self._ddl_statements = []
         self.read_only_staleness = {}
 
     @property
@@ -76,96 +75,8 @@ class Connection(object):
         if self._inside_transaction:
             self._transaction_started = val
 
-    @_connection_closed_check
-    def snapshot(self):
-        """Return an object which wraps a snapshot."""
-        return self.database.snapshot()
-
-    @_connection_closed_check
-    def run_in_transaction(self, fn, *args, **kwargs):
-        """Perform a unit of work in a transaction, retrying on abort."""
-        return self.database.run_in_transaction(fn, *args, **kwargs)
-
-    @_connection_closed_check
-    def append_ddl_statement(self, ddl_statement):
-        """Appending ddl statement"""
-        self._change_transaction_started(True)
-
-        self._ddl_statements.append(ddl_statement)
-
-        if self.autocommit:
-            self.commit()
-
-    @_connection_closed_check
-    def _run_prior_ddl_statements(self):
-        """Run the list of Data Definition Language (DDL) statements on the
-        underlying database. Each DDL statement MUST NOT contain a semicolon.
-
-        :rtype: :class:`google.api_core.operation.Operation`
-        :returns: an operation instance
-        """
-        # Synchronously wait on the operation's completion.
-        if self.read_only:
-            self._ddl_statements = []
-            raise ProgrammingError("Connection is in 'read_only' mode")
-
-        if not self._ddl_statements:
-            return
-
-        ddl_statements = self._ddl_statements
-        self._ddl_statements = []
-
-        return self.database.update_ddl(ddl_statements).result()
-
-    @_connection_closed_check
-    def list_tables(self):
-        return self.run_sql_in_snapshot(
-            """SELECT
-                t.table_name
-            FROM
-                information_schema.tables AS t
-            WHERE
-                t.table_catalog = '' and t.table_schema = ''"""
-        )
-
-    @_connection_closed_check
-    def run_sql_in_snapshot(self, sql, params=None, param_types=None):
-        # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in
-        # read-write transactions hence this method exists to circumvent that
-        # limit.
-        self._run_prior_ddl_statements()
-
-        with self.database.snapshot() as snapshot:
-            res = snapshot.execute_sql(
-                sql, params=params, param_types=param_types
-            )
-            return list(res)
-
-    @_connection_closed_check
-    def get_table_column_schema(self, table_name):
-        rows = self.run_sql_in_snapshot(
-            """SELECT
-                COLUMN_NAME, IS_NULLABLE, SPANNER_TYPE
-            FROM
-                INFORMATION_SCHEMA.COLUMNS
-            WHERE
-                TABLE_SCHEMA = ''
-            AND
-                TABLE_NAME = @table_name""",
-            params={"table_name": table_name},
-            param_types={"table_name": spanner.param_types.STRING},
-        )
-
-        column_details = {}
-        for column_name, is_nullable, spanner_type in rows:
-            column_details[column_name] = ColumnDetails(
-                null_ok=is_nullable == "YES", spanner_type=spanner_type
-            )
-        return column_details
-
     def close(self):
         """Closing database connection"""
-        self.rollback()
         self._is_closed = True
 
     @_connection_closed_check
@@ -176,29 +87,19 @@ class Connection(object):
     @_connection_closed_check
     def rollback(self):
         """Roll back a transaction"""
-        self._ddl_statements = []
-        self._change_transaction_started(False)
+        raise Warning(
+            "Connection always works in `autocommit` mode, because of Spanner's limitations."
+        )
 
     @_connection_closed_check
     def commit(self):
         """Commit mutations to the database."""
-        if self.autocommit:
-            raise Warning(
-                "This connection is in autocommit mode - manual committing is off."
-            )
-
-        self._run_prior_ddl_statements()
-        if self.transaction_mode == TransactionModes.READ_WRITE:
-            self.commit_timestamp = time.time()
-
-        self._change_transaction_started(False)
+        raise Warning(
+            "Connection always works in `autocommit` mode, because of Spanner's limitations."
+        )
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if exc_value:
-            self.rollback()
-        elif not self.autocommit:
-            self.commit()
         self.close()

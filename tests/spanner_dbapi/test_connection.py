@@ -11,7 +11,7 @@ from unittest import mock
 
 
 class TestConnection(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         from spanner_dbapi.connection import Connection
 
         with mock.patch(
@@ -61,6 +61,7 @@ class TestConnection(unittest.TestCase):
 
         cursor = self.connection.cursor()
         self.assertIsInstance(cursor, Cursor)
+        self.assertEqual(self.connection, cursor._connection)
 
     def test_commit(self):
         from spanner_dbapi.exceptions import Warning

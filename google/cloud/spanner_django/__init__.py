@@ -22,8 +22,9 @@ from .functions import register_functions
 from .lookups import register_lookups
 from .utils import check_django_compatability
 
-# __version__ = pkg_resources.get_distribution("django-google-spanner").version
-__version__ = pkg_resources.get_distribution("google-cloud-spanner-django").version
+__version__ = pkg_resources.get_distribution(
+    "google-cloud-spanner-django"
+).version
 
 check_django_compatability()
 register_expressions()

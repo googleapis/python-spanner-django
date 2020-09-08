@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 
 # Package metadata.
 
-name = "django-google-spanner"
+name = "google-cloud-spanner-django"
 description = "Bridge to enable using Django with Spanner."
 version = "2.2a0"
 # Should be one of:

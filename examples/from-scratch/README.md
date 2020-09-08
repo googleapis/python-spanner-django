@@ -1,13 +1,13 @@
-## django-spanner for Django tutorial
+## spanner-django for Django tutorial
 
-This example shows how to use django-spanner for Cloud Spanner as a backend database for [Django's tutorials](https://docs.djangoproject.com/en/2.2/intro/tutorial01/)
+This example shows how to use spanner-django for Cloud Spanner as a backend database for [Django's tutorials](https://docs.djangoproject.com/en/2.2/intro/tutorial01/)
 
 ### Walkthrough the introduction to Django
 
-### Install django-spanner
-We'll need to install `django-spanner`, by cloning this repository and then running `pip3 install`
+### Install spanner-django
+We'll need to install `spanner-django`, by cloning this repository and then running `pip3 install`
 ```shell
-git clone https://github.com/googleapis/django-spanner
+git clone https://github.com/googleapis/python-spanner-django
 pip3 install .
 ```
 
@@ -20,7 +20,7 @@ or visit this [codelab](https://opencensus.io/codelabs/spanner/#0)
 ### Follow the tutorial
 Please follow the guides in https://docs.djangoproject.com/en/2.2/intro/tutorial01/ until the end with a single DISTINCTION:
 
-### Update your settings.py file to use django-spanner
+### Update your settings.py file to use spanner-django
 After we have a Cloud Spanner database created, we'll need a few variables:
 * ProjectID
 * Instance name
@@ -40,6 +40,7 @@ b) update `DATABASES` into the following:
 ```python
 DATABASES = {
     'default': {
+        'ENGINE': 'spanner_django',
         'ENGINE': 'spanner_django',
         'PROJECT': PROJECT_ID,
         'INSTANCE': SPANNER_INSTANCE,
@@ -106,7 +107,7 @@ Running migrations:
 After those migrations are completed, that will be all. Please continue on with the guides.
 
 ### Comprehensive hands-on guide
-For a more comprehensive, step by step hands-on guide, please visit [using django-spanner from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
+For a more comprehensive, step by step hands-on guide, please visit [using spanner-django from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
 
 
 ### References
@@ -114,5 +115,5 @@ For a more comprehensive, step by step hands-on guide, please visit [using djang
 Resource|URL
 ---|---
 Cloud Spanner homepage|https://cloud.google.com/spanner/
-django-spanner project's source code|https://github.com/googleapis/python-spanner-django/
-django-spanner from scratch|https://orijtech-161805.firebaseapp.com/quickstart/new_app/
+spanner-django project's source code|https://github.com/googleapis/python-spanner-django/
+spanner-django from scratch|https://orijtech-161805.firebaseapp.com/quickstart/new_app/

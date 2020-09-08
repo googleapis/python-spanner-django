@@ -23,13 +23,13 @@ create_settings() {
     cat << ! > "$SETTINGS_FILE.py"
 DATABASES = {
    'default': {
-       'ENGINE': 'spanner_django',
+       'ENGINE': 'google/cloud/spanner_django',
        'PROJECT': "$PROJECT",
        'INSTANCE': "$INSTANCE",
        'NAME': "$TEST_DBNAME",
    },
    'other': {
-       'ENGINE': 'spanner_django',
+       'ENGINE': 'google/cloud/spanner_django',
        'PROJECT': "$PROJECT",
        'INSTANCE': "$INSTANCE",
        'NAME': "$TEST_DBNAME_OTHER",

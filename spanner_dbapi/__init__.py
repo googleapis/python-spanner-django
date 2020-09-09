@@ -21,7 +21,7 @@ from .exceptions import (
     ProgrammingError,
     Warning,
 )
-from .parse_utils import get_param_types
+from .parse_utils import to_spanner_types
 from .types import (
     BINARY,
     DATETIME,
@@ -112,7 +112,7 @@ __all__ = [
     "connect",
     "paramstyle",
     "threadsafety",
-    "get_param_types",
+    "to_spanner_types",
     "Binary",
     "Date",
     "DateFromTicks",

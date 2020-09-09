@@ -18,7 +18,7 @@ from spanner_dbapi.parse_utils import (
     classify_stmt,
     ensure_where_clause,
     escape_name,
-    get_param_types,
+    to_spanner_types,
     parse_insert,
     rows_for_insert_or_update,
     sql_pyformat_args_to_spanner,
@@ -444,7 +444,7 @@ class ParseUtilsTests(TestCase):
 
         for i, (params, want_param_types) in enumerate(cases):
             with self.subTest(i=i):
-                got_param_types = get_param_types(params)
+                got_param_types = to_spanner_types(params)
                 self.assertEqual(got_param_types, want_param_types)
 
     def test_ensure_where_clause(self):

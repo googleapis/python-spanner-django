@@ -21,6 +21,18 @@ STMT_DDL = "DDL"
 STMT_NON_UPDATING = "NON_UPDATING"
 STMT_UPDATING = "UPDATING"
 STMT_INSERT = "INSERT"
+# Python to Spanner types map
+TYPES_MAP = {
+    bool: spanner.param_types.BOOL,
+    float: spanner.param_types.FLOAT64,
+    int: spanner.param_types.INT64,
+    str: spanner.param_types.STRING,
+    bytes: spanner.param_types.BYTES,
+    TimestampStr: spanner.param_types.TIMESTAMP,
+    datetime.datetime: spanner.param_types.TIMESTAMP,
+    DateStr: spanner.param_types.DATE,
+    datetime.date: spanner.param_types.DATE,
+}
 
 # Heuristic for identifying statements that don't need to be run as updates.
 re_NON_UPDATE = re.compile(r"^\s*(SELECT)", re.IGNORECASE)
@@ -376,29 +388,25 @@ def cast_for_spanner(param):
         return param
 
 
-def get_param_types(params):
+def to_spanner_types(py_params):
+    """Designate Spanner types for the given parameters.
+
+    :type py_params: :class:`dict`
+    :param py_params: Python typed parameters.
+
+    :rtype: :class:`dict`
+    :returns: Spanner typed parameters.
     """
-    Return a dictionary of spanner.param_types for a dictionary of parameters.
-    """
-    if params is None:
-        return None
-    param_types = {}
-    for key, value in params.items():
-        if isinstance(value, bool):
-            param_types[key] = spanner.param_types.BOOL
-        elif isinstance(value, float):
-            param_types[key] = spanner.param_types.FLOAT64
-        elif isinstance(value, int):
-            param_types[key] = spanner.param_types.INT64
-        elif isinstance(value, (TimestampStr, datetime.datetime)):
-            param_types[key] = spanner.param_types.TIMESTAMP
-        elif isinstance(value, (DateStr, datetime.date)):
-            param_types[key] = spanner.param_types.DATE
-        elif isinstance(value, str):
-            param_types[key] = spanner.param_types.STRING
-        elif isinstance(value, bytes):
-            param_types[key] = spanner.param_types.BYTES
-    return param_types
+    if py_params is None:
+        return
+
+    spanner_params = {}
+
+    for key, value in py_params.items():
+        if value is not None:
+            spanner_params[key] = TYPES_MAP[type(value)]
+
+    return spanner_params
 
 
 def ensure_where_clause(sql):

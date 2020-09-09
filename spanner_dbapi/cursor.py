@@ -26,7 +26,7 @@ from .parse_utils import (
     STMT_NON_UPDATING,
     classify_stmt,
     ensure_where_clause,
-    get_param_types,
+    to_spanner_types,
     parse_insert,
     sql_pyformat_args_to_spanner,
 )
@@ -120,7 +120,7 @@ class Cursor:
         sql, params = sql_pyformat_args_to_spanner(sql, params)
 
         res = transaction.execute_update(
-            sql, params=params, param_types=get_param_types(params)
+            sql, params=params, param_types=to_spanner_types(params)
         )
         self._itr = None
         if type(res) == int:
@@ -161,7 +161,7 @@ class Cursor:
     def __do_execute_insert_heterogenous(self, transaction, sql_params_list):
         for sql, params in sql_params_list:
             sql, params = sql_pyformat_args_to_spanner(sql, params)
-            param_types = get_param_types(params)
+            param_types = to_spanner_types(params)
             res = transaction.execute_sql(
                 sql, params=params, param_types=param_types
             )
@@ -182,7 +182,7 @@ class Cursor:
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
             sql, params = sql_pyformat_args_to_spanner(sql, params)
             res = snapshot.execute_sql(
-                sql, params=params, param_types=get_param_types(params)
+                sql, params=params, param_types=to_spanner_types(params)
             )
             if type(res) == int:
                 self._row_count = res

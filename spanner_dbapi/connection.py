@@ -69,9 +69,8 @@ class Connection(object):
         """Returns cursor for current database"""
         if self._is_closed:
             raise InterfaceError("connection is already closed")
-        cursor = Cursor(self)
-        self._cursors.add(cursor)
-        return cursor
+
+        return Cursor(self)
 
     def rollback(self):
         """Roll back a transaction"""

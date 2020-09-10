@@ -62,14 +62,14 @@ class Cursor:
     """
 
     def __init__(self, connection):
+        self._connection = connection
         self._itr = None
         self._res = None
         self._row_count = _UNSET_COUNT
-        self._connection = connection
         self._is_closed = False
-
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
+        self._connection._cursors.add(self)
 
     def execute(self, sql, args=None):
         """

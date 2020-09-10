@@ -36,6 +36,8 @@ class TestConnection(unittest.TestCase):
 
     def test_is_closed(self):
         self.assertEqual(self.connection._is_closed, self.connection.is_closed)
+        self.connection.close()
+        self.assertEqual(self.connection._is_closed, self.connection.is_closed)
 
     def test_inside_transaction(self):
         self.assertEqual(

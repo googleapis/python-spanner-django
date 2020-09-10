@@ -28,7 +28,7 @@ git clone https://github.com/googleapis/spanner-django
 
 Note the full path of where spanner-django has been cloned into, for example
 ```shell
-SPANNER_DJANGO_CODE_DIR=$Desktop/spanner-sjango
+SPANNER_DJANGO_CODE_DIR=$Desktop/spanner-django
 ```
 or add it to your environment, perhaps like this
 ```shell

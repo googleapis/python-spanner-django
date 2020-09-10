@@ -5,25 +5,13 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from collections import namedtuple
-from functools import wraps
+from weakref import WeakSet
 
 from .cursor import Cursor
 from .exceptions import InterfaceError, Warning
 from .enums import AutocommitDMLModes, TransactionModes
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
-
-
-def _connection_closed_check(func):
-    """Raise an exception if attempting to use an already closed connection."""
-
-    @wraps(func)
-    def wrapped(self, *args, **kwargs):
-        if self._is_closed:
-            raise InterfaceError("connection is already closed")
-        return func(self, *args, **kwargs)
-
-    return wrapped
 
 
 class Connection(object):
@@ -54,6 +42,7 @@ class Connection(object):
         self._is_closed = False
         self._inside_transaction = not self.autocommit
         self._transaction_started = False
+        self._cursors = WeakSet()
         self.read_only_staleness = {}
 
     @property
@@ -76,19 +65,20 @@ class Connection(object):
         """Closing database connection"""
         self._is_closed = True
 
-    @_connection_closed_check
     def cursor(self):
         """Returns cursor for current database"""
-        return Cursor(self)
+        if self._is_closed:
+            raise InterfaceError("connection is already closed")
+        cursor = Cursor(self)
+        self._cursors.add(cursor)
+        return cursor
 
-    @_connection_closed_check
     def rollback(self):
         """Roll back a transaction"""
         raise Warning(
             "Connection always works in `autocommit` mode, because of Spanner's limitations."
         )
 
-    @_connection_closed_check
     def commit(self):
         """Commit mutations to the database."""
         raise Warning(

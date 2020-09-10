@@ -9,11 +9,11 @@
 import enum
 
 
-class TransactionModes(enum.Enum):
-    READ_ONLY = "READ_ONLY"
-    READ_WRITE = "READ_WRITE"
+class TransactionModes(enum.IntEnum):
+    READ_ONLY = 0
+    READ_WRITE = 1
 
 
-class AutocommitDMLModes(enum.Enum):
-    TRANSACTIONAL = "TRANSACTIONAL"
-    PARTITIONED_NON_ATOMIC = "PARTITIONED_NON_ATOMIC"
+class AutocommitDMLModes(enum.IntEnum):
+    TRANSACTIONAL = 0
+    PARTITIONED_NON_ATOMIC = 1

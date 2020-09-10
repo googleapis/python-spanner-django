@@ -19,7 +19,7 @@ API Documentation
 Changelog
 ---------
 
-For a list of all ``google-cloud-spanner-django`` releases:
+For a list of all ``django-google-spanner`` releases:
 
 .. toctree::
   :maxdepth: 2

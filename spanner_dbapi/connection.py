@@ -11,6 +11,7 @@ from .cursor import Cursor
 from .exceptions import InterfaceError, Warning
 from .enums import AutocommitDMLModes, TransactionModes
 
+
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
@@ -75,13 +76,13 @@ class Connection(object):
     def rollback(self):
         """Roll back a transaction"""
         raise Warning(
-            "Connection always works in `autocommit` mode, because of Spanner's limitations."
+            "Connection always works in `autocommit` mode, because of Spanner's specifics."
         )
 
     def commit(self):
         """Commit mutations to the database."""
         raise Warning(
-            "Connection always works in `autocommit` mode, because of Spanner's limitations."
+            "Connection always works in `autocommit` mode, because of Spanner's specifics."
         )
 
     def __enter__(self):

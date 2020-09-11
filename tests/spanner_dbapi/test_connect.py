@@ -11,7 +11,7 @@ from unittest import mock
 
 import google.auth.credentials
 from google.api_core.gapic_v1.client_info import ClientInfo
-from spanner_dbapi import connect, Connection
+from google.cloud.spanner_dbapi import connect, Connection
 
 
 def _make_credentials():

@@ -7,7 +7,7 @@ DB API Connection
 Creating a Connection
 ---------------------
 
-To use the API, the :class:`~google.cloud.spanner_django.connection.Connection`
+To use the API, the :class:`~google.cloud.django_spanner.connection.Connection`
 class defines a high-level interface which handles connection to a Spanner
 databse:
 
@@ -29,4 +29,4 @@ Configuration
   Engine or Google Compute Engine the project will be detected automatically.
   (Setting this environment variable is not required, you may instead pass the
   ``project`` explicitly when constructing a
-  :class:`~google.cloud.spanner_django.connection.Connection`).
+  :class:`~google.cloud.django_spanner.connection.Connection`).

@@ -18,7 +18,7 @@ BLACK_VERSION = "black==19.10b0"
 BLACK_PATHS = [
     "django_spanner",
     "docs",
-    "spanner_dbapi",
+    "google",
     "tests",
     "noxfile.py",
     "setup.py",
@@ -34,7 +34,7 @@ def lint(session):
     """
     session.install("flake8", BLACK_VERSION)
     session.run("black", "--check", *BLACK_PATHS)
-    session.run("flake8", "django_spanner", "spanner_dbapi", "tests")
+    session.run("flake8", "django_spanner", "google", "tests")
 
 
 @nox.session(python="3.8")
@@ -70,7 +70,7 @@ def default(session):
         "py.test",
         "--quiet",
         "--cov=django_spanner",
-        "--cov=spanner_dbapi",
+        "--cov=google.cloud",
         "--cov=tests.spanner_dbapi",
         "--cov-append",
         "--cov-config=.coveragerc",

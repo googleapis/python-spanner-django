@@ -1,5 +1,5 @@
-django-spanner
-==============
+django-google-spanner
+=====================
 
 ORM plugin for using Cloud Spanner as a database for Django.
 
@@ -37,12 +37,12 @@ Table of contents
 Installing it
 -------------
 
-Use the version of django-spanner that corresponds to your version of
-Django. For example, django-spanner 2.2.x works with Django 2.2.y. (This
+Use the version of django-google-spanner that corresponds to your version of
+Django. For example, django-google-spanner 2.2.x works with Django 2.2.y. (This
 is the only supported version at this time.)
 
 The minor release number of Django doesn't correspond to the minor
-release number of django-spanner. Use the latest minor release of each.
+release number of django-google-spanner. Use the latest minor release of each.
 
 .. code:: shell
 
@@ -54,13 +54,13 @@ Using it
 After `installing it <#installing-it>`__, you'll need to edit your
 Django ``settings.py`` file:
 
--  Add ``django_spanner`` as the very first entry in the
+-  Add ``django_google_spanner`` as the very first entry in the
    ``INSTALLED_APPS`` setting
 
    .. code:: python
 
        INSTALLED_APPS = [
-           'django_spanner',
+           'django_google_spanner',
            ...
        ]
 
@@ -73,7 +73,7 @@ Format
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django_spanner',
+            'ENGINE': 'django_google_spanner',
             'PROJECT': '<project_id>',
             'INSTANCE': '<instance_id>',
             'NAME': '<database_name>',
@@ -94,7 +94,7 @@ For example:
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django_spanner',
+            'ENGINE': 'django_google_spanner',
             'PROJECT': 'appdev-soda-spanner-staging', # Or the GCP project-id
             'INSTANCE': 'django-dev1', # Or the Cloud Spanner instance
             'NAME': 'db1', # Or the Cloud Spanner database to use
@@ -107,7 +107,7 @@ Limitations
 Transaction management isn't supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-django-spanner always works in Django's default transaction behavior,
+django-google-spanner always works in Django's default transaction behavior,
 ``autocommit`` mode. Transactions cannot be controlled manually with
 calls like ``django.db.transaction.atomic()``.
 
@@ -115,7 +115,7 @@ calls like ``django.db.transaction.atomic()``.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Spanner doesn't have support for auto-generating primary key values.
-Therefore, django-spanner monkey-patches ``AutoField`` to generate a
+Therefore, django-google-spanner monkey-patches ``AutoField`` to generate a
 random UUID4. It generates a default using ``Field``'s ``default``
 option which means ``AutoField``\ s will have a value when a model
 instance is created. For example:
@@ -136,7 +136,7 @@ were created.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Spanner doesn't support ``ON DELETE CASCADE`` when creating foreign-key
-constraints so django-spanner `doesn't support foreign key
+constraints so django-google-spanner `doesn't support foreign key
 constraints <https://github.com/googleapis/python-spanner-django/issues/313>`__.
 
 Check constraints aren't supported
@@ -185,7 +185,7 @@ Spanner has some limitations on schema changes which you must respect:
 -  Renaming tables and columns isn't supported.
 -  A column's type can't be changed.
 -  A table's primary key can't be altered.
--  Migrations aren't atomic since django-spanner doesn't support
+-  Migrations aren't atomic since django-google-spanner doesn't support
    transactions.
 
 ``DurationField`` arithmetic doesn't work with ``DateField`` values (`#253 <https://github.com/googleapis/python-spanner-django/issues/253>`__)

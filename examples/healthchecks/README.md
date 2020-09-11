@@ -1,11 +1,11 @@
-## django-spanner on healthchecks.io
+## django-google-spanner on healthchecks.io
 
-This example shows how to use django-spanner for Cloud Spanner as a backend database for [https://healthchecks.io](https://healthchecks.io)
+This example shows how to use django-google-spanner for Cloud Spanner as a backend database for [https://healthchecks.io](https://healthchecks.io)
 
 ### Table of contents
 - [Install healthchecks](#install-healthchecks)
-- [Clone django-spanner](#clone-django-spanner)
-- [Install django-spanner in the virtual-env](#install-django-spanner-in-the-virtual-env)
+- [Clone django-google-spanner](#clone-django-google-spanner)
+- [Install django-google-spanner in the virtual-env](#install-django-google-spanner-in-the-virtual-env)
 - [Ensure you have a Cloud Spanner database already created](#ensure-you-have-a-Cloud-Spanner-database-already-created)
 - [Update local_settings.py](#update-local_settings.py)
 - [Run the server](#run-the-server)
@@ -18,24 +18,24 @@ This example shows how to use django-spanner for Cloud Spanner as a backend data
 Please follow the instructions to install [healthchecks.io on Github](https://github.com/healthchecks/healthchecks/).
 You'll need to active the virtual-env as their install instructions request.
 
-### Clone django-spanner
+### Clone django-google-spanner
 Open a fresh terminal, and go to a location that isn't a parent directory of where you cloned [healthchecks.io](#install-healthchecks).
 For example we can go to our $HOME/Desktop
 ```shell
 cd $HOME/Desktop
-git clone https://github.com/googleapis/django-spanner
+git clone https://github.com/googleapis/django-google-spanner
 ```
 
-Note the full path of where django-spanner has been cloned into, for example
+Note the full path of where django-google-spanner has been cloned into, for example
 ```shell
-DJANGO_SPANNER_CODE_DIR=$Desktop/django-spanner
+DJANGO_SPANNER_CODE_DIR=$Desktop/django-google-spanner
 ```
 or add it to your environment, perhaps like this
 ```shell
-export DJANGO_SPANNER_CODE_DIR=$Desktop/django-spanner
+export DJANGO_SPANNER_CODE_DIR=$Desktop/django-google-spanner
 ```
 
-### Install django-spanner in the virtual-env
+### Install django-google-spanner in the virtual-env
 Go back to the directory in which you installed [healthchecks](#install-healthchecks) and ensure your virtual-env is on.
 Ensure that your environment is reloaded to get the settings for $DJANGO_SPANNER_CODE, or ensure you had manually copied that path.
 The prompt should look something like this
@@ -43,7 +43,7 @@ The prompt should look something like this
 (hc-venv) $
 ```
 
-now install django-spanner using the path you obtained in [Clone django-spanner](#clone-django-spanner), per
+now install django-google-spanner using the path you obtained in [Clone django-google-spanner](#clone-django-google-spanner), per
 
 ```shell
 (h-venv) $ pip3 install $DJANGO_SPANNER_CODE_DIR
@@ -62,10 +62,10 @@ After we have a Cloud Spanner database created, we'll need a few variables:
 * Database name aka DisplayName
 
 Once in, please edit the file `hc/local_settings.py` to:
-a) Add `django_spanner` as the first entry to `INSTALLED_APPS`
+a) Add `django_google_spanner` as the first entry to `INSTALLED_APPS`
 ```python
 INSTALLED_APPS = [
-    'django_spanner',  # Must be listed first.
+    'django_google_spanner',  # Must be listed first.
     ...
 ]
 ```
@@ -76,7 +76,7 @@ b) Edit `DATABASES` into the following:
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'django_google_spanner',
         'PROJECT': PROJECT_ID,
         'INSTANCE': SPANNER_INSTANCE,
         'NAME': SPANNER_DATABASE_NAME,
@@ -95,7 +95,7 @@ which when filled out, will look like this
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'django_google_spanner',
         'PROJECT': 'spanner-appdev',
         'INSTANCE': 'instance',
         'NAME': 'healthchecks_db',
@@ -104,7 +104,7 @@ DATABASES = {
 ```
 
 ### Run the server
-With those steps out of the way, and having successfully setup both healthchecks and properly installed django-spanner, we are now ready to get started
+With those steps out of the way, and having successfully setup both healthchecks and properly installed django-google-spanner, we are now ready to get started
 
 ```shell
 (hc-venv) $ python3 manage.py runserver
@@ -301,4 +301,4 @@ Resource|URL
 Healthchecks app|https://healthchecks.io/
 Healthchecks source code|https://github.com/healthchecks/healthchecks/
 Cloud Spanner homepage|https://cloud.google.com/spanner/
-django-spanner project's source code|https://github.com/googleapis/python-spanner-django/
+django-google-spanner project's source code|https://github.com/googleapis/python-spanner-django/

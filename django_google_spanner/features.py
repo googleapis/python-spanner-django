@@ -41,7 +41,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # No Django transaction management in Spanner.
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
-        # django_spanner monkey patches AutoField to have a default value.
+        # django_google_spanner monkey patches AutoField to have a default value.
         "basic.tests.ModelTest.test_hash",
         "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
         "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
@@ -218,7 +218,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",
         "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",
         "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
-        # Tests that by-pass using django_spanner and generate
+        # Tests that by-pass using django_google_spanner and generate
         # invalid DDL: https://github.com/orijtech/django-spanner/issues/298
         "cache.tests.CreateCacheTableForDBCacheTests",
         "cache.tests.DBCacheTests",
@@ -317,10 +317,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # This test isn't isolated on databases like Spanner that don't
         # support transactions: https://code.djangoproject.com/ticket/31413
         "migrations.test_loader.LoaderTests.test_loading_squashed",
-        # Probably due to django-spanner setting a default on AutoField:
+        # Probably due to django-google-spanner setting a default on AutoField:
         # https://github.com/googleapis/python-spanner-django/issues/422
         "model_inheritance_regress.tests.ModelInheritanceTest.test_issue_6755",
-        # Probably due to django-spanner setting a default on AutoField:
+        # Probably due to django-google-spanner setting a default on AutoField:
         # https://github.com/googleapis/python-spanner-django/issues/424
         "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
         "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",

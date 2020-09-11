@@ -70,7 +70,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = u"google-cloud-spanner-django"
+project = u"django-google-spanner"
 copyright = u"2020, Google"
 author = u"Google APIs"
 
@@ -237,7 +237,7 @@ html_theme_options = {
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "google-cloud-spanner-django-doc"
+htmlhelp_basename = "django-google-spanner-doc"
 
 # -- Options for warnings ------------------------------------------------------
 

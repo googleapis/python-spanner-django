@@ -16,7 +16,7 @@ import shutil
 
 BLACK_VERSION = "black==19.10b0"
 BLACK_PATHS = [
-    "django_spanner",
+    "django_google_spanner",
     "docs",
     "google",
     "tests",
@@ -34,7 +34,7 @@ def lint(session):
     """
     session.install("flake8", BLACK_VERSION)
     session.run("black", "--check", *BLACK_PATHS)
-    session.run("flake8", "django_spanner", "google", "tests")
+    session.run("flake8", "django_google_spanner", "google", "tests")
 
 
 @nox.session(python="3.8")
@@ -69,7 +69,7 @@ def default(session):
     session.run(
         "py.test",
         "--quiet",
-        "--cov=django_spanner",
+        "--cov=django_google_spanner",
         "--cov=google.cloud",
         "--cov=tests.spanner_dbapi",
         "--cov-append",

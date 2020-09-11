@@ -1,13 +1,13 @@
-## django-spanner for Django tutorial
+## django-google-spanner for Django tutorial
 
-This example shows how to use django-spanner for Cloud Spanner as a backend database for [Django's tutorials](https://docs.djangoproject.com/en/2.2/intro/tutorial01/)
+This example shows how to use django-google-spanner for Cloud Spanner as a backend database for [Django's tutorials](https://docs.djangoproject.com/en/2.2/intro/tutorial01/)
 
 ### Walkthrough the introduction to Django
 
-### Install django-spanner
-We'll need to install `django-spanner`, by cloning this repository and then running `pip3 install`
+### Install django-google-spanner
+We'll need to install `django-google-spanner`, by cloning this repository and then running `pip3 install`
 ```shell
-git clone https://github.com/googleapis/django-spanner
+git clone https://github.com/googleapis/django-google-spanner
 pip3 install .
 ```
 
@@ -20,7 +20,7 @@ or visit this [codelab](https://opencensus.io/codelabs/spanner/#0)
 ### Follow the tutorial
 Please follow the guides in https://docs.djangoproject.com/en/2.2/intro/tutorial01/ until the end with a single DISTINCTION:
 
-### Update your settings.py file to use django-spanner
+### Update your settings.py file to use django-google-spanner
 After we have a Cloud Spanner database created, we'll need a few variables:
 * ProjectID
 * Instance name
@@ -28,10 +28,10 @@ After we have a Cloud Spanner database created, we'll need a few variables:
 
 Once in, please edit the file `hc/local_settings.py`, and:
 
-a) add `django_spanner` as the very first entry to your `INSTALLED_APPS`
+a) add `django_google_spanner` as the very first entry to your `INSTALLED_APPS`
 ```python
 INSTALLED_APPS = [
-    'django_spanner',  # Must be listed first.
+    'django_google_spanner',  # Must be listed first.
     ...
 ]
 ```
@@ -40,7 +40,7 @@ b) update `DATABASES` into the following:
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'django_google_spanner',
         'PROJECT': PROJECT_ID,
         'INSTANCE': SPANNER_INSTANCE,
         'NAME': SPANNER_DATABASE_NAME,
@@ -59,7 +59,7 @@ which when filled out, will look like this
 ```python
 DATABASES = {
     'default': {
-        'ENGINE': 'django_spanner',
+        'ENGINE': 'django_google_spanner',
         'PROJECT': 'spanner-appdev',
         'INSTANCE': 'instance',
         'NAME': 'healthchecks_db',
@@ -106,7 +106,7 @@ Running migrations:
 After those migrations are completed, that will be all. Please continue on with the guides.
 
 ### Comprehensive hands-on guide
-For a more comprehensive, step by step hands-on guide, please visit [using django-spanner from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
+For a more comprehensive, step by step hands-on guide, please visit [using django-google-spanner from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
 
 
 ### References
@@ -114,5 +114,5 @@ For a more comprehensive, step by step hands-on guide, please visit [using djang
 Resource|URL
 ---|---
 Cloud Spanner homepage|https://cloud.google.com/spanner/
-django-spanner project's source code|https://github.com/googleapis/python-spanner-django/
-django-spanner from scratch|https://orijtech-161805.firebaseapp.com/quickstart/new_app/
+django-google-spanner project's source code|https://github.com/googleapis/python-spanner-django/
+django-google-spanner from scratch|https://orijtech-161805.firebaseapp.com/quickstart/new_app/

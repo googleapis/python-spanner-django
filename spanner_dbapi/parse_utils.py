@@ -61,6 +61,9 @@ def classify_query(query):
     :rtype: :class:`str`
     :returns: Query type name.
     """
+    if RE_DDL.match(query):
+        return STMT_DDL
+
     if RE_IS_INSERT.match(query):
         return STMT_INSERT
 
@@ -68,9 +71,6 @@ def classify_query(query):
         # As of 13-March-2020, Cloud Spanner only supports WITH for DQL
         # statements and doesn't yet support WITH for DML statements.
         return STMT_NON_UPDATING
-
-    if RE_DDL.match(query):
-        return STMT_DDL
 
     return STMT_UPDATING
 

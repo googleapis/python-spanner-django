@@ -24,7 +24,7 @@ from .parse_utils import (
     STMT_DDL,
     STMT_INSERT,
     STMT_NON_UPDATING,
-    classify_stmt,
+    classify_query,
     ensure_where_clause,
     get_param_types,
     parse_insert,
@@ -90,7 +90,7 @@ class Cursor:
 
         # Classify whether this is a read-only SQL statement.
         try:
-            classification = classify_stmt(sql)
+            classification = classify_query(sql)
             if classification == STMT_DDL:
                 self._connection.append_ddl_statement(sql)
                 return

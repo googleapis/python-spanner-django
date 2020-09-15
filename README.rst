@@ -18,7 +18,7 @@ of Django.  For example, ``python-spanner-django`` 2.2.x works with Django
 2.2.y. (This is the only supported version at this time.)
 
 The minor release number of Django doesn't correspond to the minor release
-number of ``python-spanner-django`` Use the latest minor release of each.
+number of ``python-spanner-django``. Use the latest minor release of each.
 
 To install from PyPI:
 
@@ -36,10 +36,10 @@ To install from source:
     pip3 install -e .
 
 
-Use
----
+Useage
+------
 
-After `installing it <#Installation>`__, you'll need to edit your Django
+After `installattion <#Installation>`__, you'll need to edit your Django
 ``settings.py`` file:
 
 -  Add ``django_spanner`` as the very first entry in the ``INSTALLED_APPS``
@@ -96,9 +96,10 @@ Limitations
 Transaction management isn't supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``python-spanner-django`` always works in Django's default transaction
-behavior, ``autocommit`` mode. Transactions cannot be controlled manually with
-calls like ``django.db.transaction.atomic()``.
+``python-spanner-django`` always works in ``autocommit`` mode, which is
+Django's default behavior even for backends that support manual transaction
+management. Transactions cannot be controlled manually with calls like
+``django.db.transaction.atomic()``.
 
 ``AutoField`` generates random IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

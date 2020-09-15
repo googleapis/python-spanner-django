@@ -52,7 +52,7 @@ RE_VALUES_PYFORMAT = re.compile(
 )
 
 
-def classify_query(query):
+def classify_stmt(query):
     """Determine SQL query type.
 
     :type query: :class:`str`

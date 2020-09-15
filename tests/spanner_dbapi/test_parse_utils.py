@@ -17,7 +17,7 @@ from google.cloud.spanner_dbapi.parse_utils import (
     STMT_UPDATING,
     DateStr,
     TimestampStr,
-    classify_query,
+    classify_stmt,
     ensure_where_clause,
     escape_name,
     get_param_types,
@@ -30,7 +30,7 @@ from google.cloud.spanner_dbapi.utils import backtick_unicode
 
 
 class ParseUtilsTests(TestCase):
-    def test_classify_query(self):
+    def test_classify_stmt(self):
         cases = (
             ("SELECT 1", STMT_NON_UPDATING),
             ("SELECT s.SongName FROM Songs AS s", STMT_NON_UPDATING),
@@ -58,7 +58,7 @@ class ParseUtilsTests(TestCase):
         )
 
         for query, want_class in cases:
-            self.assertEqual(classify_query(query), want_class)
+            self.assertEqual(classify_stmt(query), want_class)
 
     def test_parse_insert(self):
         cases = [

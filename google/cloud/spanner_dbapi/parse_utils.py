@@ -176,10 +176,7 @@ def parse_insert(insert_sql, params):
     if values.homogenous():
         # Case c)
 
-        columns = [
-            strip_backticks(mi.strip())
-            for mi in match.group("columns").split(",")
-        ]
+        columns = [mi.strip(" `") for mi in match.group("columns").split(",")]
         sql_params_list = []
         insert_sql_preamble = "INSERT INTO %s (%s) VALUES %s" % (
             match.group("table_name"),

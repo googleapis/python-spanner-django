@@ -75,7 +75,7 @@ Format
     }
 
 Database configurations
-~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 

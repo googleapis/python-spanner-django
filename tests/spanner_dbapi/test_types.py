@@ -52,7 +52,7 @@ class TypesTests(TestCase):
         )
 
     def test_TimeFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
+        epochTicks = 1572812062.9782631  # Sun Nov 03 23:14:22 2019
         got = TimeFromTicks(epochTicks)
         # Since continuous integration infrastructure such as Travis CI
         # uses clocks on UTC, it is useful to be able to compare against
@@ -67,7 +67,7 @@ class TypesTests(TestCase):
         )
 
     def test_TimestampFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
+        epochTicks = 1572812062.9782631  # Sun Nov 03 23:14:22 2019
         got = TimestampFromTicks(epochTicks)
         # Since continuous integration infrastructure such as Travis CI
         # uses clocks on UTC, it is useful to be able to compare against

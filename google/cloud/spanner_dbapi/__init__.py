@@ -71,6 +71,9 @@ def connect(
                         If none are specified, the client will attempt to ascertain
                         the credentials from the environment.
 
+    :type user_agent: :class:`str`
+    :param user_agent: (Optional) The user agent to be used with API requests.
+
     :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
     :returns: Connection object associated with the given Cloud Spanner resource.
 

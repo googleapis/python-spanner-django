@@ -5,6 +5,7 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 import datetime
+import time
 from unittest import TestCase
 
 from google.cloud.spanner_dbapi.types import (
@@ -17,8 +18,8 @@ from google.cloud.spanner_dbapi.types import (
 )
 from google.cloud.spanner_dbapi.utils import PeekIterator
 
-tzUTC = 0  # 0 hours offset from UTC
-
+tzUTC = 0 # 0 hours offset from UTC)
+utcOffset = time.timezone # offset for current timezone
 
 class TypesTests(TestCase):
     def test_Date(self):
@@ -37,8 +38,8 @@ class TypesTests(TestCase):
         self.assertEqual(got, want, "mismatch between conversion")
 
     def test_DateFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
-        got = DateFromTicks(epochTicks)
+        epochTicks = 1572822862.9782631  # Sun Nov 03 23:14:22 2019
+        got = DateFromTicks(epochTicks + utcOffset)
         # Since continuous integration infrastructure such as Travis CI
         # uses clocks on UTC, it is useful to be able to compare against
         # either of UTC or the known standard time.
@@ -52,8 +53,8 @@ class TypesTests(TestCase):
         )
 
     def test_TimeFromTicks(self):
-        epochTicks = 1572812062.9782631  # Sun Nov 03 23:14:22 2019
-        got = TimeFromTicks(epochTicks)
+        epochTicks = 1572822862.9782631  # Sun Nov 03 23:14:22 2019
+        got = TimeFromTicks(epochTicks + utcOffset)
         # Since continuous integration infrastructure such as Travis CI
         # uses clocks on UTC, it is useful to be able to compare against
         # either of UTC or the known standard time.
@@ -67,8 +68,8 @@ class TypesTests(TestCase):
         )
 
     def test_TimestampFromTicks(self):
-        epochTicks = 1572812062.9782631  # Sun Nov 03 23:14:22 2019
-        got = TimestampFromTicks(epochTicks)
+        epochTicks = 1572822862.9782631  # Sun Nov 03 23:14:22 2019
+        got = TimestampFromTicks(epochTicks + utcOffset)
         # Since continuous integration infrastructure such as Travis CI
         # uses clocks on UTC, it is useful to be able to compare against
         # either of UTC or the known standard time.

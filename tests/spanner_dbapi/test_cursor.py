@@ -9,12 +9,7 @@
 import unittest
 from unittest import mock
 
-from google.cloud.spanner_dbapi import (
-    connect,
-    InterfaceError,
-    ProgrammingError,
-)
-from google.cloud.spanner_dbapi.cursor import Cursor
+from google.cloud.spanner_dbapi import connect, InterfaceError
 
 
 class TestCursor(unittest.TestCase):

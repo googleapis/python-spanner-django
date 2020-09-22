@@ -18,8 +18,8 @@ from google.cloud.spanner_dbapi.types import (
 )
 from google.cloud.spanner_dbapi.utils import PeekIterator
 
-tzUTC = 0 # 0 hours offset from UTC)
-utcOffset = time.timezone # offset for current timezone
+tzUTC = 0  # 0 hours offset from UTC)
+utcOffset = time.timezone  # offset for current timezone
 
 class TypesTests(TestCase):
     def test_Date(self):

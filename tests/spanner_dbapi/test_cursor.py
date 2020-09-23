@@ -52,3 +52,59 @@ class TestCursor(unittest.TestCase):
         self.assertTrue(cursor.is_closed)
         with self.assertRaises(InterfaceError):
             cursor.execute("SELECT * FROM database")
+
+
+class TestColumns(unittest.TestCase):
+    def test_ctor(self):
+        name = "col-name"
+        type_code = 8
+        display_size = 5
+        internal_size = 10
+        precision = 3
+        scale = None
+        null_ok = False
+
+        cols = ColumnInfo(
+            name,
+            type_code,
+            display_size,
+            internal_size,
+            precision,
+            scale,
+            null_ok,
+        )
+
+        self.assertEqual(cols.name, name)
+        self.assertEqual(cols.type_code, type_code)
+        self.assertEqual(cols.display_size, display_size)
+        self.assertEqual(cols.internal_size, internal_size)
+        self.assertEqual(cols.precision, precision)
+        self.assertEqual(cols.scale, scale)
+        self.assertEqual(cols.null_ok, null_ok)
+        self.assertEqual(
+            cols.fields,
+            (
+                name,
+                type_code,
+                display_size,
+                internal_size,
+                precision,
+                scale,
+                null_ok,
+            ),
+        )
+
+    def test___get_item__(self):
+        fields = ("col-name", 8, 5, 10, 3, None, False)
+        cols = ColumnInfo(*fields)
+
+        for i in range(0, 7):
+            self.assertEqual(cols[i], fields[i])
+
+    def test___str__(self):
+        cols = ColumnInfo("col-name", 8, None, 10, 3, None, False)
+
+        self.assertEqual(
+            str(cols),
+            "ColumnInfo(name='col-name', type_code=8, internal_size=10, precision='3')",
+        )

@@ -10,6 +10,7 @@ import unittest
 from unittest import mock
 
 from google.cloud.spanner_dbapi import connect, InterfaceError
+from google.cloud.spanner_dbapi.cursor import ColumnInfo
 
 
 class TestCursor(unittest.TestCase):

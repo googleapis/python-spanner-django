@@ -18,6 +18,8 @@ from google.cloud.spanner_dbapi.types import (
 )
 from google.cloud.spanner_dbapi.utils import PeekIterator
 
+utcOffset = time.timezone # offset for current timezone
+
 class TypesTests(TestCase):
     def test_Date(self):
         actual = Date(2019, 11, 3)
@@ -37,7 +39,7 @@ class TypesTests(TestCase):
     def test_DateFromTicks(self):
         epochTicks = 1572822862  # Sun Nov 03 23:14:22 2019 GMT
 
-        actual = DateFromTicks(epochTicks)
+        actual = DateFromTicks(epochTicks + utcOffset)
         expected = datetime.date(2019, 11, 3)
 
         self.assertTrue(
@@ -47,7 +49,7 @@ class TypesTests(TestCase):
     def test_TimeFromTicks(self):
         epochTicks = 1572822862  # Sun Nov 03 23:14:22 2019 GMT
 
-        actual = TimeFromTicks(epochTicks)
+        actual = TimeFromTicks(epochTicks + utcOffset)
         expected = datetime.time(23, 14, 22)
 
         self.assertTrue(
@@ -57,7 +59,7 @@ class TypesTests(TestCase):
     def test_TimestampFromTicks(self):
         epochTicks = 1572822862  # Sun Nov 03 23:14:22 2019 GMT
 
-        actual = TimestampFromTicks(epochTicks)
+        actual = TimestampFromTicks(epochTicks + utcOffset)
         expected = datetime.datetime(2019, 11, 3, 23, 14, 22)
 
         self.assertTrue(

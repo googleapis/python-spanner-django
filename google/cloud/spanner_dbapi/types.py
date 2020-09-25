@@ -25,15 +25,15 @@ def Timestamp(year, month, day, hour, minute, second):
 
 
 def DateFromTicks(ticks):
-    return Date(*time.localtime(ticks)[:3])
+    return Date(*time.gmtime(ticks)[:3])
 
 
 def TimeFromTicks(ticks):
-    return Time(*time.localtime(ticks)[3:6])
+    return Time(*time.gmtime(ticks)[3:6])
 
 
 def TimestampFromTicks(ticks):
-    return Timestamp(*time.localtime(ticks)[:6])
+    return Timestamp(*time.gmtime(ticks)[:6])
 
 
 def Binary(string):

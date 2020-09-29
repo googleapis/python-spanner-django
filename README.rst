@@ -99,9 +99,9 @@ Execute a query
     cursor = connection.cursor()
 
     cursor.execute(
-    "SELECT *"
-    "FROM Singers"
-    "WHERE SingerId = 15"
+        "SELECT *"
+        "FROM Singers"
+        "WHERE SingerId = 15"
     )
 
     results = cur.fetchall()

@@ -15,9 +15,11 @@ vers = sys.version_info
 
 
 def google_client_info(user_agent=None):
-    """
-    Return a google.api_core.gapic_v1.client_info.ClientInfo
-    containg the user_agent and python_version for this library
+    """Returns a :class:`google.api_core.gapic_v1.client_info.ClientInfo`
+    containing the user_agent and python_version for this library.
+
+    :rtype: :class:`google.api_core.gapic_v1.client_info.ClientInfo`
+    :return: object with client information
     """
 
     return ClientInfo(

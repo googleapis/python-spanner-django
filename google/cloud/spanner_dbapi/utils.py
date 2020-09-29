@@ -8,8 +8,7 @@ import re
 
 
 class PeekIterator:
-    """
-    PeekIterator peeks at the first element out of an iterator
+    """Peeks at the first element out of an iterator
     for the sake of operations like auto-population of fields on reading
     the first element.
     If next's result is an instance of list, it'll be converted into a tuple
@@ -51,6 +50,12 @@ re_UNICODE_POINTS = re.compile(r"([^\s]*[\u0080-\uFFFF]+[^\s]*)")
 
 
 def backtick_unicode(sql):
+    """Checks sql to be valid and splits it by segments.
+
+    :rtype: str
+    :return: sql parsed by segments in unicode if initial
+             sql is valid, initial string otherwise.
+    """
     matches = list(re_UNICODE_POINTS.finditer(sql))
     if not matches:
         return sql
@@ -71,11 +76,16 @@ def backtick_unicode(sql):
 
 
 def sanitize_literals_for_upload(s):
-    """
-    Convert literals in s, to be fit for consumption by Cloud Spanner.
-    1. Convert %% (escaped percent literals) to %. Percent signs must be escaped when
-    values like %s are used as SQL parameter placeholders but Spanner's query language
-    uses placeholders like @a0 and doesn't expect percent signs to be escaped.
-    2. Quote words containing non-ASCII, with backticks, for example föö to `föö`.
+    """Convert literals in s, to be fit for consumption by Cloud Spanner.
+
+    * Convert %% (escaped percent literals) to %. Percent signs must be escaped
+      when values like %s are used as SQL parameter placeholders but Spanner's query
+      language uses placeholders like @a0 and doesn't expect percent signs to be
+      escaped.
+
+    * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
+
+    :rtype: str
+    :return: sanitized string for upload
     """
     return backtick_unicode(s.replace("%%", "%"))

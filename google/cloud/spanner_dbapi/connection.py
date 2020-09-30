@@ -38,7 +38,8 @@ class Connection:
             raise InterfaceError("connection is already closed")
 
     def __handle_update_ddl(self, ddl_statements):
-        """Run the list of Data Definition Language (DDL) statements on the
+        """
+        Run the list of Data Definition Language (DDL) statements on the
         underlying database. Each DDL statement MUST NOT contain a semicolon.
         Args:
             ddl_statements: a list of DDL statements, each without a semicolon.

@@ -13,39 +13,57 @@ from base64 import b64encode
 
 
 def Date(year, month, day):
+    """This function constructs an object holding a date value."""
     return datetime.date(year, month, day)
 
 
 def Time(hour, minute, second):
+    """This function constructs an object holding a time value."""
     return datetime.time(hour, minute, second)
 
 
 def Timestamp(year, month, day, hour, minute, second):
+    """This function constructs an object holding a time stamp value."""
     return datetime.datetime(year, month, day, hour, minute, second)
 
 
 def DateFromTicks(ticks):
+    """
+    This function constructs an object holding a date value from the given
+    ticks value (number of seconds since the epoch; see
+    https://docs.python.org/3/library/time.html for details).
+    """
     return Date(*time.localtime(ticks)[:3])
 
 
 def TimeFromTicks(ticks):
+    """
+    Constructs an object holding a time value from the given ticks value (
+    number of seconds since the epoch; see the documentation of the standard
+    Python time module for details).
+    """
     return Time(*time.localtime(ticks)[3:6])
 
 
 def TimestampFromTicks(ticks):
+    """
+    Constructs an object holding a time stamp value from the given ticks
+    value (number of seconds since the epoch; see the documentation of the
+    standard Python time module for details).
+    """
     return Timestamp(*time.localtime(ticks)[:6])
 
 
 def Binary(string):
     """
-    Creates an object capable of holding a binary (long) string value.
+    Constructs an object capable of holding a binary (long) string value.
     """
     return b64encode(string)
 
 
 class BINARY:
     """
-    This object describes (long) binary columns in a database (e.g. LONG, RAW, BLOBS).
+    Describes (long) binary columns in a database (e.g. LONG, RAW, BLOBS).
     """
 
     # TODO: Implement me.
@@ -54,7 +72,7 @@ class BINARY:
 
 class STRING:
     """
-    This object describes columns in a database that are string-based (e.g. CHAR).
+    Describes columns in a database that are string-based (e.g. CHAR).
     """
 
     # TODO: Implement me.
@@ -63,7 +81,7 @@ class STRING:
 
 class NUMBER:
     """
-    This object describes numeric columns in a database.
+    Describes numeric columns in a database.
     """
 
     # TODO: Implement me.
@@ -72,7 +90,7 @@ class NUMBER:
 
 class DATETIME:
     """
-    This object describes date/time columns in a database.
+    Describes date/time columns in a database.
     """
 
     # TODO: Implement me.
@@ -81,7 +99,7 @@ class DATETIME:
 
 class ROWID:
     """
-    This object describes the "Row ID" column in a database.
+    Describes the "Row ID" column in a database.
     """
 
     # TODO: Implement me.

@@ -8,9 +8,9 @@ import re
 
 
 class PeekIterator:
-    """Peeks at the first element out of an iterator
-    for the sake of operations like auto-population of fields on reading
-    the first element.
+    """
+    Peeks at the first element out of an iterator for the sake of operations
+    like auto-population of fields on reading the first element.
     If next's result is an instance of list, it'll be converted into a tuple
     to conform with DBAPI v2's sequence expectations.
     """

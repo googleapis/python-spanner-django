@@ -7,22 +7,37 @@
 """Connection() class unit tests."""
 
 import unittest
-from unittest import mock
 
-from google.cloud.spanner_dbapi import connect, InterfaceError
+# import google.cloud.spanner_dbapi.exceptions as dbapi_exceptions
+
+from google.cloud.spanner_dbapi import Connection, InterfaceError, Warning
+from google.cloud.spanner_v1.database import Database
+from google.cloud.spanner_v1.instance import Instance
 
 
 class TestConnection(unittest.TestCase):
+    instance_name = "instance-name"
+    database_name = "database-name"
+
+    def _make_connection(self):
+        # we don't need real Client object to test the constructor
+        instance = Instance(self.instance_name, client=None)
+        database = instance.database(self.database_name)
+        return Connection(instance, database)
+
+    def test_ctor(self):
+        connection = self._make_connection()
+
+        self.assertIsInstance(connection.instance, Instance)
+        self.assertEqual(connection.instance.instance_id, self.instance_name)
+
+        self.assertIsInstance(connection.database, Database)
+        self.assertEqual(connection.database.database_id, self.database_name)
+
+        self.assertFalse(connection.is_closed)
+
     def test_close(self):
-        with mock.patch(
-            "google.cloud.spanner_v1.instance.Instance.exists",
-            return_value=True,
-        ):
-            with mock.patch(
-                "google.cloud.spanner_v1.database.Database.exists",
-                return_value=True,
-            ):
-                connection = connect("test-instance", "test-database")
+        connection = self._make_connection()
 
         self.assertFalse(connection.is_closed)
         connection.close()
@@ -30,3 +45,12 @@ class TestConnection(unittest.TestCase):
 
         with self.assertRaises(InterfaceError):
             connection.cursor()
+
+    def test_transaction_management_warnings(self):
+        connection = self._make_connection()
+
+        with self.assertRaises(Warning):
+            connection.commit()
+
+        with self.assertRaises(Warning):
+            connection.rollback()

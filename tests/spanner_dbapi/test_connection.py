@@ -11,7 +11,7 @@ from unittest import mock
 
 # import google.cloud.spanner_dbapi.exceptions as dbapi_exceptions
 
-from google.cloud.spanner_dbapi import Connection, InterfaceError, Warning
+from google.cloud.spanner_dbapi import Connection, InterfaceError
 from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 from google.cloud.spanner_v1.database import Database
 from google.cloud.spanner_v1.instance import Instance

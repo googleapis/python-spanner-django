@@ -12,7 +12,7 @@ import warnings
 from google.cloud import spanner_v1
 
 from .cursor import Cursor
-from .exceptions import InterfaceError, Warning
+from .exceptions import InterfaceError
 
 AUTOCOMMIT_MODE_WARNING = (
     "This method is non-operational, as Cloud Spanner"

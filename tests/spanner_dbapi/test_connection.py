@@ -7,10 +7,12 @@
 """Connection() class unit tests."""
 
 import unittest
+from unittest import mock
 
 # import google.cloud.spanner_dbapi.exceptions as dbapi_exceptions
 
 from google.cloud.spanner_dbapi import Connection, InterfaceError, Warning
+from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 from google.cloud.spanner_v1.database import Database
 from google.cloud.spanner_v1.instance import Instance
 
@@ -46,11 +48,15 @@ class TestConnection(unittest.TestCase):
         with self.assertRaises(InterfaceError):
             connection.cursor()
 
-    def test_transaction_management_warnings(self):
+    @mock.patch("warnings.warn")
+    def test_transaction_management_warnings(self, warn_mock):
         connection = self._make_connection()
 
-        with self.assertRaises(Warning):
-            connection.commit()
-
-        with self.assertRaises(Warning):
-            connection.rollback()
+        connection.commit()
+        warn_mock.assert_called_with(
+            AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2
+        )
+        connection.rollback()
+        warn_mock.assert_called_with(
+            AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2
+        )

@@ -7,11 +7,18 @@
 """Cloud Spanner DB connection object."""
 
 from collections import namedtuple
+import warnings
 
 from google.cloud import spanner_v1
 
 from .cursor import Cursor
 from .exceptions import InterfaceError, Warning
+
+AUTOCOMMIT_MODE_WARNING = (
+    "This method is non-operational, as Cloud Spanner"
+    "DB API always works in `autocommit` mode."
+    "See https://github.com/googleapis/python-spanner-django#transaction-management-isnt-supported"
+)
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
@@ -142,17 +149,11 @@ class Connection:
 
     def commit(self):
         """Commit all the pending transactions."""
-        raise Warning(
-            "Cloud Spanner DB API always works in `autocommit` mode."
-            "See https://github.com/googleapis/python-spanner-django#transaction-management-isnt-supported"
-        )
+        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
 
     def rollback(self):
         """Rollback all the pending transactions."""
-        raise Warning(
-            "Cloud Spanner DB API always works in `autocommit` mode."
-            "See https://github.com/googleapis/python-spanner-django#transaction-management-isnt-supported"
-        )
+        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
 
     def __enter__(self):
         return self

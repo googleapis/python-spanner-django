@@ -18,7 +18,7 @@ from google.cloud.spanner_dbapi.types import (
 )
 from google.cloud.spanner_dbapi.utils import PeekIterator
 
-utcOffset = time.timezone # offset for current timezone
+utcOffset = time.timezone  # offset for current timezone
 
 class TypesTests(TestCase):
     def test_Date(self):
@@ -42,9 +42,7 @@ class TypesTests(TestCase):
         actual = DateFromTicks(epochTicks + utcOffset)
         expected = datetime.date(2019, 11, 3)
 
-        self.assertTrue(
-            actual == expected, "`%s` doesn't match\n`%s`" % (actual, expected)
-        )
+        self.assertEqual(actual, expected, "mismatch between conversion")
 
     def test_TimeFromTicks(self):
         epochTicks = 1572822862  # Sun Nov 03 23:14:22 2019 GMT
@@ -52,9 +50,7 @@ class TypesTests(TestCase):
         actual = TimeFromTicks(epochTicks + utcOffset)
         expected = datetime.time(23, 14, 22)
 
-        self.assertTrue(
-            actual == expected, "`%s` doesn't match\n`%s`" % (actual, expected)
-        )
+        self.assertEqual(actual, expected, "mismatch between conversion")
 
     def test_TimestampFromTicks(self):
         epochTicks = 1572822862  # Sun Nov 03 23:14:22 2019 GMT
@@ -62,9 +58,7 @@ class TypesTests(TestCase):
         actual = TimestampFromTicks(epochTicks + utcOffset)
         expected = datetime.datetime(2019, 11, 3, 23, 14, 22)
 
-        self.assertTrue(
-            actual == expected, "`%s` doesn't match\n`%s`" % (actual, expected)
-        )
+        self.assertEqual(actual, expected, "mismatch between conversion")
 
     def test_PeekIterator(self):
         cases = [

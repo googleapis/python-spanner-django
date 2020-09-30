@@ -43,7 +43,3 @@ class TypesTests(TestCase):
         self.assertEqual(types.DATETIME, "TIMESTAMP")
         self.assertEqual(types.DATETIME, "DATE")
         self.assertNotEqual(types.DATETIME, "STRING")
-
-        self.assertNotEqual("STRING", types.BINARY)
-        self.assertEqual(types.Binary(u"hello"), b"hello")
-        self.assertEqual(types.Binary(u"\u1f60"), u"\u1f60".encode("utf-8"))

@@ -12,6 +12,7 @@
 """
 
 import datetime
+from base64 import b64encode
 
 
 def _time_from_ticks(ticks, tz=None):
@@ -27,19 +28,6 @@ def _time_from_ticks(ticks, tz=None):
     :returns: The corresponding time value.
     """
     return datetime.datetime.fromtimestamp(ticks, tz=tz).timetz()
-
-
-def _binary(string):
-    """A helper method used to construct an object capable of
-    holding a binary (long) string value.
-
-    :type string: str
-    :param string: A string to encode as binary bytes.
-
-    :rtype: bytes
-    :returns: The UTF-8 encoded representation of the string.
-    """
-    return string.encode("utf-8")
 
 
 class _DBAPITypeObject(object):
@@ -63,7 +51,7 @@ Timestamp = datetime.datetime
 DateFromTicks = datetime.date.fromtimestamp
 TimeFromTicks = _time_from_ticks
 TimestampFromTicks = datetime.datetime.fromtimestamp
-Binary = _binary
+Binary = b64encode
 
 STRING = "STRING"
 BINARY = _DBAPITypeObject("TYPE_CODE_UNSPECIFIED", "BYTES", "ARRAY", "STRUCT")

@@ -5,93 +5,45 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 import datetime
+import time
 from unittest import TestCase
 
-from google.cloud.spanner_dbapi.types import (
-    Date,
-    DateFromTicks,
-    Time,
-    TimeFromTicks,
-    Timestamp,
-    TimestampFromTicks,
-)
-from google.cloud.spanner_dbapi.utils import PeekIterator
+from google.cloud._helpers import UTC
+from google.cloud.spanner_dbapi import types
 
-tzUTC = 0  # 0 hours offset from UTC
+
+utcOffset = time.timezone  # offset for current timezone
 
 
 class TypesTests(TestCase):
-    def test_Date(self):
-        got = Date(2019, 11, 3)
-        want = datetime.date(2019, 11, 3)
-        self.assertEqual(got, want, "mismatch between conversion")
+    def test__time_from_ticks(self):
+        ticks = 1572822862.9782631  # Sun 03 Nov 2019 23:14:22 UTC
+        timezone = UTC
 
-    def test_Time(self):
-        got = Time(23, 8, 19)
-        want = datetime.time(23, 8, 19)
-        self.assertEqual(got, want, "mismatch between conversion")
+        actual = types.TimeFromTicks(ticks, tz=timezone)
+        expected = datetime.datetime.fromtimestamp(ticks, tz=timezone).timetz()
 
-    def test_Timestamp(self):
-        got = Timestamp(2019, 11, 3, 23, 8, 19)
-        want = datetime.datetime(2019, 11, 3, 23, 8, 19)
-        self.assertEqual(got, want, "mismatch between conversion")
-
-    def test_DateFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
-        got = DateFromTicks(epochTicks)
-        # Since continuous integration infrastructure such as Travis CI
-        # uses clocks on UTC, it is useful to be able to compare against
-        # either of UTC or the known standard time.
-        want = (
-            datetime.date(2019, 11, 3),
-            datetime.datetime(2019, 11, 4, tzUTC).date(),
-        )
-        matches = got in want
         self.assertTrue(
-            matches, "`%s` not present in any of\n`%s`" % (got, want)
+            actual == expected, "`%s` doesn't match\n`%s`" % (actual, expected)
         )
 
-    def test_TimeFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
-        got = TimeFromTicks(epochTicks)
-        # Since continuous integration infrastructure such as Travis CI
-        # uses clocks on UTC, it is useful to be able to compare against
-        # either of UTC or the known standard time.
-        want = (
-            datetime.time(23, 14, 22),
-            datetime.datetime(2019, 11, 4, 7, 14, 22, tzUTC).time(),
-        )
-        matches = got in want
-        self.assertTrue(
-            matches, "`%s` not present in any of\n`%s`" % (got, want)
-        )
+    def test_type_equal(self):
+        self.assertEqual(types.BINARY, "TYPE_CODE_UNSPECIFIED")
+        self.assertEqual(types.BINARY, "BYTES")
+        self.assertEqual(types.BINARY, "ARRAY")
+        self.assertEqual(types.BINARY, "STRUCT")
+        self.assertNotEqual(types.BINARY, "STRING")
 
-    def test_TimestampFromTicks(self):
-        epochTicks = 1572851662.9782631  # Sun Nov 03 23:14:22 2019
-        got = TimestampFromTicks(epochTicks)
-        # Since continuous integration infrastructure such as Travis CI
-        # uses clocks on UTC, it is useful to be able to compare against
-        # either of UTC or the known standard time.
-        want = (
-            datetime.datetime(2019, 11, 3, 23, 14, 22),
-            datetime.datetime(2019, 11, 4, 7, 14, 22, tzUTC),
-        )
-        matches = got in want
-        self.assertTrue(
-            matches, "`%s` not present in any of\n`%s`" % (got, want)
-        )
+        self.assertEqual(types.NUMBER, "BOOL")
+        self.assertEqual(types.NUMBER, "INT64")
+        self.assertEqual(types.NUMBER, "FLOAT64")
+        self.assertEqual(types.NUMBER, "NUMERIC")
+        self.assertNotEqual(types.NUMBER, "STRING")
 
-    def test_PeekIterator(self):
-        cases = [
-            ("list", [1, 2, 3, 4, 6, 7], [1, 2, 3, 4, 6, 7]),
-            ("iter_from_list", iter([1, 2, 3, 4, 6, 7]), [1, 2, 3, 4, 6, 7]),
-            ("tuple", ("a", 12, 0xFF), ["a", 12, 0xFF]),
-            ("iter_from_tuple", iter(("a", 12, 0xFF)), ["a", 12, 0xFF]),
-            ("no_args", (), []),
-        ]
+        self.assertEqual(types.DATETIME, "TIMESTAMP")
+        self.assertEqual(types.DATETIME, "DATE")
+        self.assertNotEqual(types.DATETIME, "STRING")
 
-        for name, data_in, want in cases:
-            with self.subTest(name=name):
-                pitr = PeekIterator(data_in)
-                got = list(pitr)
-                self.assertEqual(got, want)
+        self.assertNotEqual("STRING", types.BINARY)
+        self.assertEqual(types.Binary(u"hello"), b"hello")
+        self.assertEqual(types.Binary(u"\u1f60"), u"\u1f60".encode("utf-8"))

@@ -54,8 +54,7 @@ code_to_display_size = {
 
 
 class Cursor:
-    """
-    Database cursor to manage the context of a fetch operation.
+    """Database cursor to manage the context of a fetch operation.
 
     :type connection: :class:`spanner_dbapi.connection.Connection`
     :param connection: Parent connection object for this Cursor.
@@ -72,14 +71,20 @@ class Cursor:
         self.arraysize = 1
 
     def execute(self, sql, args=None):
-        """
-        Abstracts and implements execute SQL statements on Cloud Spanner.
-        Args:
-            sql: A SQL statement
-            *args: variadic argument list
-            **kwargs: key worded arguments
-        Returns:
-            None
+        """Abstracts and implements execute SQL statements on Cloud Spanner.
+
+        :param sql: A SQL statement
+        :type sql: str
+
+        :param *args: (Optional) variadic argument list
+        :type *args: list
+
+        :param **kwargs: (Optional) key worded arguments
+        :type **kwargs: list
+
+        :raises: :class:`IntegrityError` if precondition failed or argument
+        already exists, :class:`ProgrammingError` if there is invalid argument,
+        :class:`OperationalError` if there is internal server error.
         """
         self._raise_if_closed()
 
@@ -215,6 +220,11 @@ class Cursor:
 
     @property
     def description(self):
+        """Gives description of the table.
+
+        :rtype: tuple
+        :returns: tuple of columns' information.
+        """
         if not (self._res and self._res.metadata):
             return None
 
@@ -235,13 +245,18 @@ class Cursor:
 
     @property
     def rowcount(self):
+        """Returns number of rows in the table.
+
+        :rtype: int
+        :returns: number of rows
+        """
         return self._row_count
 
     @property
     def is_closed(self):
         """The cursor close indicator.
 
-        :rtype: :class:`bool`
+        :rtype: bool
         :returns: True if this cursor or it's parent connection is closed, False
                   otherwise.
         """
@@ -268,6 +283,17 @@ class Cursor:
         self._is_closed = True
 
     def executemany(self, operation, seq_of_params):
+        """Executes a sequence of params.
+
+        :param operation: sql operation
+        :type operation: str
+
+        :param seq_of_params: sequence of parameters
+        :type seq_of_params: list
+
+        :raises: :class:`ProgrammingError` if cursor is not connected to
+                 database.
+        """
         if not self._connection:
             raise ProgrammingError("Cursor is not connected to the database")
 
@@ -285,6 +311,10 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
+        """Tries to fetch next element.
+
+        :returns: next element if it is possible, None otherwise.
+        """
         self._raise_if_closed()
 
         try:
@@ -293,6 +323,11 @@ class Cursor:
             return None
 
     def fetchall(self):
+        """Fetches all elements.
+
+        :rtype: list
+        :returns: list of fetched elements
+        """
         self._raise_if_closed()
 
         return list(self.__iter__())
@@ -302,13 +337,12 @@ class Cursor:
         Fetch the next set of rows of a query result, returning a sequence of sequences.
         An empty sequence is returned when no more rows are available.
 
-        Args:
-            size: optional integer to determine the maximum number of results to fetch.
+        :param size: (Optional) maximum number of results to fetch.
+        :type size: int
 
 
-        Raises:
-            Error if the previous call to .execute*() did not produce any result set
-            or if no call was issued yet.
+        :raises: an error if the previous call to .execute*() did not produce
+                 any result set or if no call was issued yet.
         """
         self._raise_if_closed()
 
@@ -338,16 +372,60 @@ class Cursor:
         return self._connection.run_prior_DDL_statements()
 
     def list_tables(self):
+        """Lists tables.
+
+        :rtype: str
+        :returns: tables with theirs' corresponding information.
+        """
         return self._connection.list_tables()
 
     def run_sql_in_snapshot(self, sql):
+        """Runs SQL in snapshot.
+
+        :param sql: sql request
+        :type sql: str
+
+        :rtype: list
+        :returns: result of operation
+        """
         return self._connection.run_sql_in_snapshot(sql)
 
     def get_table_column_schema(self, table_name):
+        """Gets table column schema.
+
+        :param table_name: name of the table
+        :type table_name: str
+
+        :rtype: dict
+        :returns: dictionary of table column schema
+        """
         return self._connection.get_table_column_schema(table_name)
 
 
 class Column:
+    """Object defines column of the table.
+
+    :param name: name of the column.
+    :type name: str
+
+    :param type_code: code of the value type
+    :type type_code: int
+
+    :param display_size: (Optional) Display size. Default is None.
+    :type display_size: int
+
+    :param internal_size: (Optional) Internal size. Default is None.
+    :type internal_size: int
+
+    :param precision: (Optional) Number of significant digits. Default is None.
+    :type precision: int
+
+    :param scale: (Optional) Scale. Default is None.
+    :type scale: float
+
+    :param null_ok: (Optional) Allows column value to be None. Default is False.
+    :type null_ok: bool
+    """
     def __init__(
         self,
         name,

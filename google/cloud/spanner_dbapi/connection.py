@@ -15,6 +15,11 @@ ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
 class Connection:
+    """A wrap-around object for the existing :class:`Database` and the corresponding :class:`Instance` objects
+
+    :type is_closed: bool
+    :param is_closed: (Optional) Flag of the connection state (open/closed). Default is False.
+    """
     def __init__(self, db_handle):
         self._dbhandle = db_handle
         self._ddl_statements = []
@@ -22,6 +27,11 @@ class Connection:
         self.is_closed = False
 
     def cursor(self):
+        """Checks connection is open and returns :class:`Cursor` object.
+
+        :rtype: :class:`Cursor`
+        :returns: :class:`Cursor` object.
+        """
         self._raise_if_closed()
 
         return Cursor(self)
@@ -41,28 +51,46 @@ class Connection:
         """
         Run the list of Data Definition Language (DDL) statements on the underlying
         database. Each DDL statement MUST NOT contain a semicolon.
-        Args:
-            ddl_statements: a list of DDL statements, each without a semicolon.
-        Returns:
-            google.api_core.operation.Operation.result()
+
+        :param ddl_statements: a list of DDL statements, each without a semicolon.
+        :type ddl_statements: list
+
+        :rtype: :func:`google.api_core.operation.Operation.result()`
+        :returns: result of the operation
         """
         self._raise_if_closed()
         # Synchronously wait on the operation's completion.
         return self._dbhandle.update_ddl(ddl_statements).result()
 
     def read_snapshot(self):
+        """Returns Data Base snapshot if connection is open.
+
+        :rtype: :class:`Snapshot`
+        :returns: database snapshot.
+        """
         self._raise_if_closed()
         return self._dbhandle.snapshot()
 
     def in_transaction(self, fn, *args, **kwargs):
+        """Runs :func:`spanner_v1.Database.run_in_transaction` inside open connection.
+
+        :rtype: Any
+        :returns: result of transaction running.
+        """
         self._raise_if_closed()
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
+        """Appends DDL statement."""
         self._raise_if_closed()
         self._ddl_statements.append(ddl_statement)
 
     def run_prior_DDL_statements(self):
+        """Runs prior DDL statements.
+
+        :rtype: :func:`__handle_update_ddl()`
+        :returns: updated statements.
+        """
         self._raise_if_closed()
 
         if not self._ddl_statements:
@@ -74,6 +102,11 @@ class Connection:
         return self.__handle_update_ddl(ddl_statements)
 
     def list_tables(self):
+        """Lists all existing tables.
+
+        :rtype: str
+        :returns: tables with corresponding information.
+        """
         return self.run_sql_in_snapshot(
             """
             SELECT
@@ -86,6 +119,20 @@ class Connection:
         )
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
+        """Runs SQL request in snapshot.
+
+        :param sql: SQL request
+        :type sql: str
+
+        :param params: (Optional) List of parameters.
+        :type params: list
+
+        :param param_types: (Optional) List of parameters' types.
+        :type param_types: list
+
+        :rtype: list
+        :returns: list of running results
+        """
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
         # hence this method exists to circumvent that limit.
         self.run_prior_DDL_statements()
@@ -97,6 +144,14 @@ class Connection:
             return list(res)
 
     def get_table_column_schema(self, table_name):
+        """Gets table column schema.
+
+        :param table_name: name of the table.
+        :type table_name: str
+
+        :rtype: dict
+        :returns: column details
+        """
         rows = self.run_sql_in_snapshot(
             """SELECT
                 COLUMN_NAME, IS_NULLABLE, SPANNER_TYPE
@@ -120,13 +175,14 @@ class Connection:
     def close(self):
         """Close this connection.
 
-        The connection will be unusable from this point forward.
+        :note: The connection will be unusable from this point forward.
         """
         self.rollback()
         self.__dbhandle = None
         self.is_closed = True
 
     def commit(self):
+        """Runs :func:`run_prior_DDL_statements()` if connection is open."""
         self._raise_if_closed()
 
         self.run_prior_DDL_statements()

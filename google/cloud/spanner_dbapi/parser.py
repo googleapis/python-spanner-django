@@ -61,9 +61,7 @@ class func:
 
 
 class terminal(str):
-    """
-    terminal represents the unit symbol that can be part of a SQL values clause.
-    """
+    """Represents the unit symbol that can be part of a SQL values clause."""
 
     pass
 
@@ -105,9 +103,11 @@ class a_args:
         return self.argv[index]
 
     def homogenous(self):
-        """
-        Return True if all the arguments are pyformat
-        args and have the same number of arguments.
+        """Checks arguments to be homogenous.
+
+        :rtype: bool
+        :return: True if all arguments are in pyformat and have the same number
+                 of arguments, False otherwise
         """
         if not self.all_have_same_argc():
             return False
@@ -123,8 +123,10 @@ class a_args:
         return True
 
     def all_have_same_argc(self):
-        """
-        Return False if all the arguments have the same length.
+        """Checks arguments' length.
+
+        :rtype: bool
+        :return: False if all arguments have the same length.
         """
         if len(self) == 0:
             return True
@@ -142,14 +144,23 @@ class values(a_args):
         return "VALUES%s" % super().__str__()
 
 
-def parse_values(stmt):
-    return expect(stmt, VALUES)
-
-
 pyfmt_str = terminal("%s")
 
 
 def expect(word, token):
+    """Parses given expression recursively.
+
+    :param word: str
+    :type word: string expression
+
+    :param token: str
+    :type token: expression token
+
+    :rtype: (str, Any)
+    :returns: tuple of the rest expression string and tree of already parsed
+              expression.
+    :raises: :class:`ProgrammingError` if there is parsing error.
+    """
     word = word.strip(" ")
     if token == VALUES:
         if not word.startswith("VALUES"):
@@ -256,5 +267,6 @@ def expect(word, token):
 
 
 def as_values(values_stmt):
-    _, values = parse_values(values_stmt)
+    """Returns parsed values."""
+    _, values = expect(values_stmt, VALUES)
     return values

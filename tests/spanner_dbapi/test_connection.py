@@ -12,7 +12,7 @@ from unittest import mock
 
 class TestConnection(unittest.TestCase):
     def setUp(self):
-        from spanner_dbapi.connection import Connection
+        from google.cloud.spanner_dbapi.connection import Connection
 
         with mock.patch(
             "google.cloud.spanner_v1.database.Database"
@@ -23,7 +23,7 @@ class TestConnection(unittest.TestCase):
                 self.connection = Connection(database_mock, instance_mock)
 
     def test_connection_close_check(self):
-        from spanner_dbapi.exceptions import InterfaceError
+        from google.cloud.spanner_dbapi.exceptions import InterfaceError
 
         self.connection.close()
         with self.assertRaises(InterfaceError):
@@ -59,20 +59,20 @@ class TestConnection(unittest.TestCase):
         self.assertTrue(self.connection._transaction_started)
 
     def test_cursor(self):
-        from spanner_dbapi.cursor import Cursor
+        from google.cloud.spanner_dbapi.cursor import Cursor
 
         cursor = self.connection.cursor()
         self.assertIsInstance(cursor, Cursor)
         self.assertEqual(self.connection, cursor._connection)
 
     def test_commit(self):
-        from spanner_dbapi.exceptions import Warning
+        from google.cloud.spanner_dbapi.exceptions import Warning
 
         with self.assertRaises(Warning):
             self.connection.commit()
 
     def test_rollback(self):
-        from spanner_dbapi.exceptions import Warning
+        from google.cloud.spanner_dbapi.exceptions import Warning
 
         with self.assertRaises(Warning):
             self.connection.rollback()

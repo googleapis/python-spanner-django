@@ -5,27 +5,33 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 import datetime
-import time
+from time import timezone
 from unittest import TestCase
 
-from google.cloud._helpers import UTC
 from google.cloud.spanner_dbapi import types
 
 
-utcOffset = time.timezone  # offset for current timezone
-
-
 class TypesTests(TestCase):
+
+    TICKS = 1572822862.9782631 + timezone  # Sun 03 Nov 2019 23:14:22 UTC
+
+    def test__date_from_ticks(self):
+        actual = types._date_from_ticks(self.TICKS)
+        expected = datetime.date(2019, 11, 3)
+
+        self.assertEqual(actual, expected)
+
     def test__time_from_ticks(self):
-        ticks = 1572822862.9782631  # Sun 03 Nov 2019 23:14:22 UTC
-        timezone = UTC
+        actual = types._time_from_ticks(self.TICKS)
+        expected = datetime.time(23, 14, 22)
 
-        actual = types.TimeFromTicks(ticks, tz=timezone)
-        expected = datetime.datetime.fromtimestamp(ticks, tz=timezone).timetz()
+        self.assertEqual(actual, expected)
 
-        self.assertTrue(
-            actual == expected, "`%s` doesn't match\n`%s`" % (actual, expected)
-        )
+    def test__timestamp_from_ticks(self):
+        actual = types._timestamp_from_ticks(self.TICKS)
+        expected = datetime.datetime(2019, 11, 3, 23, 14, 22)
+
+        self.assertEqual(actual, expected)
 
     def test_type_equal(self):
         self.assertEqual(types.BINARY, "TYPE_CODE_UNSPECIFIED")

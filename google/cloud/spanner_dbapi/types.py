@@ -12,22 +12,32 @@
 """
 
 import datetime
+import time
 from base64 import b64encode
 
 
-def _time_from_ticks(ticks, tz=None):
-    """A helper method used to construct a DB-API time value.
+def _date_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
 
-    :type ticks: float
-    :param ticks: The number of seconds passed since the epoch.
-
-    :type tz: :class:`datetime.tzinfo`
-    :param tz: (Optional) The timezone information to use for conversion.
-
-    :rtype: :class:`datetime.time`
-    :returns: The corresponding time value.
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
-    return datetime.datetime.fromtimestamp(ticks, tz=tz).timetz()
+    return Date(*time.localtime(ticks)[:3])
+
+
+def _time_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
+
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
+    """
+    return Time(*time.localtime(ticks)[3:6])
+
+
+def _timestamp_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
+
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
+    """
+    return Timestamp(*time.localtime(ticks)[:6])
 
 
 class _DBAPITypeObject(object):
@@ -48,9 +58,9 @@ class _DBAPITypeObject(object):
 Date = datetime.date
 Time = datetime.time
 Timestamp = datetime.datetime
-DateFromTicks = datetime.date.fromtimestamp
+DateFromTicks = _date_from_ticks
 TimeFromTicks = _time_from_ticks
-TimestampFromTicks = datetime.datetime.fromtimestamp
+TimestampFromTicks = _timestamp_from_ticks
 Binary = b64encode
 
 STRING = "STRING"

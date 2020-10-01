@@ -9,10 +9,12 @@ import decimal
 from unittest import TestCase
 
 from google.cloud.spanner_v1 import param_types
-from spanner_dbapi.exceptions import Error, ProgrammingError
-from spanner_dbapi.parse_utils import (
+from google.cloud.spanner_dbapi.exceptions import Error, ProgrammingError
+from google.cloud.spanner_dbapi.parse_utils import (
     STMT_DDL,
+    STMT_INSERT,
     STMT_NON_UPDATING,
+    STMT_UPDATING,
     DateStr,
     TimestampStr,
     classify_stmt,
@@ -22,14 +24,13 @@ from spanner_dbapi.parse_utils import (
     parse_insert,
     rows_for_insert_or_update,
     sql_pyformat_args_to_spanner,
-    strip_backticks,
 )
-from spanner_dbapi.utils import backtick_unicode
+from google.cloud.spanner_dbapi.utils import backtick_unicode
 
 
 class ParseUtilsTests(TestCase):
     def test_classify_stmt(self):
-        cases = [
+        cases = (
             ("SELECT 1", STMT_NON_UPDATING),
             ("SELECT s.SongName FROM Songs AS s", STMT_NON_UPDATING),
             (
@@ -51,16 +52,12 @@ class ParseUtilsTests(TestCase):
                 "CREATE INDEX AlbumsByAlbumTitle2 ON Albums(AlbumTitle) STORING (MarketingBudget)",
                 STMT_DDL,
             ),
-        ]
+            ("INSERT INTO table (col1) VALUES (1)", STMT_INSERT),
+            ("UPDATE table SET col1 = 1 WHERE col1 = NULL", STMT_UPDATING),
+        )
 
-        for tt in cases:
-            sql, want_classification = tt
-            got_classification = classify_stmt(sql)
-            self.assertEqual(
-                got_classification,
-                want_classification,
-                "Classification mismatch",
-            )
+        for query, want_class in cases:
+            self.assertEqual(classify_stmt(query), want_class)
 
     def test_parse_insert(self):
         cases = [
@@ -489,13 +486,6 @@ class ParseUtilsTests(TestCase):
         for name, want in cases:
             with self.subTest(name=name):
                 got = escape_name(name)
-                self.assertEqual(got, want)
-
-    def test_strip_backticks(self):
-        cases = [("foo", "foo"), ("`foo`", "foo")]
-        for name, want in cases:
-            with self.subTest(name=name):
-                got = strip_backticks(name)
                 self.assertEqual(got, want)
 
     def test_backtick_unicode(self):

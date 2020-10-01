@@ -57,10 +57,10 @@ RE_PYFORMAT = re.compile(r"(%s|%\([^\(\)]+\)s)+", re.DOTALL)
 def classify_stmt(query):
     """Determine SQL query type.
 
-    :type query: :class:`str`
+    :type query: str
     :param query: SQL query.
 
-    :rtype: :class:`str`
+    :rtype: str
     :returns: Query type name.
     """
     if RE_DDL.match(query):
@@ -79,7 +79,7 @@ def classify_stmt(query):
 
 def parse_insert(insert_sql, params):
     """
-    Parse an INSERT statement an generate a list of tuples of the form:
+    Parses an INSERT statement an generate a list of tuples of the form:
         [
             (SQL, params_per_row1),
             (SQL, params_per_row2),
@@ -134,6 +134,15 @@ def parse_insert(insert_sql, params):
                     ('INSERT INTO T (f1, f2) VALUES (UPPER(%s), %s)', ('c', 'd',))
                 ],
             }
+            
+    :param insert_sql: initial sql request
+    :type insert_sql: str
+    
+    :param params: list of parameters
+    :type params: list
+    
+    :rtype: dict
+    :returns: dictionary of name to list of parameters
     """  # noqa
     match = RE_INSERT.search(insert_sql)
 
@@ -215,7 +224,7 @@ def parse_insert(insert_sql, params):
 
 def rows_for_insert_or_update(columns, params, pyformat_args=None):
     """
-    Create a tupled list of params to be used as a single value per
+    Creates a tupled list of params to be used as a single value per
     value that inserted from a statement such as
         SQL:        'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s)'
         Params A:   [(1, 2, 3), (4, 5, 6), (7, 8, 9)]
@@ -223,6 +232,15 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
 
     We'll have to convert both params types into:
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
+        
+    :param columns:
+    :type columns:
+    
+    :param params: 
+    :type params:
+    
+    :rtype: list
+    :returns: list of tuples of parameters
     """  # noqa
 
     if not pyformat_args:
@@ -320,6 +338,15 @@ def sql_pyformat_args_to_spanner(sql, params):
     becomes:
         SQL:      'SELECT * from t where f1=@a0, f2=@a1, f3=@a2'
         Params:   {'a0': 'a', 'a1': 23, 'a2': '888***'}
+
+    :param sql: initial sql request
+    :type sql: str
+
+    :param params: list of parameters
+    :type params: list
+
+    :rtype: (str, dict)
+    :returns: tuple of sanitized sql anddictionary of named arguments
     """
     if not params:
         return sanitize_literals_for_upload(sql), params
@@ -360,7 +387,14 @@ def sql_pyformat_args_to_spanner(sql, params):
 
 
 def cast_for_spanner(param):
-    """Convert param to its Cloud Spanner equivalent type."""
+    """Convert param to its Cloud Spanner equivalent type.
+
+    :param param: Django type parameter
+    :type param: Any
+
+    :rtype: Any
+    :returns: Cloud spanner equivalent type
+    """
     if isinstance(param, decimal.Decimal):
         return float(param)
     else:
@@ -369,7 +403,15 @@ def cast_for_spanner(param):
 
 def get_param_types(params):
     """
-    Return a dictionary of spanner.param_types for a dictionary of parameters.
+    Returns a dictionary of :class:`spanner.param_types` for a dictionary of
+    parameters.
+
+    :param params: dictionary of Django parameters.
+    :type params: dict
+
+    :rtype: dict
+    :returns: None if params are empty, dictionary of
+              :class:`spanner.param_types` otherwise.
     """
     if params is None:
         return None
@@ -396,6 +438,12 @@ def ensure_where_clause(sql):
     """
     Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
     Add a dummy WHERE clause if necessary.
+
+    :param sql: sql request
+    :type sql: str
+
+    :rtype: str
+    :returns: sql request with dummy WHERE clause if necessary.
     """
     if any(
         isinstance(token, sqlparse.sql.Where)
@@ -509,6 +557,12 @@ def escape_name(name):
     """
     Escape name by applying backticks to value that either
     contain '-' or are any of Cloud Spanner's reserved keywords.
+
+    :param name: name of the token
+    :type name: str
+
+    :rtype: str
+    :returns: name with applied backticks
     """
     if "-" in name or " " in name or name.upper() in SPANNER_RESERVED_KEYWORDS:
         return "`" + name + "`"

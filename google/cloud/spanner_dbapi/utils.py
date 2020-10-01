@@ -53,7 +53,7 @@ def backtick_unicode(sql):
     """Checks sql to be valid and splits it by segments.
 
     :rtype: str
-    :return: sql parsed by segments in unicode if initial
+    :returns: sql parsed by segments in unicode if initial
              sql is valid, initial string otherwise.
     """
     matches = list(re_UNICODE_POINTS.finditer(sql))
@@ -86,6 +86,6 @@ def sanitize_literals_for_upload(s):
     * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
 
     :rtype: str
-    :return: sanitized string for upload
+    :returns: sanitized string for upload
     """
     return backtick_unicode(s.replace("%%", "%"))

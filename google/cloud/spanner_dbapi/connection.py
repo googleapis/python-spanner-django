@@ -20,6 +20,7 @@ class Connection:
     :type is_closed: bool
     :param is_closed: (Optional) Flag of the connection state (open/closed). Default is False.
     """
+
     def __init__(self, db_handle):
         self._dbhandle = db_handle
         self._ddl_statements = []
@@ -52,8 +53,8 @@ class Connection:
         Run the list of Data Definition Language (DDL) statements on the underlying
         database. Each DDL statement MUST NOT contain a semicolon.
 
-        :param ddl_statements: a list of DDL statements, each without a semicolon.
         :type ddl_statements: list
+        :param ddl_statements: a list of DDL statements, each without a semicolon.
 
         :rtype: :func:`google.api_core.operation.Operation.result()`
         :returns: result of the operation
@@ -121,14 +122,14 @@ class Connection:
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
         """Runs SQL request in snapshot.
 
-        :param sql: SQL request
         :type sql: str
+        :param sql: SQL request
 
-        :param params: (Optional) List of parameters.
         :type params: list
+        :param params: (Optional) List of parameters.
 
-        :param param_types: (Optional) List of parameters' types.
         :type param_types: list
+        :param param_types: (Optional) List of parameters' types.
 
         :rtype: list
         :returns: list of running results
@@ -146,8 +147,8 @@ class Connection:
     def get_table_column_schema(self, table_name):
         """Gets table column schema.
 
-        :param table_name: name of the table.
         :type table_name: str
+        :param table_name: name of the table.
 
         :rtype: dict
         :returns: column details
@@ -175,7 +176,7 @@ class Connection:
     def close(self):
         """Close this connection.
 
-        :note: The connection will be unusable from this point forward.
+        .. note:: The connection will be unusable from this point forward.
         """
         self.rollback()
         self.__dbhandle = None

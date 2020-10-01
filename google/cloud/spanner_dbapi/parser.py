@@ -150,11 +150,11 @@ pyfmt_str = terminal("%s")
 def expect(word, token):
     """Parses given expression recursively.
 
-    :param word: str
-    :type word: string expression
+    :type word: str
+    :param word: string expression
 
-    :param token: str
-    :type token: expression token
+    :type token: str
+    :param token: expression token
 
     :rtype: (str, Any)
     :returns: tuple of the rest expression string and tree of already parsed

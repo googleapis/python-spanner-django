@@ -73,18 +73,19 @@ class Cursor:
     def execute(self, sql, args=None):
         """Abstracts and implements execute SQL statements on Cloud Spanner.
 
-        :param sql: A SQL statement
         :type sql: str
+        :param sql: A SQL statement
 
-        :param *args: (Optional) variadic argument list
         :type *args: list
+        :param *args: (Optional) variadic argument list
 
-        :param **kwargs: (Optional) key worded arguments
         :type **kwargs: list
+        :param **kwargs: (Optional) key worded arguments
 
         :raises: :class:`IntegrityError` if precondition failed or argument
-        already exists, :class:`ProgrammingError` if there is invalid argument,
-        :class:`OperationalError` if there is internal server error.
+                 already exists, :class:`ProgrammingError` if there is
+                 invalid argument, :class:`OperationalError` if there is
+                 internal server error.
         """
         self._raise_if_closed()
 
@@ -285,11 +286,11 @@ class Cursor:
     def executemany(self, operation, seq_of_params):
         """Executes a sequence of params.
 
-        :param operation: sql operation
         :type operation: str
+        :param operation: SQL operation
 
-        :param seq_of_params: sequence of parameters
         :type seq_of_params: list
+        :param seq_of_params: sequence of parameters
 
         :raises: :class:`ProgrammingError` if cursor is not connected to
                  database.
@@ -337,8 +338,8 @@ class Cursor:
         Fetch the next set of rows of a query result, returning a sequence of sequences.
         An empty sequence is returned when no more rows are available.
 
-        :param size: (Optional) maximum number of results to fetch.
         :type size: int
+        :param size: (Optional) maximum number of results to fetch.
 
 
         :raises: an error if the previous call to .execute*() did not produce
@@ -382,8 +383,8 @@ class Cursor:
     def run_sql_in_snapshot(self, sql):
         """Runs SQL in snapshot.
 
-        :param sql: sql request
         :type sql: str
+        :param sql: SQL request
 
         :rtype: list
         :returns: result of operation
@@ -393,8 +394,8 @@ class Cursor:
     def get_table_column_schema(self, table_name):
         """Gets table column schema.
 
-        :param table_name: name of the table
         :type table_name: str
+        :param table_name: name of the table
 
         :rtype: dict
         :returns: dictionary of table column schema
@@ -405,27 +406,28 @@ class Cursor:
 class Column:
     """Object defines column of the table.
 
-    :param name: name of the column.
     :type name: str
+    :param name: name of the column.
 
-    :param type_code: code of the value type
     :type type_code: int
+    :param type_code: code of the value type
 
-    :param display_size: (Optional) Display size. Default is None.
     :type display_size: int
+    :param display_size: (Optional) Display size. Default is None.
 
-    :param internal_size: (Optional) Internal size. Default is None.
     :type internal_size: int
+    :param internal_size: (Optional) Internal size. Default is None.
 
-    :param precision: (Optional) Number of significant digits. Default is None.
     :type precision: int
+    :param precision: (Optional) Number of significant digits. Default is None.
 
-    :param scale: (Optional) Scale. Default is None.
     :type scale: float
+    :param scale: (Optional) Scale. Default is None.
 
-    :param null_ok: (Optional) Allows column value to be None. Default is False.
     :type null_ok: bool
+    :param null_ok: (Optional) Allows column value to be None. Default is False.
     """
+
     def __init__(
         self,
         name,

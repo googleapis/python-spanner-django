@@ -19,6 +19,10 @@ def google_client_info(user_agent=None):
     Returns a :class:`google.api_core.gapic_v1.client_info.ClientInfo`
     containing the user_agent and python_version for this library.
 
+    :type user_agent: str
+    :param user_agent: (Optional) Django user agent with it's version.
+                       Default is None.
+
     :rtype: :class:`~google.api_core.gapic_v1.client_info.ClientInfo`
     :returns: object with client information
     """

@@ -134,13 +134,13 @@ def parse_insert(insert_sql, params):
                     ('INSERT INTO T (f1, f2) VALUES (UPPER(%s), %s)', ('c', 'd',))
                 ],
             }
-            
+
     :param insert_sql: initial sql request
     :type insert_sql: str
-    
+
     :param params: list of parameters
     :type params: list
-    
+
     :rtype: dict
     :returns: dictionary of name to list of parameters
     """  # noqa
@@ -232,13 +232,13 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
 
     We'll have to convert both params types into:
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
-        
-    :param columns:
-    :type columns:
-    
-    :param params: 
-    :type params:
-    
+
+    :param columns: list of columns
+    :type columns: list
+
+    :param params: list of params
+    :type params: list
+
     :rtype: list
     :returns: list of tuples of parameters
     """  # noqa
@@ -339,11 +339,11 @@ def sql_pyformat_args_to_spanner(sql, params):
         SQL:      'SELECT * from t where f1=@a0, f2=@a1, f3=@a2'
         Params:   {'a0': 'a', 'a1': 23, 'a2': '888***'}
 
-    :param sql: initial sql request
     :type sql: str
+    :param sql: initial sql request
 
-    :param params: list of parameters
     :type params: list
+    :param params: list of parameters
 
     :rtype: (str, dict)
     :returns: tuple of sanitized sql anddictionary of named arguments
@@ -389,8 +389,8 @@ def sql_pyformat_args_to_spanner(sql, params):
 def cast_for_spanner(param):
     """Convert param to its Cloud Spanner equivalent type.
 
-    :param param: Django type parameter
     :type param: Any
+    :param param: Django type parameter.
 
     :rtype: Any
     :returns: Cloud spanner equivalent type
@@ -406,8 +406,8 @@ def get_param_types(params):
     Returns a dictionary of :class:`spanner.param_types` for a dictionary of
     parameters.
 
-    :param params: dictionary of Django parameters.
     :type params: dict
+    :param params: dictionary of Django parameters.
 
     :rtype: dict
     :returns: None if params are empty, dictionary of
@@ -439,11 +439,11 @@ def ensure_where_clause(sql):
     Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
     Add a dummy WHERE clause if necessary.
 
-    :param sql: sql request
     :type sql: str
+    :param sql: SQL request
 
     :rtype: str
-    :returns: sql request with dummy WHERE clause if necessary.
+    :returns: SQL request with dummy WHERE clause if necessary.
     """
     if any(
         isinstance(token, sqlparse.sql.Where)
@@ -558,8 +558,8 @@ def escape_name(name):
     Escape name by applying backticks to value that either
     contain '-' or are any of Cloud Spanner's reserved keywords.
 
-    :param name: name of the token
     :type name: str
+    :param name: name of the token
 
     :rtype: str
     :returns: name with applied backticks

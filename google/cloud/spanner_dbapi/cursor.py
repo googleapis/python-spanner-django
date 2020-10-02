@@ -208,10 +208,7 @@ class Cursor:
         return self
 
     def __exit__(self, etype, value, traceback):
-        self.__clear()
-
-    def __clear(self):
-        self._connection = None
+        self.close()
 
     @property
     def description(self):
@@ -222,7 +219,7 @@ class Cursor:
         columns = []
         for field in row_type.fields:
             columns.append(
-                Column(
+                ColumnInfo(
                     name=field.name,
                     type_code=field.type.code,
                     # Size of the SQL type of the column.
@@ -264,12 +261,20 @@ class Cursor:
 
         The cursor will be unusable from this point forward.
         """
-        self.__clear()
         self._is_closed = True
 
     def executemany(self, operation, seq_of_params):
-        if not self._connection:
-            raise ProgrammingError("Cursor is not connected to the database")
+        """
+        Execute the given SQL with every parameters set
+        from the given sequence of parameters.
+
+        :type operation: :class:`str`
+        :param operation: SQL code to execute.
+
+        :type seq_of_params: :class:`list`
+        :param seq_of_params: Sequence of params to run the query with.
+        """
+        self._raise_if_closed()
 
         for params in seq_of_params:
             self.execute(operation, params)
@@ -347,7 +352,9 @@ class Cursor:
         return self._connection.get_table_column_schema(table_name)
 
 
-class Column:
+class ColumnInfo:
+    """Row column description object."""
+
     def __init__(
         self,
         name,
@@ -366,48 +373,41 @@ class Column:
         self.scale = scale
         self.null_ok = null_ok
 
+        self.fields = (
+            self.name,
+            self.type_code,
+            self.display_size,
+            self.internal_size,
+            self.precision,
+            self.scale,
+            self.null_ok,
+        )
+
     def __repr__(self):
         return self.__str__()
 
     def __getitem__(self, index):
-        if index == 0:
-            return self.name
-        elif index == 1:
-            return self.type_code
-        elif index == 2:
-            return self.display_size
-        elif index == 3:
-            return self.internal_size
-        elif index == 4:
-            return self.precision
-        elif index == 5:
-            return self.scale
-        elif index == 6:
-            return self.null_ok
+        return self.fields[index]
 
     def __str__(self):
-        rstr = ", ".join(
-            [
-                field
-                for field in [
+        str_repr = ", ".join(
+            filter(
+                lambda part: part is not None,
+                [
                     "name='%s'" % self.name,
                     "type_code=%d" % self.type_code,
-                    None
-                    if not self.display_size
-                    else "display_size=%d" % self.display_size,
-                    None
-                    if not self.internal_size
-                    else "internal_size=%d" % self.internal_size,
-                    None
-                    if not self.precision
-                    else "precision='%s'" % self.precision,
-                    None if not self.scale else "scale='%s'" % self.scale,
-                    None
-                    if not self.null_ok
-                    else "null_ok='%s'" % self.null_ok,
-                ]
-                if field
-            ]
+                    "display_size=%d" % self.display_size
+                    if self.display_size
+                    else None,
+                    "internal_size=%d" % self.internal_size
+                    if self.internal_size
+                    else None,
+                    "precision='%s'" % self.precision
+                    if self.precision
+                    else None,
+                    "scale='%s'" % self.scale if self.scale else None,
+                    "null_ok='%s'" % self.null_ok if self.null_ok else None,
+                ],
+            )
         )
-
-        return "Column(%s)" % rstr
+        return "ColumnInfo(%s)" % str_repr

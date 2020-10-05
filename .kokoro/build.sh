@@ -57,7 +57,7 @@ pip3 install .
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"
-mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django
+mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch master https://github.com/django/django.git $DJANGO_TESTS_DIR/django
 
 # Install dependencies for Django tests.
 sudo apt-get update

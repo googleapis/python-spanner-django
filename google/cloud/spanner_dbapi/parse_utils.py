@@ -135,14 +135,14 @@ def parse_insert(insert_sql, params):
                 ],
             }
 
-    :param insert_sql: initial sql request
     :type insert_sql: str
+    :param insert_sql: An initial SQL request.
 
-    :param params: list of parameters
     :type params: list
+    :param params: A list of parameters.
 
     :rtype: dict
-    :returns: dictionary of name to list of parameters
+    :returns: A dictionary of name to list of parameters.
     """  # noqa
     match = RE_INSERT.search(insert_sql)
 
@@ -233,14 +233,14 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
     We'll have to convert both params types into:
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
 
-    :param columns: list of columns
     :type columns: list
+    :param columns: A list of columns of a table.
 
-    :param params: list of params
     :type params: list
+    :param params: A list of parameters.
 
     :rtype: list
-    :returns: list of tuples of parameters
+    :returns: A list of tuples of parameters.
     """  # noqa
 
     if not pyformat_args:
@@ -340,13 +340,13 @@ def sql_pyformat_args_to_spanner(sql, params):
         Params:   {'a0': 'a', 'a1': 23, 'a2': '888***'}
 
     :type sql: str
-    :param sql: initial sql request
+    :param sql: An initial SQL request.
 
     :type params: list
-    :param params: list of parameters
+    :param params: A list of parameters.
 
     :rtype: (str, dict)
-    :returns: tuple of sanitized sql anddictionary of named arguments
+    :returns: A tuple of sanitized SQL and dictionary of named arguments.
     """
     if not params:
         return sanitize_literals_for_upload(sql), params
@@ -393,7 +393,7 @@ def cast_for_spanner(param):
     :param param: Django type parameter.
 
     :rtype: Any
-    :returns: Cloud spanner equivalent type
+    :returns: Cloud spanner equivalent type.
     """
     if isinstance(param, decimal.Decimal):
         return float(param)
@@ -407,7 +407,7 @@ def get_param_types(params):
     parameters.
 
     :type params: dict
-    :param params: dictionary of Django parameters.
+    :param params: A dictionary of Django parameters.
 
     :rtype: dict
     :returns: None if params are empty, dictionary of
@@ -440,7 +440,7 @@ def ensure_where_clause(sql):
     Add a dummy WHERE clause if necessary.
 
     :type sql: str
-    :param sql: SQL request
+    :param sql: SQL request.
 
     :rtype: str
     :returns: SQL request with dummy WHERE clause if necessary.
@@ -559,10 +559,10 @@ def escape_name(name):
     contain '-' or are any of Cloud Spanner's reserved keywords.
 
     :type name: str
-    :param name: name of the token
+    :param name: Name of the token.
 
     :rtype: str
-    :returns: name with applied backticks
+    :returns: Name with applied backticks.
     """
     if "-" in name or " " in name or name.upper() in SPANNER_RESERVED_KEYWORDS:
         return "`" + name + "`"

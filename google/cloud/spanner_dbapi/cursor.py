@@ -74,13 +74,13 @@ class Cursor:
         """Abstracts and implements execute SQL statements on Cloud Spanner.
 
         :type sql: str
-        :param sql: A SQL statement
+        :param sql: A SQL statement.
 
         :type *args: list
-        :param *args: (Optional) variadic argument list
+        :param *args: (Optional) variadic argument list.
 
         :type **kwargs: list
-        :param **kwargs: (Optional) key worded arguments
+        :param **kwargs: (Optional) key worded arguments.
 
         :raises: :class:`IntegrityError` if precondition failed or argument
                  already exists, :class:`ProgrammingError` if there is
@@ -221,7 +221,7 @@ class Cursor:
         """Gives description of the table.
 
         :rtype: tuple
-        :returns: tuple of columns' information.
+        :returns: A tuple of columns' information.
         """
         if not (self._res and self._res.metadata):
             return None
@@ -246,7 +246,7 @@ class Cursor:
         """Returns number of rows in the table.
 
         :rtype: int
-        :returns: number of rows
+        :returns: Number of rows.
         """
         return self._row_count
 
@@ -273,7 +273,7 @@ class Cursor:
             raise InterfaceError("cursor is already closed")
 
     def close(self):
-        """Close this cursor.
+        """Close cursor of linked Database.
 
         The cursor will be unusable from this point forward.
         """
@@ -311,7 +311,7 @@ class Cursor:
     def fetchone(self):
         """Fetch next element.
 
-        :returns: next element if it is possible, None otherwise.
+        :returns: The next element if it is possible, None otherwise.
         """
         self._raise_if_closed()
 
@@ -324,7 +324,7 @@ class Cursor:
         """Fetches all elements.
 
         :rtype: list
-        :returns: list of fetched elements
+        :returns: A list of fetched elements.
         """
         self._raise_if_closed()
 
@@ -339,7 +339,7 @@ class Cursor:
         :param size: (Optional) maximum number of results to fetch.
 
 
-        :raises: an error if the previous call to .execute*() did not produce
+        :raises: An error if the previous call to .execute*() did not produce
                  any result set or if no call was issued yet.
         """
         self._raise_if_closed()
@@ -370,10 +370,10 @@ class Cursor:
         return self._connection.run_prior_DDL_statements()
 
     def list_tables(self):
-        """Lists tables.
+        """Lists tables of linked Database.
 
         :rtype: str
-        :returns: tables with theirs' corresponding information.
+        :returns: Tables with theirs' corresponding information.
         """
         return self._connection.list_tables()
 
@@ -381,10 +381,10 @@ class Cursor:
         """Runs SQL in snapshot.
 
         :type sql: str
-        :param sql: SQL request
+        :param sql: SQL request.
 
         :rtype: list
-        :returns: result of operation
+        :returns: Result of operation.
         """
         return self._connection.run_sql_in_snapshot(sql)
 
@@ -392,22 +392,22 @@ class Cursor:
         """Gets table column schema.
 
         :type table_name: str
-        :param table_name: name of the table
+        :param table_name: Name of the table.
 
         :rtype: dict
-        :returns: dictionary of table column schema
+        :returns: A dictionary of table column schema.
         """
         return self._connection.get_table_column_schema(table_name)
 
 
 class Column:
-    """Object defines column of the table.
+    """Object defines column of the table in linked Database.
 
     :type name: str
-    :param name: name of the column.
+    :param name: Name of the column.
 
     :type type_code: int
-    :param type_code: code of the value type
+    :param type_code: Code of the value type.
 
     :type display_size: int
     :param display_size: (Optional) Display size.
@@ -416,10 +416,10 @@ class Column:
     :param internal_size: (Optional) Internal size.
 
     :type precision: int
-    :param precision: (Optional) Number of significant digits. Default is None.
+    :param precision: (Optional) Number of significant digits.
 
     :type scale: float
-    :param scale: (Optional) Scale. Default is None.
+    :param scale: (Optional) Scale.
 
     :type null_ok: bool
     :param null_ok: (Optional) Allows column value to be None. Default is False.

@@ -23,7 +23,7 @@ def google_client_info(user_agent=None):
     :param user_agent: (Optional) User agent with it's version.
 
     :rtype: :class:`~google.api_core.gapic_v1.client_info.ClientInfo`
-    :returns: object with client information
+    :returns: An object with client information.
     """
 
     return ClientInfo(

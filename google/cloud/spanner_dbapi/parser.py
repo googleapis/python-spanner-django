@@ -67,6 +67,12 @@ class terminal(str):
 
 
 class a_args:
+    """Expression arguments.
+
+    :type argv: list
+    :param argv: A List of expression arguments;
+    """
+
     def __init__(self, argv):
         self.argv = argv
 
@@ -140,6 +146,12 @@ class a_args:
 
 
 class values(a_args):
+    """Wrapper for values.
+
+    :rtype: str
+    :returns: A string of values expression in tree view.
+    """
+
     def __str__(self):
         return "VALUES%s" % super().__str__()
 
@@ -151,13 +163,13 @@ def expect(word, token):
     """Parses given expression recursively.
 
     :type word: str
-    :param word: string expression
+    :param word: A string expression.
 
     :type token: str
-    :param token: expression token
+    :param token: An expression token.
 
     :rtype: (str, Any)
-    :returns: tuple of the rest expression string and tree of already parsed
+    :returns: A tuple of the rest expression string and tree of already parsed
               expression.
     :raises: :class:`ProgrammingError` if there is parsing error.
     """
@@ -267,6 +279,13 @@ def expect(word, token):
 
 
 def as_values(values_stmt):
-    """Returns parsed values."""
+    """Returns parsed values.
+
+    :type values_stmt: str
+    :param values_stmt: Raw values.
+
+    :rtype: Any
+    :returns: A tree of already parsed expression.
+    """
     _, values = expect(values_stmt, VALUES)
     return values

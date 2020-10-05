@@ -18,10 +18,10 @@ class Connection:
     """
     A wrap-around object for the existing
     :class:`~google.cloud.spanner_v1.database.Database` and the corresponding
-    :class:`~google.cloud.spanner_admin_instance_v1.types.Instance` objects
+    :class:`~google.cloud.spanner_admin_instance_v1.types.Instance` objects.
 
     :type db_handle: :class:`Database`
-    :param db_handle: Database handle
+    :param db_handle: Database handle.
     """
 
     def __init__(self, db_handle):
@@ -57,10 +57,11 @@ class Connection:
         database. Each DDL statement MUST NOT contain a semicolon.
 
         :type ddl_statements: list
-        :param ddl_statements: a list of DDL statements, each without a semicolon.
+        :param ddl_statements: A list of DDL statements, each without a
+                               semicolon.
 
         :rtype: str
-        :returns: result of the operation
+        :returns: Result of the operation.
         """
         self._raise_if_closed()
         # Synchronously wait on the operation's completion.
@@ -79,7 +80,7 @@ class Connection:
         """Perform a unit of work in a linked Transaction, retrying on abort.
 
         :rtype: Any
-        :returns: runs the given function as it would be a transaction.
+        :returns: Runs the given function as it would be a transaction.
         """
         self._raise_if_closed()
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
@@ -88,7 +89,8 @@ class Connection:
         """Appends DDL statement.
 
         :type ddl_statements: list
-        :param ddl_statements: a list of DDL statements, each without a semicolon.
+        :param ddl_statements: A list of DDL statements, each without a
+                               semicolon.
         """
         self._raise_if_closed()
         self._ddl_statements.append(ddl_statement)
@@ -97,7 +99,7 @@ class Connection:
         """Runs prior Operation.
 
         :rtype: str
-        :returns: updated statements.
+        :returns: Updated statements.
         """
         self._raise_if_closed()
 
@@ -113,7 +115,7 @@ class Connection:
         """Lists tables contained within the linked Database.
 
         :rtype: list
-        :returns: tables with corresponding information.
+        :returns: Tables with corresponding information.
         """
         return self.run_sql_in_snapshot(
             """
@@ -130,7 +132,7 @@ class Connection:
         """Runs an SQL request on the linked Database snapshot.
 
         :type sql: str
-        :param sql: SQL request
+        :param sql: SQL request.
 
         :type params: list
         :param params: (Optional) List of parameters.
@@ -156,10 +158,10 @@ class Connection:
         """Gets table column schema.
 
         :type table_name: str
-        :param table_name: name of the table.
+        :param table_name: Name of the table.
 
         :rtype: dict
-        :returns: column description
+        :returns: Column description.
         """
         rows = self.run_sql_in_snapshot(
             """SELECT

@@ -98,9 +98,7 @@ class DATETIME:
 
 
 class ROWID:
-    """
-    Describes the "Row ID" column in a database.
-    """
+    """Describes the "Row ID" column in a database."""
 
     # TODO: Implement me.
     pass

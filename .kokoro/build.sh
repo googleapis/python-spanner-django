@@ -35,6 +35,7 @@ python3.6 -m pip uninstall --yes --quiet nox-automation
 # Install nox
 python3.6 -m pip install --upgrade --quiet nox
 python3.6 -m pip install --upgrade requests
+python3.8 -m pip install --upgrade requests
 python3.6 -m nox --version
 
 # If NOX_SESSION is set, it only runs the specified session,

@@ -20,11 +20,9 @@ from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 from .expressions import register_expressions
 from .functions import register_functions
 from .lookups import register_lookups
-from .utils import check_django_compatability
 
 __version__ = pkg_resources.get_distribution("django-google-spanner").version
 
-# check_django_compatability()
 register_expressions()
 register_functions()
 register_lookups()

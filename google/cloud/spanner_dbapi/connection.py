@@ -15,10 +15,13 @@ ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
 class Connection:
-    """A wrap-around object for the existing :class:`Database` and the corresponding :class:`Instance` objects
+    """
+    A wrap-around object for the existing
+    :class:`~google.cloud.spanner_v1.database.Database` and the corresponding
+    :class:`~google.cloud.spanner_admin_instance_v1.types.Instance` objects
 
-    :type is_closed: bool
-    :param is_closed: (Optional) Flag of the connection state (open/closed). Default is False.
+    :type db_handle: :class:`Database`
+    :param db_handle: Database handle
     """
 
     def __init__(self, db_handle):
@@ -28,7 +31,7 @@ class Connection:
         self.is_closed = False
 
     def cursor(self):
-        """Checks connection is open and returns :class:`Cursor` object.
+        """Factory to create a :class:`Cursor` linked to this Connection.
 
         :rtype: :class:`Cursor`
         :returns: :class:`Cursor` object.
@@ -56,7 +59,7 @@ class Connection:
         :type ddl_statements: list
         :param ddl_statements: a list of DDL statements, each without a semicolon.
 
-        :rtype: :func:`google.api_core.operation.Operation.result()`
+        :rtype: str
         :returns: result of the operation
         """
         self._raise_if_closed()
@@ -64,32 +67,36 @@ class Connection:
         return self._dbhandle.update_ddl(ddl_statements).result()
 
     def read_snapshot(self):
-        """Returns Data Base snapshot if connection is open.
+        """Returns a Snapshot of the linked Database.
 
-        :rtype: :class:`Snapshot`
-        :returns: database snapshot.
+        :rtype: :class:`~google.cloud.spanner_v1.snapshot.Snapshot`
+        :returns: A snapshot of the linked Database.
         """
         self._raise_if_closed()
         return self._dbhandle.snapshot()
 
     def in_transaction(self, fn, *args, **kwargs):
-        """Runs :func:`spanner_v1.Database.run_in_transaction` inside open connection.
+        """Perform a unit of work in a linked Transaction, retrying on abort.
 
         :rtype: Any
-        :returns: result of transaction running.
+        :returns: runs the given function as it would be a transaction.
         """
         self._raise_if_closed()
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
-        """Appends DDL statement."""
+        """Appends DDL statement.
+
+        :type ddl_statements: list
+        :param ddl_statements: a list of DDL statements, each without a semicolon.
+        """
         self._raise_if_closed()
         self._ddl_statements.append(ddl_statement)
 
     def run_prior_DDL_statements(self):
-        """Runs prior DDL statements.
+        """Runs prior Operation.
 
-        :rtype: :func:`__handle_update_ddl()`
+        :rtype: str
         :returns: updated statements.
         """
         self._raise_if_closed()
@@ -103,9 +110,9 @@ class Connection:
         return self.__handle_update_ddl(ddl_statements)
 
     def list_tables(self):
-        """Lists all existing tables.
+        """Lists tables contained within the linked Database.
 
-        :rtype: str
+        :rtype: list
         :returns: tables with corresponding information.
         """
         return self.run_sql_in_snapshot(
@@ -120,7 +127,7 @@ class Connection:
         )
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
-        """Runs SQL request in snapshot.
+        """Runs an SQL request on the linked Database snapshot.
 
         :type sql: str
         :param sql: SQL request
@@ -128,11 +135,12 @@ class Connection:
         :type params: list
         :param params: (Optional) List of parameters.
 
-        :type param_types: list
+        :type param_types: dict
         :param param_types: (Optional) List of parameters' types.
 
         :rtype: list
-        :returns: list of running results
+        :returns: A list of :class:`~google.cloud.spanner_v1.streamed.StreamedResultSet`
+                  results.
         """
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
         # hence this method exists to circumvent that limit.
@@ -151,7 +159,7 @@ class Connection:
         :param table_name: name of the table.
 
         :rtype: dict
-        :returns: column details
+        :returns: column description
         """
         rows = self.run_sql_in_snapshot(
             """SELECT
@@ -183,7 +191,7 @@ class Connection:
         self.is_closed = True
 
     def commit(self):
-        """Runs :func:`run_prior_DDL_statements()` if connection is open."""
+        """Commit all the pending transactions."""
         self._raise_if_closed()
 
         self.run_prior_DDL_statements()

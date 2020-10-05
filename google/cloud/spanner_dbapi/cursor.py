@@ -309,7 +309,7 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
-        """Tries to fetch next element.
+        """Fetch next element.
 
         :returns: next element if it is possible, None otherwise.
         """
@@ -410,10 +410,10 @@ class Column:
     :param type_code: code of the value type
 
     :type display_size: int
-    :param display_size: (Optional) Display size. Default is None.
+    :param display_size: (Optional) Display size.
 
     :type internal_size: int
-    :param internal_size: (Optional) Internal size. Default is None.
+    :param internal_size: (Optional) Internal size.
 
     :type precision: int
     :param precision: (Optional) Number of significant digits. Default is None.

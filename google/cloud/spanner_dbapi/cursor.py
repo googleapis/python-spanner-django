@@ -70,6 +70,45 @@ class Cursor:
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
 
+    @property
+    def description(self):
+        """Read-only attribute containing a sequence of the following items:
+
+        -   ``name``
+        -   ``type_code``
+        -   ``display_size``
+        -   ``internal_size``
+        -   ``precision``
+        -   ``scale``
+        -   ``null_ok``
+        """
+        if not (self._res and self._res.metadata):
+            return None
+
+        row_type = self._res.metadata.row_type
+        columns = []
+        for field in row_type.fields:
+            columns.append(
+                ColumnInfo(
+                    name=field.name,
+                    type_code=field.type.code,
+                    # Size of the SQL type of the column.
+                    display_size=code_to_display_size.get(field.type.code),
+                    # Client perceived size of the column.
+                    internal_size=field.ByteSize(),
+                )
+            )
+        return tuple(columns)
+
+    @property
+    def rowcount(self):
+        """The number of rows produced by the last `.execute()`."""
+        return self._row_count
+
+    def close(self):
+        """Closes this Cursor, making it unusable from this point forward."""
+        self._is_closed = True
+
     def execute(self, sql, args=None):
         """Prepares and executes a Spanner database operation.
 
@@ -109,6 +148,73 @@ class Cursor:
             raise ProgrammingError(e.details if hasattr(e, "details") else e)
         except InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, "details") else e)
+
+    def executemany(self, operation, seq_of_params):
+        """Execute the given SQL with every parameters set
+        from the given sequence of parameters.
+
+        :type operation: str
+        :param operation: SQL code to execute.
+
+        :type seq_of_params: list
+        :param seq_of_params: Sequence of additional parameters to run
+                              the query with.
+        """
+        self._raise_if_closed()
+
+        for params in seq_of_params:
+            self.execute(operation, params)
+
+    def fetchone(self):
+        """Fetch the next row of a query result set, returning a single
+        sequence, or None when no more data is available."""
+        self._raise_if_closed()
+
+        try:
+            return next(self)
+        except StopIteration:
+            return None
+
+    def fetchmany(self, size=None):
+        """Fetch the next set of rows of a query result, returning a sequence
+        of sequences. An empty sequence is returned when no more rows are available.
+
+        :type size: int
+        :param size: (Optional) The maximum number of results to fetch.
+
+        :raises InterfaceError:
+            if the previous call to .execute*() did not produce any result set
+            or if no call was issued yet.
+        """
+        self._raise_if_closed()
+
+        if size is None:
+            size = self.arraysize
+
+        items = []
+        for i in range(size):
+            try:
+                items.append(tuple(self.__next__()))
+            except StopIteration:
+                break
+
+        return items
+
+    def fetchall(self):
+        """Fetch all (remaining) rows of a query result, returning them as
+        a sequence of sequences.
+        """
+        self._raise_if_closed()
+
+        return list(self.__iter__())
+
+    def setinputsizes(self, sizes):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        pass
+
+    def setoutputsize(self, size, column=None):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        pass
 
     def __handle_update(self, sql, params):
         self._connection.in_transaction(self.__do_execute_update, sql, params)
@@ -209,41 +315,6 @@ class Cursor:
         self.close()
 
     @property
-    def description(self):
-        """Read-only attribute containing a sequence of the following items:
-
-        -   ``name``
-        -   ``type_code``
-        -   ``display_size``
-        -   ``internal_size``
-        -   ``precision``
-        -   ``scale``
-        -   ``null_ok``
-        """
-        if not (self._res and self._res.metadata):
-            return None
-
-        row_type = self._res.metadata.row_type
-        columns = []
-        for field in row_type.fields:
-            columns.append(
-                ColumnInfo(
-                    name=field.name,
-                    type_code=field.type.code,
-                    # Size of the SQL type of the column.
-                    display_size=code_to_display_size.get(field.type.code),
-                    # Client perceived size of the column.
-                    internal_size=field.ByteSize(),
-                )
-            )
-        return tuple(columns)
-
-    @property
-    def rowcount(self):
-        """The number of rows produced by the last `.execute()`."""
-        return self._row_count
-
-    @property
     def is_closed(self):
         """The cursor close indicator.
 
@@ -265,26 +336,6 @@ class Cursor:
         if self.is_closed:
             raise InterfaceError("cursor is already closed")
 
-    def close(self):
-        """Closes this Cursor, making it unusable from this point forward."""
-        self._is_closed = True
-
-    def executemany(self, operation, seq_of_params):
-        """Execute the given SQL with every parameters set
-        from the given sequence of parameters.
-
-        :type operation: str
-        :param operation: SQL code to execute.
-
-        :type seq_of_params: list
-        :param seq_of_params: Sequence of additional parameters to run
-                              the query with.
-        """
-        self._raise_if_closed()
-
-        for params in seq_of_params:
-            self.execute(operation, params)
-
     def __next__(self):
         if self._itr is None:
             raise ProgrammingError("no results to return")
@@ -295,60 +346,9 @@ class Cursor:
             raise ProgrammingError("no results to return")
         return self._itr
 
-    def fetchone(self):
-        """Fetch the next row of a query result set, returning a single
-        sequence, or None when no more data is available."""
-        self._raise_if_closed()
-
-        try:
-            return next(self)
-        except StopIteration:
-            return None
-
-    def fetchall(self):
-        """Fetch all (remaining) rows of a query result, returning them as
-        a sequence of sequences.
-        """
-        self._raise_if_closed()
-
-        return list(self.__iter__())
-
-    def fetchmany(self, size=None):
-        """Fetch the next set of rows of a query result, returning a sequence
-        of sequences. An empty sequence is returned when no more rows are available.
-
-        :type size: int
-        :param size: (Optional) The maximum number of results to fetch.
-
-        :raises InterfaceError:
-            if the previous call to .execute*() did not produce any result set
-            or if no call was issued yet.
-        """
-        self._raise_if_closed()
-
-        if size is None:
-            size = self.arraysize
-
-        items = []
-        for i in range(size):
-            try:
-                items.append(tuple(self.__next__()))
-            except StopIteration:
-                break
-
-        return items
-
     @property
     def lastrowid(self):
         return None
-
-    def setinputsizes(sizes):
-        """A no-op, raising an error if the cursor or connection is closed."""
-        raise ProgrammingError("Unimplemented")
-
-    def setoutputsize(size, column=None):
-        """A no-op, raising an error if the cursor or connection is closed."""
-        raise ProgrammingError("Unimplemented")
 
     def _run_prior_DDL_statements(self):
         return self._connection.run_prior_DDL_statements()

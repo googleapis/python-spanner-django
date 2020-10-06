@@ -246,7 +246,7 @@ class Cursor:
         """Returns number of rows in the table.
 
         :rtype: int
-        :returns: Number of rows.
+        :returns: Number of rows that last .execute*() produced.
         """
         return self._row_count
 
@@ -273,7 +273,7 @@ class Cursor:
             raise InterfaceError("cursor is already closed")
 
     def close(self):
-        """Close cursor of linked Database.
+        """Close this cursor.
 
         The cursor will be unusable from this point forward.
         """
@@ -309,7 +309,7 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
-        """Fetch next element.
+        """Fetch next resulting row of the last ran query.
 
         :returns: The next element if it is possible, None otherwise.
         """

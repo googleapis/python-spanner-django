@@ -34,7 +34,8 @@ class Connection:
         """Factory to create a :class:`Cursor` linked to this Connection.
 
         :rtype: :class:`Cursor`
-        :returns: :class:`Cursor` object.
+        :returns: A database cursor, which is used to manage the context of a
+                  fetch operation.
         """
         self._raise_if_closed()
 
@@ -59,9 +60,6 @@ class Connection:
         :type ddl_statements: list
         :param ddl_statements: A list of DDL statements, each without a
                                semicolon.
-
-        :rtype: str
-        :returns: Result of the operation.
         """
         self._raise_if_closed()
         # Synchronously wait on the operation's completion.
@@ -79,6 +77,20 @@ class Connection:
     def in_transaction(self, fn, *args, **kwargs):
         """Perform a unit of work in a linked Transaction, retrying on abort.
 
+        :type fn: callable
+        :param fn: takes a required positional argument, the transaction,
+                   and additional positional / keyword arguments as supplied
+                   by the caller.
+
+        :type *args: tuple
+        :param *args: additional positional arguments to be passed to ``fn``.
+
+        :type **kwargs: dict
+        :param **kwargs: (Optional) keyword arguments to be passed to ``fn``.
+                         If passed, "timeout_secs" will be removed and used to
+                         override the default retry timeout which defines
+                         maximum timestamp to continue retrying the transaction.
+
         :rtype: Any
         :returns: Runs the given function as it would be a transaction.
         """
@@ -86,7 +98,8 @@ class Connection:
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
-        """Appends DDL statement.
+        """Appends DDL statement to the existing list of DDL statements in
+        linked database.
 
         :type ddl_statements: list
         :param ddl_statements: A list of DDL statements, each without a

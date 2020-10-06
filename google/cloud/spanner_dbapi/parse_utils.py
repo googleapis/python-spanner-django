@@ -79,7 +79,7 @@ def classify_stmt(query):
 
 def parse_insert(insert_sql, params):
     """
-    Parses an INSERT statement an generate a list of tuples of the form:
+    Parse an INSERT statement an generate a list of tuples of the form:
         [
             (SQL, params_per_row1),
             (SQL, params_per_row2),
@@ -136,7 +136,7 @@ def parse_insert(insert_sql, params):
             }
 
     :type insert_sql: str
-    :param insert_sql: An initial SQL request.
+    :param insert_sql: SQL insert request.
 
     :type params: list
     :param params: A list of parameters.
@@ -224,7 +224,7 @@ def parse_insert(insert_sql, params):
 
 def rows_for_insert_or_update(columns, params, pyformat_args=None):
     """
-    Creates a tupled list of params to be used as a single value per
+    Create a tupled list of params to be used as a single value per
     value that inserted from a statement such as
         SQL:        'INSERT INTO t (f1, f2, f3) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s)'
         Params A:   [(1, 2, 3), (4, 5, 6), (7, 8, 9)]

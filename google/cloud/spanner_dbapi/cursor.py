@@ -53,7 +53,7 @@ code_to_display_size = {
 }
 
 
-class Cursor:
+class Cursor(object):
     """Database cursor to manage the context of a fetch operation.
 
     :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
@@ -334,7 +334,7 @@ class Cursor:
         :raises: :class:`InterfaceError` if this cursor is closed.
         """
         if self.is_closed:
-            raise InterfaceError("cursor is already closed")
+            raise InterfaceError("Cursor and/or connection is already closed.")
 
     def __next__(self):
         if self._itr is None:

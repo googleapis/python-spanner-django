@@ -16,14 +16,12 @@ import time
 from base64 import b64encode
 
 
-
 def _date_from_ticks(ticks):
     """Based on PEP-249 Implementation Hints for Module Authors:
 
     https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
     return Date(*time.localtime(ticks)[:3])
-
 
 
 def _time_from_ticks(ticks):

@@ -4,108 +4,80 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-# Implements the types requested by the Python Database API in:
-#   https://www.python.org/dev/peps/pep-0249/#type-objects-and-constructors
+"""Implementation of the type objects and constructors according to the
+   PEP-0249 specification.
+
+   See
+   https://www.python.org/dev/peps/pep-0249/#type-objects-and-constructors
+"""
 
 import datetime
 import time
 from base64 import b64encode
 
 
-def Date(year, month, day):
-    """This function constructs an object holding a date value."""
-    return datetime.date(year, month, day)
 
+def _date_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
 
-def Time(hour, minute, second):
-    """This function constructs an object holding a time value."""
-    return datetime.time(hour, minute, second)
-
-
-def Timestamp(year, month, day, hour, minute, second):
-    """This function constructs an object holding a time stamp value."""
-    return datetime.datetime(year, month, day, hour, minute, second)
-
-
-def DateFromTicks(ticks):
-    """
-    This function constructs an object holding a date value from the given
-    ticks value (number of seconds since the epoch; see
-    https://docs.python.org/3/library/time.html for details).
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
     return Date(*time.localtime(ticks)[:3])
 
 
-def TimeFromTicks(ticks):
-    """
-    Constructs an object holding a time value from the given ticks value (
-    number of seconds since the epoch; see the documentation of the standard
-    Python time module for details).
+
+def _time_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
+
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
     return Time(*time.localtime(ticks)[3:6])
 
 
-def TimestampFromTicks(ticks):
-    """
-    Constructs an object holding a time stamp value from the given ticks
-    value (number of seconds since the epoch; see the documentation of the
-    standard Python time module for details).
+def _timestamp_from_ticks(ticks):
+    """Based on PEP-249 Implementation Hints for Module Authors:
+
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
     return Timestamp(*time.localtime(ticks)[:6])
 
 
-def Binary(string):
-    """
-    Constructs an object capable of holding a binary (long) string value.
-    """
-    return b64encode(string)
+class _DBAPITypeObject(object):
+    """Implementation of a helper class used for type comparison among similar
+    but possibly different types.
 
 
-class BINARY:
-    """
-    Describes (long) binary columns in a database (e.g. LONG, RAW, BLOBS).
+    See
+    https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """
 
-    # TODO: Implement me.
-    pass
+    def __init__(self, *values):
+        self.values = values
+
+    def __eq__(self, other):
+        return other in self.values
 
 
-class STRING:
-    """
-    Describes columns in a database that are string-based (e.g. CHAR).
-    """
+Date = datetime.date
+Time = datetime.time
+Timestamp = datetime.datetime
+DateFromTicks = _date_from_ticks
+TimeFromTicks = _time_from_ticks
+TimestampFromTicks = _timestamp_from_ticks
+Binary = b64encode
 
-    # TODO: Implement me.
-    pass
-
-
-class NUMBER:
-    """
-    Describes numeric columns in a database.
-    """
-
-    # TODO: Implement me.
-    pass
-
-
-class DATETIME:
-    """
-    Describes date/time columns in a database.
-    """
-
-    # TODO: Implement me.
-    pass
-
-
-class ROWID:
-    """Describes the "Row ID" column in a database."""
-
-    # TODO: Implement me.
-    pass
+STRING = "STRING"
+BINARY = _DBAPITypeObject("TYPE_CODE_UNSPECIFIED", "BYTES", "ARRAY", "STRUCT")
+NUMBER = _DBAPITypeObject("BOOL", "INT64", "FLOAT64", "NUMERIC")
+DATETIME = _DBAPITypeObject("TIMESTAMP", "DATE")
+ROWID = "STRING"
 
 
 class TimestampStr(str):
-    """
+    """[inherited from the alpha release]
+
+    TODO: Decide whether this class is necessary
+
     TimestampStr exists so that we can purposefully format types as timestamps
     compatible with Cloud Spanner's TIMESTAMP type, but right before making
     queries, it'll help differentiate between normal strings and the case of
@@ -116,7 +88,10 @@ class TimestampStr(str):
 
 
 class DateStr(str):
-    """
+    """[inherited from the alpha release]
+
+    TODO: Decide whether this class is necessary
+
     DateStr is a sentinel type to help format Django dates as
     compatible with Cloud Spanner's DATE type, but right before making
     queries, it'll help differentiate between normal strings and the case of

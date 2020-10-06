@@ -65,7 +65,7 @@ mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch stabl
 # Install dependencies for Django tests.
 sudo apt-get update
 apt-get install -y libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
-cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt && pip3 install --upgrade requests; cd ../../
 
 if [[ $USE_SPANNER_EMULATOR != 1 ]]
 then

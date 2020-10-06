@@ -4,7 +4,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-"""Database cursor API."""
+"""Database cursor for Google Cloud Spanner DB-API."""
 
 from google.api_core.exceptions import (
     AlreadyExists,
@@ -53,12 +53,11 @@ code_to_display_size = {
 }
 
 
-class Cursor:
-    """
-    Database cursor to manage the context of a fetch operation.
+class Cursor(object):
+    """Database cursor to manage the context of a fetch operation.
 
-    :type connection: :class:`spanner_dbapi.connection.Connection`
-    :param connection: Parent connection object for this Cursor.
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: A DB-API connection to Google Cloud Spanner.
     """
 
     def __init__(self, connection):
@@ -71,15 +70,53 @@ class Cursor:
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
 
-    def execute(self, sql, args=None):
+    @property
+    def description(self):
+        """Read-only attribute containing a sequence of the following items:
+
+        -   ``name``
+        -   ``type_code``
+        -   ``display_size``
+        -   ``internal_size``
+        -   ``precision``
+        -   ``scale``
+        -   ``null_ok``
         """
-        Abstracts and implements execute SQL statements on Cloud Spanner.
-        Args:
-            sql: A SQL statement
-            *args: variadic argument list
-            **kwargs: key worded arguments
-        Returns:
-            None
+        if not (self._res and self._res.metadata):
+            return None
+
+        row_type = self._res.metadata.row_type
+        columns = []
+        for field in row_type.fields:
+            columns.append(
+                ColumnInfo(
+                    name=field.name,
+                    type_code=field.type.code,
+                    # Size of the SQL type of the column.
+                    display_size=code_to_display_size.get(field.type.code),
+                    # Client perceived size of the column.
+                    internal_size=field.ByteSize(),
+                )
+            )
+        return tuple(columns)
+
+    @property
+    def rowcount(self):
+        """The number of rows produced by the last `.execute()`."""
+        return self._row_count
+
+    def close(self):
+        """Closes this Cursor, making it unusable from this point forward."""
+        self._is_closed = True
+
+    def execute(self, sql, params=None):
+        """Prepares and executes a Spanner database operation.
+
+        :type sql: str
+        :param sql: A SQL query statement.
+
+        :type params: list
+        :param params: Additional parameters to supplement the SQL query.
         """
         self._raise_if_closed()
 
@@ -100,11 +137,13 @@ class Cursor:
             self._run_prior_DDL_statements()
 
             if classification == STMT_NON_UPDATING:
-                self.__handle_DQL(sql, args or None)
+                self.__handle_DQL(sql, params or None)
             elif classification == STMT_INSERT:
-                self.__handle_insert(sql, args or None)
+                self.__handle_insert(sql, params or None)
             else:
-                self.__handle_update(sql, args or None)
+                self._connection.in_transaction(
+                    self.__do_execute_update, sql, params
+                )
         except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except InvalidArgument as e:
@@ -112,8 +151,73 @@ class Cursor:
         except InternalServerError as e:
             raise OperationalError(e.details if hasattr(e, "details") else e)
 
-    def __handle_update(self, sql, params):
-        self._connection.in_transaction(self.__do_execute_update, sql, params)
+    def executemany(self, operation, seq_of_params):
+        """Execute the given SQL with every parameters set
+        from the given sequence of parameters.
+
+        :type operation: str
+        :param operation: SQL code to execute.
+
+        :type seq_of_params: list
+        :param seq_of_params: Sequence of additional parameters to run
+                              the query with.
+        """
+        self._raise_if_closed()
+
+        for params in seq_of_params:
+            self.execute(operation, params)
+
+    def fetchone(self):
+        """Fetch the next row of a query result set, returning a single
+        sequence, or None when no more data is available."""
+        self._raise_if_closed()
+
+        try:
+            return next(self)
+        except StopIteration:
+            return None
+
+    def fetchmany(self, size=None):
+        """Fetch the next set of rows of a query result, returning a sequence
+        of sequences. An empty sequence is returned when no more rows are available.
+
+        :type size: int
+        :param size: (Optional) The maximum number of results to fetch.
+
+        :raises InterfaceError:
+            if the previous call to .execute*() did not produce any result set
+            or if no call was issued yet.
+        """
+        self._raise_if_closed()
+
+        if size is None:
+            size = self.arraysize
+
+        items = []
+        for i in range(size):
+            try:
+                items.append(tuple(self.__next__()))
+            except StopIteration:
+                break
+
+        return items
+
+    def fetchall(self):
+        """Fetch all (remaining) rows of a query result, returning them as
+        a sequence of sequences."""
+        self._raise_if_closed()
+
+        return list(self.__iter__())
+
+    def setinputsizes(self, sizes):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        self._raise_if_closed()
+
+    def setoutputsize(self, size, column=None):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        self._raise_if_closed()
+
+    # To be refactored
 
     def __do_execute_update(self, transaction, sql, params, param_types=None):
         sql = ensure_where_clause(sql)
@@ -177,6 +281,9 @@ class Cursor:
         return transaction.insert(table, columns, values)
 
     def __handle_DQL(self, sql, params):
+        """
+
+        """
         with self._connection.read_snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
@@ -211,36 +318,12 @@ class Cursor:
         self.close()
 
     @property
-    def description(self):
-        if not (self._res and self._res.metadata):
-            return None
-
-        row_type = self._res.metadata.row_type
-        columns = []
-        for field in row_type.fields:
-            columns.append(
-                ColumnInfo(
-                    name=field.name,
-                    type_code=field.type.code,
-                    # Size of the SQL type of the column.
-                    display_size=code_to_display_size.get(field.type.code),
-                    # Client perceived size of the column.
-                    internal_size=field.ByteSize(),
-                )
-            )
-        return tuple(columns)
-
-    @property
-    def rowcount(self):
-        return self._row_count
-
-    @property
     def is_closed(self):
         """The cursor close indicator.
 
-        :rtype: :class:`bool`
-        :returns: True if this cursor or it's parent connection is closed, False
-                  otherwise.
+        :rtype: bool
+        :returns: True if the cursor or the parent connection is closed,
+                  otherwise False.
         """
         return self._is_closed or self._connection.is_closed
 
@@ -256,29 +339,6 @@ class Cursor:
         if self.is_closed:
             raise InterfaceError("cursor is already closed")
 
-    def close(self):
-        """Close this cursor.
-
-        The cursor will be unusable from this point forward.
-        """
-        self._is_closed = True
-
-    def executemany(self, operation, seq_of_params):
-        """
-        Execute the given SQL with every parameters set
-        from the given sequence of parameters.
-
-        :type operation: :class:`str`
-        :param operation: SQL code to execute.
-
-        :type seq_of_params: :class:`list`
-        :param seq_of_params: Sequence of params to run the query with.
-        """
-        self._raise_if_closed()
-
-        for params in seq_of_params:
-            self.execute(operation, params)
-
     def __next__(self):
         if self._itr is None:
             raise ProgrammingError("no results to return")
@@ -289,55 +349,9 @@ class Cursor:
             raise ProgrammingError("no results to return")
         return self._itr
 
-    def fetchone(self):
-        self._raise_if_closed()
-
-        try:
-            return next(self)
-        except StopIteration:
-            return None
-
-    def fetchall(self):
-        self._raise_if_closed()
-
-        return list(self.__iter__())
-
-    def fetchmany(self, size=None):
-        """
-        Fetch the next set of rows of a query result, returning a sequence of sequences.
-        An empty sequence is returned when no more rows are available.
-
-        Args:
-            size: optional integer to determine the maximum number of results to fetch.
-
-
-        Raises:
-            Error if the previous call to .execute*() did not produce any result set
-            or if no call was issued yet.
-        """
-        self._raise_if_closed()
-
-        if size is None:
-            size = self.arraysize
-
-        items = []
-        for i in range(size):
-            try:
-                items.append(tuple(self.__next__()))
-            except StopIteration:
-                break
-
-        return items
-
     @property
     def lastrowid(self):
         return None
-
-    def setinputsizes(sizes):
-        raise ProgrammingError("Unimplemented")
-
-    def setoutputsize(size, column=None):
-        raise ProgrammingError("Unimplemented")
 
     def _run_prior_DDL_statements(self):
         return self._connection.run_prior_DDL_statements()

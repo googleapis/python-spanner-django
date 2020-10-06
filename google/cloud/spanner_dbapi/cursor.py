@@ -4,7 +4,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-"""Database cursor API."""
+"""Database cursor for Google Cloud Spanner DB-API."""
 
 from google.api_core.exceptions import (
     AlreadyExists,
@@ -54,11 +54,10 @@ code_to_display_size = {
 
 
 class Cursor:
-    """
-    Database cursor to manage the context of a fetch operation.
+    """Database cursor to manage the context of a fetch operation.
 
-    :type connection: :class:`spanner_dbapi.connection.Connection`
-    :param connection: Parent connection object for this Cursor.
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: A DB-API connection to Google Cloud Spanner.
     """
 
     def __init__(self, connection):
@@ -72,14 +71,13 @@ class Cursor:
         self.arraysize = 1
 
     def execute(self, sql, args=None):
-        """
-        Abstracts and implements execute SQL statements on Cloud Spanner.
-        Args:
-            sql: A SQL statement
-            *args: variadic argument list
-            **kwargs: key worded arguments
-        Returns:
-            None
+        """Prepares and executes a Spanner database operation.
+
+        :type sql: str
+        :param sql: A SQL query statement.
+
+        :type args: list
+        :param args: Additional parameters to supplement the SQL query.
         """
         self._raise_if_closed()
 
@@ -212,6 +210,16 @@ class Cursor:
 
     @property
     def description(self):
+        """Read-only attribute containing a sequence of the following items:
+
+        -   ``name``
+        -   ``type_code``
+        -   ``display_size``
+        -   ``internal_size``
+        -   ``precision``
+        -   ``scale``
+        -   ``null_ok``
+        """
         if not (self._res and self._res.metadata):
             return None
 
@@ -232,15 +240,16 @@ class Cursor:
 
     @property
     def rowcount(self):
+        """The number of rows produced by the last `.execute()`."""
         return self._row_count
 
     @property
     def is_closed(self):
         """The cursor close indicator.
 
-        :rtype: :class:`bool`
-        :returns: True if this cursor or it's parent connection is closed, False
-                  otherwise.
+        :rtype: bool
+        :returns: True if the cursor or the parent connection is closed,
+                  otherwise False.
         """
         return self._is_closed or self._connection.is_closed
 
@@ -257,22 +266,19 @@ class Cursor:
             raise InterfaceError("cursor is already closed")
 
     def close(self):
-        """Close this cursor.
-
-        The cursor will be unusable from this point forward.
-        """
+        """Closes this Cursor, making it unusable from this point forward."""
         self._is_closed = True
 
     def executemany(self, operation, seq_of_params):
-        """
-        Execute the given SQL with every parameters set
+        """Execute the given SQL with every parameters set
         from the given sequence of parameters.
 
-        :type operation: :class:`str`
+        :type operation: str
         :param operation: SQL code to execute.
 
-        :type seq_of_params: :class:`list`
-        :param seq_of_params: Sequence of params to run the query with.
+        :type seq_of_params: list
+        :param seq_of_params: Sequence of additional parameters to run
+                              the query with.
         """
         self._raise_if_closed()
 
@@ -290,6 +296,8 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
+        """Fetch the next row of a query result set, returning a single
+        sequence, or None when no more data is available."""
         self._raise_if_closed()
 
         try:
@@ -298,21 +306,22 @@ class Cursor:
             return None
 
     def fetchall(self):
+        """Fetch all (remaining) rows of a query result, returning them as
+        a sequence of sequences.
+        """
         self._raise_if_closed()
 
         return list(self.__iter__())
 
     def fetchmany(self, size=None):
-        """
-        Fetch the next set of rows of a query result, returning a sequence of sequences.
-        An empty sequence is returned when no more rows are available.
+        """Fetch the next set of rows of a query result, returning a sequence
+        of sequences. An empty sequence is returned when no more rows are available.
 
-        Args:
-            size: optional integer to determine the maximum number of results to fetch.
+        :type size: int
+        :param size: (Optional) The maximum number of results to fetch.
 
-
-        Raises:
-            Error if the previous call to .execute*() did not produce any result set
+        :raises InterfaceError:
+            if the previous call to .execute*() did not produce any result set
             or if no call was issued yet.
         """
         self._raise_if_closed()
@@ -334,9 +343,11 @@ class Cursor:
         return None
 
     def setinputsizes(sizes):
+        """A no-op, raising an error if the cursor or connection is closed."""
         raise ProgrammingError("Unimplemented")
 
     def setoutputsize(size, column=None):
+        """A no-op, raising an error if the cursor or connection is closed."""
         raise ProgrammingError("Unimplemented")
 
     def _run_prior_DDL_statements(self):

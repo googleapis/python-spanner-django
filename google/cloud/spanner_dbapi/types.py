@@ -44,7 +44,6 @@ class _DBAPITypeObject(object):
     """Implementation of a helper class used for type comparison among similar
     but possibly different types.
 
-
     See
     https://www.python.org/dev/peps/pep-0249/#implementation-hints-for-module-authors
     """

@@ -9,7 +9,7 @@ import re
 
 class PeekIterator:
     """
-    Peeks at the first element out of an iterator for the sake of operations
+    Peek at the first element out of an iterator for the sake of operations
     like auto-population of fields on reading the first element.
     If next's result is an instance of list, it'll be converted into a tuple
     to conform with DBAPI v2's sequence expectations.
@@ -53,7 +53,7 @@ re_UNICODE_POINTS = re.compile(r"([^\s]*[\u0080-\uFFFF]+[^\s]*)")
 
 
 def backtick_unicode(sql):
-    """Checks sql to be valid and splits it by segments.
+    """Check sql to be valid and splits it by segments.
 
     :type sql: str
     :param sql: SQL request.

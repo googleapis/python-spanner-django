@@ -61,7 +61,7 @@ class func:
 
 
 class terminal(str):
-    """Represents the unit symbol that can be part of a SQL values clause."""
+    """Represent the unit symbol that can be part of a SQL values clause."""
 
     pass
 
@@ -109,7 +109,7 @@ class a_args:
         return self.argv[index]
 
     def homogenous(self):
-        """Checks arguments to be homogenous.
+        """Check arguments to be homogenous.
 
         :rtype: bool
         :return: True if all arguments are in pyformat and have the same number
@@ -129,7 +129,7 @@ class a_args:
         return True
 
     def all_have_same_argc(self):
-        """Checks arguments' length.
+        """Check arguments' length.
 
         :rtype: bool
         :return: False if all arguments have the same length.
@@ -279,7 +279,7 @@ def expect(word, token):
 
 
 def as_values(values_stmt):
-    """Returns parsed values.
+    """Return parsed values.
 
     :type values_stmt: str
     :param values_stmt: Raw values.

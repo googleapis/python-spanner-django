@@ -403,7 +403,7 @@ def cast_for_spanner(param):
 
 def get_param_types(params):
     """
-    Returns a dictionary of :class:`spanner.param_types` for a dictionary of
+    Return a dictionary of :class:`spanner.param_types` for a dictionary of
     parameters.
 
     :type params: dict

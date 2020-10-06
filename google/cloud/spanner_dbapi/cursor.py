@@ -218,7 +218,7 @@ class Cursor:
 
     @property
     def description(self):
-        """Gives description of the table.
+        """Give description of the table.
 
         :rtype: tuple
         :returns: A tuple of columns' information.
@@ -243,7 +243,7 @@ class Cursor:
 
     @property
     def rowcount(self):
-        """Returns number of rows in the table.
+        """Return number of rows in the table.
 
         :rtype: int
         :returns: Number of rows that last .execute*() produced.
@@ -281,7 +281,7 @@ class Cursor:
 
     def executemany(self, operation, seq_of_params):
         """
-        Executes the given SQL with every parameters set from the given sequence
+        Execute the given SQL with every parameters set from the given sequence
         of parameters.
 
         :type operation: str
@@ -321,7 +321,7 @@ class Cursor:
             return None
 
     def fetchall(self):
-        """Fetches all elements.
+        """Fetch all elements.
 
         :rtype: list
         :returns: A list of fetched elements.
@@ -370,7 +370,7 @@ class Cursor:
         return self._connection.run_prior_DDL_statements()
 
     def list_tables(self):
-        """Lists tables of linked Database.
+        """List tables of linked Database.
 
         :rtype: str
         :returns: Tables with theirs' corresponding information.
@@ -378,7 +378,7 @@ class Cursor:
         return self._connection.list_tables()
 
     def run_sql_in_snapshot(self, sql):
-        """Runs SQL in snapshot.
+        """Run SQL in snapshot.
 
         :type sql: str
         :param sql: SQL request.
@@ -389,7 +389,7 @@ class Cursor:
         return self._connection.run_sql_in_snapshot(sql)
 
     def get_table_column_schema(self, table_name):
-        """Gets table column schema.
+        """Get table column schema.
 
         :type table_name: str
         :param table_name: Name of the table.

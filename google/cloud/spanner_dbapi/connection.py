@@ -66,7 +66,7 @@ class Connection:
         return self._dbhandle.update_ddl(ddl_statements).result()
 
     def read_snapshot(self):
-        """Returns a Snapshot of the linked Database.
+        """Return a Snapshot of the linked Database.
 
         :rtype: :class:`~google.cloud.spanner_v1.snapshot.Snapshot`
         :returns: A snapshot of the linked Database.
@@ -98,7 +98,7 @@ class Connection:
         return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
-        """Appends DDL statement to the existing list of DDL statements in
+        """Append DDL statement to the existing list of DDL statements in
         linked database.
 
         :type ddl_statements: list
@@ -109,7 +109,7 @@ class Connection:
         self._ddl_statements.append(ddl_statement)
 
     def run_prior_DDL_statements(self):
-        """Runs prior Operation.
+        """Run prior Operation.
 
         :rtype: str
         :returns: Updated statements.
@@ -125,7 +125,7 @@ class Connection:
         return self.__handle_update_ddl(ddl_statements)
 
     def list_tables(self):
-        """Lists tables contained within the linked Database.
+        """List tables contained within the linked Database.
 
         :rtype: list
         :returns: Tables with corresponding information.
@@ -142,7 +142,7 @@ class Connection:
         )
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
-        """Runs an SQL request on the linked Database snapshot.
+        """Run an SQL request on the linked Database snapshot.
 
         :type sql: str
         :param sql: SQL request.
@@ -168,7 +168,7 @@ class Connection:
             return list(res)
 
     def get_table_column_schema(self, table_name):
-        """Gets table column schema.
+        """Get table column schema.
 
         :type table_name: str
         :param table_name: Name of the table.

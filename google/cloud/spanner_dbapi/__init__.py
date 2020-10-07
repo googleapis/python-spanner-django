@@ -34,9 +34,10 @@ from .types import (
     Time,
     TimeFromTicks,
     Timestamp,
+    TimestampStr,
     TimestampFromTicks,
 )
-from .version import google_client_info
+from .version import google_client_info, DEFAULT_USER_AGENT
 
 apilevel = "2.0"  # supports DP-API 2.0 level.
 paramstyle = "format"  # ANSI C printf format codes, e.g. ...WHERE name=%s.

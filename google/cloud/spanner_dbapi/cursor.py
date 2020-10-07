@@ -13,6 +13,9 @@ from google.api_core.exceptions import (
     InvalidArgument,
 )
 from google.cloud.spanner_v1 import param_types
+from collections import namedtuple
+
+from google.cloud import spanner_v1 as spanner
 
 from .exceptions import (
     IntegrityError,
@@ -30,10 +33,12 @@ from .parse_utils import (
     parse_insert,
     sql_pyformat_args_to_spanner,
 )
+
 from .utils import PeekIterator
 
 _UNSET_COUNT = -1
 
+ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 # This table maps spanner_types to Spanner's data type sizes as per
 #   https://cloud.google.com/spanner/docs/data-types#allowable-types
@@ -71,6 +76,24 @@ class Cursor(object):
         self.arraysize = 1
 
     @property
+    def connection(self):
+        return self._connection
+
+    @property
+    def lastrowid(self):
+        return None
+
+    @property
+    def is_closed(self):
+        """The cursor close indicator.
+
+        :rtype: bool
+        :returns: True if the cursor or the parent connection is closed,
+                  otherwise False.
+        """
+        return self._is_closed or self._connection.is_closed
+
+    @property
     def description(self):
         """Read-only attribute containing a sequence of the following items:
 
@@ -105,9 +128,38 @@ class Cursor(object):
         """The number of rows produced by the last `.execute()`."""
         return self._row_count
 
+    def _raise_if_closed(self):
+        """Raise an exception if this cursor is closed.
+
+        Helper to check this cursor's state before running a
+        SQL/DDL/DML query. If the parent connection is
+        already closed it also raises an error.
+
+        :raises: :class:`InterfaceError` if this cursor is closed.
+        """
+        if self.is_closed:
+            raise InterfaceError("Cursor and/or connection is already closed.")
+
+    def callproc(self, procname, args=None):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        self._raise_if_closed()
+
     def close(self):
         """Closes this Cursor, making it unusable from this point forward."""
         self._is_closed = True
+
+    def __do_execute_update(self, transaction, sql, params, param_types=None):
+        sql = ensure_where_clause(sql)
+        sql, params = sql_pyformat_args_to_spanner(sql, params)
+
+        res = transaction.execute_update(
+            sql, params=params, param_types=get_param_types(params)
+        )
+        self._itr = None
+        if type(res) == int:
+            self._row_count = res
+
+        return res
 
     def execute(self, sql, args=None):
         """Prepares and executes a Spanner database operation.
@@ -129,19 +181,23 @@ class Cursor(object):
         try:
             classification = classify_stmt(sql)
             if classification == STMT_DDL:
-                self._connection.append_ddl_statement(sql)
+                self._connection.ddl_statements.append(sql)
                 return
 
             # For every other operation, we've got to ensure that
             # any prior DDL statements were run.
-            self._run_prior_DDL_statements()
+            # self._run_prior_DDL_statements()
+            self._connection.run_prior_DDL_statements()
 
             if classification == STMT_NON_UPDATING:
                 self.__handle_DQL(sql, args or None)
             elif classification == STMT_INSERT:
                 self.__handle_insert(sql, args or None)
             else:
-                self.__handle_update(sql, args or None)
+                # self.__handle_update(sql, args or None)
+                self._connection.database.run_in_transaction(
+                    self.__do_execute_update, sql, args or None
+                )
         except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
         except InvalidArgument as e:
@@ -208,6 +264,10 @@ class Cursor(object):
 
         return list(self.__iter__())
 
+    def nextset(self):
+        """A no-op, raising an error if the cursor or connection is closed."""
+        self._raise_if_closed()
+
     def setinputsizes(self, sizes):
         """A no-op, raising an error if the cursor or connection is closed."""
         self._raise_if_closed()
@@ -216,21 +276,10 @@ class Cursor(object):
         """A no-op, raising an error if the cursor or connection is closed."""
         self._raise_if_closed()
 
-    def __handle_update(self, sql, params):
-        self._connection.in_transaction(self.__do_execute_update, sql, params)
-
-    def __do_execute_update(self, transaction, sql, params, param_types=None):
-        sql = ensure_where_clause(sql)
-        sql, params = sql_pyformat_args_to_spanner(sql, params)
-
-        res = transaction.execute_update(
-            sql, params=params, param_types=get_param_types(params)
-        )
-        self._itr = None
-        if type(res) == int:
-            self._row_count = res
-
-        return res
+    # def __handle_update(self, sql, params):
+    #     self._connection.database.run_in_transaction(
+    #         self.__do_execute_update, sql, params
+    #     )
 
     def __handle_insert(self, sql, params):
         parts = parse_insert(sql, params)
@@ -251,14 +300,14 @@ class Cursor(object):
         if parts.get("homogenous"):
             # The common case of multiple values being passed in
             # non-complex pyformat args and need to be uploaded in one RPC.
-            return self._connection.in_transaction(
+            return self._connection.database.run_in_transaction(
                 self.__do_execute_insert_homogenous, parts
             )
         else:
             # All the other cases that are esoteric and need
             #   transaction.execute_sql
             sql_params_list = parts.get("sql_params_list")
-            return self._connection.in_transaction(
+            return self._connection.database.run_in_transaction(
                 self.__do_execute_insert_heterogenous, sql_params_list
             )
 
@@ -281,7 +330,7 @@ class Cursor(object):
         return transaction.insert(table, columns, values)
 
     def __handle_DQL(self, sql, params):
-        with self._connection.read_snapshot() as snapshot:
+        with self._connection.database.snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
             sql, params = sql_pyformat_args_to_spanner(sql, params)
@@ -314,28 +363,6 @@ class Cursor(object):
     def __exit__(self, etype, value, traceback):
         self.close()
 
-    @property
-    def is_closed(self):
-        """The cursor close indicator.
-
-        :rtype: bool
-        :returns: True if the cursor or the parent connection is closed,
-                  otherwise False.
-        """
-        return self._is_closed or self._connection.is_closed
-
-    def _raise_if_closed(self):
-        """Raise an exception if this cursor is closed.
-
-        Helper to check this cursor's state before running a
-        SQL/DDL/DML query. If the parent connection is
-        already closed it also raises an error.
-
-        :raises: :class:`InterfaceError` if this cursor is closed.
-        """
-        if self.is_closed:
-            raise InterfaceError("Cursor and/or connection is already closed.")
-
     def __next__(self):
         if self._itr is None:
             raise ProgrammingError("no results to return")
@@ -346,21 +373,49 @@ class Cursor(object):
             raise ProgrammingError("no results to return")
         return self._itr
 
-    @property
-    def lastrowid(self):
-        return None
-
-    def _run_prior_DDL_statements(self):
-        return self._connection.run_prior_DDL_statements()
-
     def list_tables(self):
-        return self._connection.list_tables()
+        return self.run_sql_in_snapshot(
+            """
+            SELECT
+              t.table_name
+            FROM
+              information_schema.tables AS t
+            WHERE
+              t.table_catalog = '' and t.table_schema = ''
+            """
+        )
 
-    def run_sql_in_snapshot(self, sql):
-        return self._connection.run_sql_in_snapshot(sql)
+    def run_sql_in_snapshot(self, sql, params=None, param_types=None):
+        # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
+        # hence this method exists to circumvent that limit.
+        self._connection.run_prior_DDL_statements()
+
+        with self._connection.database.snapshot() as snapshot:
+            res = snapshot.execute_sql(
+                sql, params=params, param_types=param_types
+            )
+            return list(res)
 
     def get_table_column_schema(self, table_name):
-        return self._connection.get_table_column_schema(table_name)
+        rows = self.run_sql_in_snapshot(
+            """SELECT
+                COLUMN_NAME, IS_NULLABLE, SPANNER_TYPE
+            FROM
+                INFORMATION_SCHEMA.COLUMNS
+            WHERE
+                TABLE_SCHEMA = ''
+            AND
+                TABLE_NAME = @table_name""",
+            params={"table_name": table_name},
+            param_types={"table_name": spanner.param_types.STRING},
+        )
+
+        column_details = {}
+        for column_name, is_nullable, spanner_type in rows:
+            column_details[column_name] = ColumnDetails(
+                null_ok=is_nullable == "YES", spanner_type=spanner_type
+            )
+        return column_details
 
 
 class ColumnInfo:

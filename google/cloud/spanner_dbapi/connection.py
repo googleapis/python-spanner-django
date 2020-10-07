@@ -20,6 +20,7 @@ class Connection(object):
     :type database: :class:`~google.cloud.spanner_v1.database.Database`
     :param database: The database to which the connection is linked.
     """
+
     def __init__(self, database):
         self._database = database
         self._ddl_statements = []

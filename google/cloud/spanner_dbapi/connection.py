@@ -14,14 +14,20 @@ from .exceptions import InterfaceError
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
 
-class Connection:
-    def __init__(self, db_handle):
-        self._dbhandle = db_handle
+class Connection(object):
+    """DB-API Connection to a Google Cloud Spanner database.
+
+    :type database: :class:`~google.cloud.spanner_v1.database.Database`
+    :param database: The database to which the connection is linked.
+    """
+    def __init__(self, database):
+        self._database = database
         self._ddl_statements = []
 
         self.is_closed = False
 
     def cursor(self):
+        """Factory to create a DB-API Cursor."""
         self._raise_if_closed()
 
         return Cursor(self)
@@ -48,15 +54,15 @@ class Connection:
         """
         self._raise_if_closed()
         # Synchronously wait on the operation's completion.
-        return self._dbhandle.update_ddl(ddl_statements).result()
+        return self._database.update_ddl(ddl_statements).result()
 
     def read_snapshot(self):
         self._raise_if_closed()
-        return self._dbhandle.snapshot()
+        return self._database.snapshot()
 
     def in_transaction(self, fn, *args, **kwargs):
         self._raise_if_closed()
-        return self._dbhandle.run_in_transaction(fn, *args, **kwargs)
+        return self._database.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
         self._raise_if_closed()
@@ -90,7 +96,7 @@ class Connection:
         # hence this method exists to circumvent that limit.
         self.run_prior_DDL_statements()
 
-        with self._dbhandle.snapshot() as snapshot:
+        with self._database.snapshot() as snapshot:
             res = snapshot.execute_sql(
                 sql, params=params, param_types=param_types
             )
@@ -123,7 +129,7 @@ class Connection:
         The connection will be unusable from this point forward.
         """
         self.rollback()
-        self.__dbhandle = None
+        self._database = None
         self.is_closed = True
 
     def commit(self):
@@ -132,9 +138,8 @@ class Connection:
         self.run_prior_DDL_statements()
 
     def rollback(self):
+        """A no-op, raising an error if the connection is closed."""
         self._raise_if_closed()
-
-        # TODO: to be added.
 
     def __enter__(self):
         return self

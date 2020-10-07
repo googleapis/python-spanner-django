@@ -118,10 +118,10 @@ class Cursor(object):
         :type args: list
         :param args: Additional parameters to supplement the SQL query.
         """
-        self._raise_if_closed()
-
         if not self._connection:
             raise ProgrammingError("Cursor is not connected to the database")
+
+        self._raise_if_closed()
 
         self._res = None
 
@@ -210,11 +210,11 @@ class Cursor(object):
 
     def setinputsizes(self, sizes):
         """A no-op, raising an error if the cursor or connection is closed."""
-        pass
+        self._raise_if_closed()
 
     def setoutputsize(self, size, column=None):
         """A no-op, raising an error if the cursor or connection is closed."""
-        pass
+        self._raise_if_closed()
 
     def __handle_update(self, sql, params):
         self._connection.in_transaction(self.__do_execute_update, sql, params)

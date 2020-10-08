@@ -91,6 +91,9 @@ def sanitize_literals_for_upload(s):
 
     * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
 
+    :type s: str
+    :param s: string with literals to be fitted for consumption
+
     :rtype: str
     :returns: Sanitized string for uploading.
     """

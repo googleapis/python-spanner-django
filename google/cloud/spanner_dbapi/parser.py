@@ -132,7 +132,7 @@ class a_args:
         """Check arguments' length.
 
         :rtype: bool
-        :return: False if all arguments have the same length.
+        :return: False if sequences of arguments have the same length.
         """
         if len(self) == 0:
             return True
@@ -160,7 +160,7 @@ pyfmt_str = terminal("%s")
 
 
 def expect(word, token):
-    """Parse given expression recursively.
+    """Parse the given expression recursively.
 
     :type word: str
     :param word: A string expression.

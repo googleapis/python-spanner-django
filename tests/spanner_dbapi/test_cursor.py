@@ -9,12 +9,11 @@
 import unittest
 from unittest import mock
 
-from google.cloud.spanner_dbapi import connect, InterfaceError
-from google.cloud.spanner_dbapi.cursor import ColumnInfo
-
 
 class TestCursor(unittest.TestCase):
     def test_close(self):
+        from google.cloud.spanner_dbapi import connect, InterfaceError
+
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists",
             return_value=True,
@@ -34,27 +33,9 @@ class TestCursor(unittest.TestCase):
         with self.assertRaises(InterfaceError):
             cursor.execute("SELECT * FROM database")
 
-    def test_connection_closed(self):
-        with mock.patch(
-            "google.cloud.spanner_v1.instance.Instance.exists",
-            return_value=True,
-        ):
-            with mock.patch(
-                "google.cloud.spanner_v1.database.Database.exists",
-                return_value=True,
-            ):
-                connection = connect("test-instance", "test-database")
-
-        cursor = connection.cursor()
-        self.assertFalse(cursor.is_closed)
-
-        connection.close()
-
-        self.assertTrue(cursor.is_closed)
-        with self.assertRaises(InterfaceError):
-            cursor.execute("SELECT * FROM database")
-
     def test_executemany_on_closed_cursor(self):
+        from google.cloud.spanner_dbapi import connect, InterfaceError
+
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists",
             return_value=True,
@@ -74,6 +55,8 @@ class TestCursor(unittest.TestCase):
             )
 
     def test_executemany(self):
+        from google.cloud.spanner_dbapi import connect
+
         operation = """SELECT * FROM table1 WHERE "col1" = @a1"""
         params_seq = ((1,), (2,))
 
@@ -100,6 +83,8 @@ class TestCursor(unittest.TestCase):
 
 class TestColumns(unittest.TestCase):
     def test_ctor(self):
+        from google.cloud.spanner_dbapi.cursor import ColumnInfo
+
         name = "col-name"
         type_code = 8
         display_size = 5
@@ -139,6 +124,8 @@ class TestColumns(unittest.TestCase):
         )
 
     def test___get_item__(self):
+        from google.cloud.spanner_dbapi.cursor import ColumnInfo
+
         fields = ("col-name", 8, 5, 10, 3, None, False)
         cols = ColumnInfo(*fields)
 
@@ -146,6 +133,8 @@ class TestColumns(unittest.TestCase):
             self.assertEqual(cols[i], fields[i])
 
     def test___str__(self):
+        from google.cloud.spanner_dbapi.cursor import ColumnInfo
+
         cols = ColumnInfo("col-name", 8, None, 10, 3, None, False)
 
         self.assertEqual(

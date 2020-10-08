@@ -22,14 +22,12 @@ class Connection(object):
     :param database: The database to which the connection is linked.
     """
 
-    def __init__(self, database):
-        self._database = database
-        self.ddl_statements = []
+    def __init__(self, instance, database):
+        self.instance = instance
+        self.database = database
         self.is_closed = False
 
-    @property
-    def database(self):
-        return self._database
+        self.ddl_statements = []
 
     def _raise_if_closed(self):
         """Helper to check the connection state before running a query.
@@ -45,7 +43,7 @@ class Connection(object):
 
         The connection will be unusable from this point forward.
         """
-        self._database = None
+        self.database = None
         self.is_closed = True
 
     def commit(self):
@@ -73,7 +71,7 @@ class Connection(object):
         ddl_statements = self.ddl_statements
         self.ddl_statements = []
 
-        return self._database.update_ddl(ddl_statements).result()
+        return self.database.update_ddl(ddl_statements).result()
 
     def __enter__(self):
         return self
@@ -133,4 +131,4 @@ def connect(
     if not database.exists():
         raise ValueError("database '%s' does not exist." % database_id)
 
-    return Connection(database)
+    return Connection(instance, database)

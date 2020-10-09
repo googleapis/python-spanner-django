@@ -90,7 +90,11 @@ class Cursor:
         self._res = None
 
         if not self._connection.autocommit:
-            if not self.transaction:
+            if (
+                not self.transaction
+                or self.transaction.committed
+                or self.transaction.rolled_back
+            ):
                 self.transaction = self._connection.session().transaction()
                 self.transaction.begin()
                 self._connection.transactions.append(self.transaction)

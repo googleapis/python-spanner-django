@@ -65,13 +65,11 @@ class Connection(object):
     def run_prior_DDL_statements(self):
         self._raise_if_closed()
 
-        if not self.ddl_statements:
-            return
+        if self.ddl_statements:
+            ddl_statements = self.ddl_statements
+            self.ddl_statements = []
 
-        ddl_statements = self.ddl_statements
-        self.ddl_statements = []
-
-        return self.database.update_ddl(ddl_statements).result()
+            return self.database.update_ddl(ddl_statements).result()
 
     def __enter__(self):
         return self

@@ -68,6 +68,7 @@ class Cursor:
         self._connection = connection
         self._is_closed = False
 
+        self.transaction = None
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
 
@@ -87,6 +88,16 @@ class Cursor:
             raise ProgrammingError("Cursor is not connected to the database")
 
         self._res = None
+
+        if not self._connection.autocommit:
+            if not self.transaction:
+                self.transaction = self._connection.session().transaction()
+                self.transaction.begin()
+                self._connection.transactions.append(self.transaction)
+
+            self._res = self.transaction.execute_sql(sql)
+            self._itr = PeekIterator(self._res)
+            return
 
         # Classify whether this is a read-only SQL statement.
         try:

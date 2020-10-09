@@ -10,15 +10,12 @@ from collections import namedtuple
 import warnings
 
 from google.cloud import spanner_v1
+from google.cloud.spanner_v1.pool import BurstyPool
 
 from .cursor import Cursor
 from .exceptions import InterfaceError
 
-AUTOCOMMIT_MODE_WARNING = (
-    "This method is non-operational, as Cloud Spanner"
-    "DB API always works in `autocommit` mode."
-    "See https://github.com/googleapis/python-spanner-django#transaction-management-isnt-supported"
-)
+AUTOCOMMIT_MODE_WARNING = "This method is non-operational in autocommit mode"
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
 
@@ -37,11 +34,25 @@ class Connection:
     """
 
     def __init__(self, instance, database):
+        self._sessions_pool = BurstyPool()
+        self._sessions_pool.bind(database)
+
         self.instance = instance
         self.database = database
-        self.is_closed = False
 
         self._ddl_statements = []
+        self.transactions = []
+
+        self.is_closed = False
+        self.autocommit = True
+
+    def session(self):
+        """Get a Cloud Spanner session.
+
+        :rtype: :class:`google.cloud.spanner_v1.session.Session`
+        :returns: Cloud Spanner session object ready to use.
+        """
+        return self._sessions_pool.get()
 
     def cursor(self):
         self._raise_if_closed()
@@ -149,11 +160,23 @@ class Connection:
 
     def commit(self):
         """Commit all the pending transactions."""
-        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        if self.autocommit:
+            warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        else:
+            for transaction in self.transactions:
+                transaction.commit()
+
+            self.transactions = []
 
     def rollback(self):
         """Rollback all the pending transactions."""
-        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        if self.autocommit:
+            warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        else:
+            for transaction in self.transactions:
+                transaction.rollback()
+
+            self.transactions = []
 
     def __enter__(self):
         return self

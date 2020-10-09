@@ -17,6 +17,9 @@ set -eo pipefail
 
 cd github/python-spanner-django
 
+python3.6 -m venv env
+source env/bin/activate
+
 # Disable buffering, so that the logs stream through.
 export PYTHONUNBUFFERED=1
 
@@ -34,9 +37,9 @@ python3.6 -m pip uninstall --yes --quiet nox-automation
 
 # Install nox
 python3.6 -m pip install --upgrade --quiet nox
-python3.6 -m pip install --upgrade requests
-python3.8 -m pip install --upgrade requests
 python3.6 -m nox --version
+
+python3.6 -m pip install --upgrade requests
 
 # If NOX_SESSION is set, it only runs the specified session,
 # otherwise run all the sessions.
@@ -56,7 +59,6 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 export USE_SPANNER_EMULATOR=0
 
 pip3 install .
-pip3 install --upgrade requests
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"
@@ -65,7 +67,7 @@ mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch stabl
 # Install dependencies for Django tests.
 sudo apt-get update
 apt-get install -y libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
-cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt && pip3 uninstall -y requests && pip3 install --upgrade requests; cd ../../
+cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 
 if [[ $USE_SPANNER_EMULATOR != 1 ]]
 then

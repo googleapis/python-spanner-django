@@ -90,7 +90,7 @@ class TestConnection(unittest.TestCase):
             connection.run_prior_DDL_statements()
             mock_database.update_ddl.assert_not_called()
 
-            ddl = ['ddl']
+            ddl = ["ddl"]
             connection.ddl_statements = ddl
 
             connection.run_prior_DDL_statements()

@@ -165,7 +165,7 @@ class Cursor(object):
             if classification == parse_utils.STMT_NON_UPDATING:
                 self._handle_DQL(sql, args or None)
             elif classification == parse_utils.STMT_INSERT:
-                _helpers.handle_insert(sql, args or None)
+                _helpers.handle_insert(self._connection, sql, args or None)
             else:
                 self._connection.database.run_in_transaction(
                     self._do_execute_update, sql, args or None

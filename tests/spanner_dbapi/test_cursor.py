@@ -7,7 +7,7 @@
 """Cursor() class unit tests."""
 
 import unittest
-from unittest import mock
+import mock
 
 
 class TestCursor(unittest.TestCase):
@@ -105,9 +105,10 @@ class TestCursor(unittest.TestCase):
             "google.cloud.spanner_dbapi.parse_utils.classify_stmt",
             return_value=parse_utils.STMT_DDL,
         ) as mock_classify_stmt:
-            cursor.execute(sql="sql")
-            mock_classify_stmt.assert_called()
-            self.assertEqual(cursor._connection.ddl_statements, ["sql"])
+            sql = 'sql'
+            cursor.execute(sql=sql)
+            mock_classify_stmt.assert_called_once_with(sql)
+            self.assertEqual(cursor._connection.ddl_statements, [sql])
 
         with mock.patch(
             "google.cloud.spanner_dbapi.parse_utils.classify_stmt",

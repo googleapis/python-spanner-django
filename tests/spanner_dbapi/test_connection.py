@@ -61,7 +61,7 @@ class TestConnection(unittest.TestCase):
             "google.cloud.spanner_dbapi.connection.Connection.run_prior_DDL_statements"
         ) as run_ddl_mock:
             connection.commit()
-            run_ddl_mock.assert_called_once()
+            run_ddl_mock.assert_called_once_with()
 
         connection.is_closed = True
 
@@ -77,7 +77,7 @@ class TestConnection(unittest.TestCase):
             "google.cloud.spanner_dbapi.connection.Connection._raise_if_closed"
         ) as check_closed_mock:
             connection.rollback()
-            check_closed_mock.assert_called_once()
+            check_closed_mock.assert_called_once_with()
 
     def test_run_prior_DDL_statements(self):
         from google.cloud.spanner_dbapi import Connection, InterfaceError
@@ -90,10 +90,11 @@ class TestConnection(unittest.TestCase):
             connection.run_prior_DDL_statements()
             mock_database.update_ddl.assert_not_called()
 
-            connection.ddl_statements = ["ddl"]
+            ddl = ['ddl']
+            connection.ddl_statements = ddl
 
             connection.run_prior_DDL_statements()
-            mock_database.update_ddl.assert_called_once()
+            mock_database.update_ddl.assert_called_once_with(ddl)
 
             connection.is_closed = True
 

@@ -69,13 +69,13 @@ def default(session):
     session.run(
         "py.test",
         "--quiet",
-        "--cov=django_spanner",
+        # "--cov=django_spanner",
         "--cov=google.cloud",
         "--cov=tests.spanner_dbapi",
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=0",
+        "--cov-fail-under=90",
         os.path.join("tests", "spanner_dbapi"),
         *session.posargs
     )

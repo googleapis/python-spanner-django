@@ -22,8 +22,8 @@ def _make_credentials():
 class TestConnection(unittest.TestCase):
 
     PROJECT = "test-project"
-    INSTANCE = 'test-instance'
-    DATABASE = 'test-database'
+    INSTANCE = "test-instance"
+    DATABASE = "test-database"
     USER_AGENT = "user-agent"
     CREDENTIALS = _make_credentials()
 
@@ -69,7 +69,7 @@ class TestConnection(unittest.TestCase):
             connection.commit()
 
     def test_rollback(self):
-        from google.cloud.spanner_dbapi import Connection, InterfaceError
+        from google.cloud.spanner_dbapi import Connection
 
         connection = Connection(self.INSTANCE, self.DATABASE)
 
@@ -83,15 +83,14 @@ class TestConnection(unittest.TestCase):
         from google.cloud.spanner_dbapi import Connection, InterfaceError
 
         with mock.patch(
-            "google.cloud.spanner_v1.database.Database",
-            autospec=True,
+            "google.cloud.spanner_v1.database.Database", autospec=True,
         ) as mock_database:
             connection = Connection(self.INSTANCE, mock_database)
 
             connection.run_prior_DDL_statements()
             mock_database.update_ddl.assert_not_called()
 
-            connection.ddl_statements = ['ddl']
+            connection.ddl_statements = ["ddl"]
 
             connection.run_prior_DDL_statements()
             mock_database.update_ddl.assert_called_once()

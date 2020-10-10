@@ -6,56 +6,32 @@
 
 """Database cursor for Google Cloud Spanner DB-API."""
 
-from google.api_core.exceptions import (
-    AlreadyExists,
-    FailedPrecondition,
-    InternalServerError,
-    InvalidArgument,
-)
-from google.cloud.spanner_v1 import param_types
+from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import FailedPrecondition
+from google.api_core.exceptions import InternalServerError
+from google.api_core.exceptions import InvalidArgument
+
 from collections import namedtuple
 
 from google.cloud import spanner_v1 as spanner
 
-from .exceptions import (
-    IntegrityError,
-    InterfaceError,
-    OperationalError,
-    ProgrammingError,
-)
-from .parse_utils import (
-    STMT_DDL,
-    STMT_INSERT,
-    STMT_NON_UPDATING,
-    classify_stmt,
-    ensure_where_clause,
-    get_param_types,
-    parse_insert,
-    sql_pyformat_args_to_spanner,
-)
+from google.cloud.spanner_dbapi.exceptions import IntegrityError
+from google.cloud.spanner_dbapi.exceptions import InterfaceError
+from google.cloud.spanner_dbapi.exceptions import OperationalError
+from google.cloud.spanner_dbapi.exceptions import ProgrammingError
+
+from google.cloud.spanner_dbapi import _helpers
+from google.cloud.spanner_dbapi._helpers import ColumnInfo
+from google.cloud.spanner_dbapi._helpers import code_to_display_size
+
+from google.cloud.spanner_dbapi import parse_utils
+from google.cloud.spanner_dbapi.parse_utils import get_param_types
 
 from .utils import PeekIterator
 
 _UNSET_COUNT = -1
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
-
-# This table maps spanner_types to Spanner's data type sizes as per
-#   https://cloud.google.com/spanner/docs/data-types#allowable-types
-# It is used to map `display_size` to a known type for Cursor.description
-# after a row fetch.
-# Since ResultMetadata
-#   https://cloud.google.com/spanner/docs/reference/rest/v1/ResultSetMetadata
-# does not send back the actual size, we have to lookup the respective size.
-# Some fields' sizes are dependent upon the dynamic data hence aren't sent back
-# by Cloud Spanner.
-code_to_display_size = {
-    param_types.BOOL.code: 1,
-    param_types.DATE.code: 4,
-    param_types.FLOAT64.code: 8,
-    param_types.INT64.code: 8,
-    param_types.TIMESTAMP.code: 12,
-}
 
 
 class Cursor(object):
@@ -67,7 +43,7 @@ class Cursor(object):
 
     def __init__(self, connection):
         self._itr = None
-        self._res = None
+        self._result_set = None
         self._row_count = _UNSET_COUNT
         self._connection = connection
         self._is_closed = False
@@ -78,10 +54,6 @@ class Cursor(object):
     @property
     def connection(self):
         return self._connection
-
-    @property
-    def lastrowid(self):
-        return None
 
     @property
     def is_closed(self):
@@ -105,22 +77,23 @@ class Cursor(object):
         -   ``scale``
         -   ``null_ok``
         """
-        if not (self._res and self._res.metadata):
+        if not (self._result_set and self._result_set.metadata):
             return None
 
-        row_type = self._res.metadata.row_type
+        row_type = self._result_set.metadata.row_type
         columns = []
+
         for field in row_type.fields:
-            columns.append(
-                ColumnInfo(
-                    name=field.name,
-                    type_code=field.type.code,
-                    # Size of the SQL type of the column.
-                    display_size=code_to_display_size.get(field.type.code),
-                    # Client perceived size of the column.
-                    internal_size=field.ByteSize(),
-                )
+            column_info = ColumnInfo(
+                name=field.name,
+                type_code=field.type.code,
+                # Size of the SQL type of the column.
+                display_size=code_to_display_size.get(field.type.code),
+                # Client perceived size of the column.
+                internal_size=field.ByteSize(),
             )
+            columns.append(column_info)
+
         return tuple(columns)
 
     @property
@@ -148,18 +121,18 @@ class Cursor(object):
         """Closes this Cursor, making it unusable from this point forward."""
         self._is_closed = True
 
-    def __do_execute_update(self, transaction, sql, params, param_types=None):
-        sql = ensure_where_clause(sql)
-        sql, params = sql_pyformat_args_to_spanner(sql, params)
+    def _do_execute_update(self, transaction, sql, params, param_types=None):
+        sql = parse_utils.ensure_where_clause(sql)
+        sql, params = parse_utils.sql_pyformat_args_to_spanner(sql, params)
 
-        res = transaction.execute_update(
+        result = transaction.execute_update(
             sql, params=params, param_types=get_param_types(params)
         )
         self._itr = None
-        if type(res) == int:
-            self._row_count = res
+        if type(result) == int:
+            self._row_count = result
 
-        return res
+        return result
 
     def execute(self, sql, args=None):
         """Prepares and executes a Spanner database operation.
@@ -175,12 +148,12 @@ class Cursor(object):
 
         self._raise_if_closed()
 
-        self._res = None
+        self._result_set = None
 
         # Classify whether this is a read-only SQL statement.
         try:
-            classification = classify_stmt(sql)
-            if classification == STMT_DDL:
+            classification = parse_utils.classify_stmt(sql)
+            if classification == parse_utils.STMT_DDL:
                 self._connection.ddl_statements.append(sql)
                 return
 
@@ -189,14 +162,13 @@ class Cursor(object):
             # self._run_prior_DDL_statements()
             self._connection.run_prior_DDL_statements()
 
-            if classification == STMT_NON_UPDATING:
-                self.__handle_DQL(sql, args or None)
-            elif classification == STMT_INSERT:
-                self.__handle_insert(sql, args or None)
+            if classification == parse_utils.STMT_NON_UPDATING:
+                self._handle_DQL(sql, args or None)
+            elif classification == parse_utils.STMT_INSERT:
+                _helpers.handle_insert(sql, args or None)
             else:
-                # self.__handle_update(sql, args or None)
                 self._connection.database.run_in_transaction(
-                    self.__do_execute_update, sql, args or None
+                    self._do_execute_update, sql, args or None
                 )
         except (AlreadyExists, FailedPrecondition) as e:
             raise IntegrityError(e.details if hasattr(e, "details") else e)
@@ -276,64 +248,11 @@ class Cursor(object):
         """A no-op, raising an error if the cursor or connection is closed."""
         self._raise_if_closed()
 
-    # def __handle_update(self, sql, params):
-    #     self._connection.database.run_in_transaction(
-    #         self.__do_execute_update, sql, params
-    #     )
-
-    def __handle_insert(self, sql, params):
-        parts = parse_insert(sql, params)
-
-        # The split between the two styles exists because:
-        # in the common case of multiple values being passed
-        # with simple pyformat arguments,
-        #   SQL: INSERT INTO T (f1, f2) VALUES (%s, %s, %s)
-        #   Params:   [(1, 2, 3, 4, 5, 6, 7, 8, 9, 10,)]
-        # we can take advantage of a single RPC with:
-        #       transaction.insert(table, columns, values)
-        # instead of invoking:
-        #   with transaction:
-        #       for sql, params in sql_params_list:
-        #           transaction.execute_sql(sql, params, param_types)
-        # which invokes more RPCs and is more costly.
-
-        if parts.get("homogenous"):
-            # The common case of multiple values being passed in
-            # non-complex pyformat args and need to be uploaded in one RPC.
-            return self._connection.database.run_in_transaction(
-                self.__do_execute_insert_homogenous, parts
-            )
-        else:
-            # All the other cases that are esoteric and need
-            #   transaction.execute_sql
-            sql_params_list = parts.get("sql_params_list")
-            return self._connection.database.run_in_transaction(
-                self.__do_execute_insert_heterogenous, sql_params_list
-            )
-
-    def __do_execute_insert_heterogenous(self, transaction, sql_params_list):
-        for sql, params in sql_params_list:
-            sql, params = sql_pyformat_args_to_spanner(sql, params)
-            param_types = get_param_types(params)
-            res = transaction.execute_sql(
-                sql, params=params, param_types=param_types
-            )
-            # TODO: File a bug with Cloud Spanner and the Python client maintainers
-            # about a lost commit when res isn't read from.
-            _ = list(res)
-
-    def __do_execute_insert_homogenous(self, transaction, parts):
-        # Perform an insert in one shot.
-        table = parts.get("table")
-        columns = parts.get("columns")
-        values = parts.get("values")
-        return transaction.insert(table, columns, values)
-
-    def __handle_DQL(self, sql, params):
+    def _handle_DQL(self, sql, params):
         with self._connection.database.snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
-            sql, params = sql_pyformat_args_to_spanner(sql, params)
+            sql, params = parse_utils.sql_pyformat_args_to_spanner(sql, params)
             res = snapshot.execute_sql(
                 sql, params=params, param_types=get_param_types(params)
             )
@@ -349,10 +268,10 @@ class Cursor(object):
                 # are for .fetchone() with those that would result in
                 # many items returns a RuntimeError if .fetchone() is
                 # invoked and vice versa.
-                self._res = res
-                # Read the first element so that StreamedResult can
+                self._result_set = res
+                # Read the first element so that the StreamedResultSet can
                 # return the metadata after a DQL statement. See issue #155.
-                self._itr = PeekIterator(self._res)
+                self._itr = PeekIterator(self._result_set)
                 # Unfortunately, Spanner doesn't seem to send back
                 # information about the number of rows available.
                 self._row_count = _UNSET_COUNT
@@ -374,16 +293,7 @@ class Cursor(object):
         return self._itr
 
     def list_tables(self):
-        return self.run_sql_in_snapshot(
-            """
-            SELECT
-              t.table_name
-            FROM
-              information_schema.tables AS t
-            WHERE
-              t.table_catalog = '' and t.table_schema = ''
-            """
-        )
+        return self.run_sql_in_snapshot(_helpers.SQL_LIST_TABLES)
 
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
@@ -398,14 +308,7 @@ class Cursor(object):
 
     def get_table_column_schema(self, table_name):
         rows = self.run_sql_in_snapshot(
-            """SELECT
-                COLUMN_NAME, IS_NULLABLE, SPANNER_TYPE
-            FROM
-                INFORMATION_SCHEMA.COLUMNS
-            WHERE
-                TABLE_SCHEMA = ''
-            AND
-                TABLE_NAME = @table_name""",
+            sql=_helpers.SQL_GET_TABLE_COLUMN_SCHEMA,
             params={"table_name": table_name},
             param_types={"table_name": spanner.param_types.STRING},
         )
@@ -416,64 +319,3 @@ class Cursor(object):
                 null_ok=is_nullable == "YES", spanner_type=spanner_type
             )
         return column_details
-
-
-class ColumnInfo:
-    """Row column description object."""
-
-    def __init__(
-        self,
-        name,
-        type_code,
-        display_size=None,
-        internal_size=None,
-        precision=None,
-        scale=None,
-        null_ok=False,
-    ):
-        self.name = name
-        self.type_code = type_code
-        self.display_size = display_size
-        self.internal_size = internal_size
-        self.precision = precision
-        self.scale = scale
-        self.null_ok = null_ok
-
-        self.fields = (
-            self.name,
-            self.type_code,
-            self.display_size,
-            self.internal_size,
-            self.precision,
-            self.scale,
-            self.null_ok,
-        )
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __getitem__(self, index):
-        return self.fields[index]
-
-    def __str__(self):
-        str_repr = ", ".join(
-            filter(
-                lambda part: part is not None,
-                [
-                    "name='%s'" % self.name,
-                    "type_code=%d" % self.type_code,
-                    "display_size=%d" % self.display_size
-                    if self.display_size
-                    else None,
-                    "internal_size=%d" % self.internal_size
-                    if self.internal_size
-                    else None,
-                    "precision='%s'" % self.precision
-                    if self.precision
-                    else None,
-                    "scale='%s'" % self.scale if self.scale else None,
-                    "null_ok='%s'" % self.null_ok if self.null_ok else None,
-                ],
-            )
-        )
-        return "ColumnInfo(%s)" % str_repr

@@ -157,8 +157,11 @@ class TestCursor(unittest.TestCase):
                 "google.cloud.spanner_dbapi._helpers.handle_insert",
                 return_value=parse_utils.STMT_INSERT,
             ) as mock_handle_insert:
-                cursor.execute(sql="sql")
-                mock_handle_insert.assert_called()
+                sql = "sql"
+                cursor.execute(sql=sql)
+                mock_handle_insert.assert_called_once_with(
+                    connection, sql, None
+                )
 
     def test_execute_integrity_error(self):
         from google.api_core import exceptions

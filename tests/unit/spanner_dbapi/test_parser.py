@@ -79,13 +79,13 @@ class TestParser(unittest.TestCase):
     def test_func_eq(self):
         from google.cloud.spanner_dbapi.parser import func
 
-        func1 = func('func1', None)
-        func2 = func('func2', None)
+        func1 = func("func1", None)
+        func2 = func("func2", None)
         self.assertFalse(func1 == object)
         self.assertFalse(func1 == func2)
         func2.name = func1.name
         func1.args = 0
-        func2.args = '0'
+        func2.args = "0"
         self.assertFalse(func1 == func2)
         func1.args = [0]
         func2.args = [0, 0]
@@ -164,7 +164,7 @@ class TestParser(unittest.TestCase):
         from google.cloud.spanner_dbapi.parser import a_args
         from google.cloud.spanner_dbapi.parser import terminal
 
-        a_obj = a_args([a_args([terminal(10**i)]) for i in range(10)])
+        a_obj = a_args([a_args([terminal(10 ** i)]) for i in range(10)])
         self.assertTrue(a_obj.homogenous())
 
         a_obj = a_args([a_args([[object()]]) for _ in range(10)])
@@ -181,7 +181,7 @@ class TestParser(unittest.TestCase):
         from google.cloud.spanner_dbapi.parser import terminal
         from google.cloud.spanner_dbapi.parser import values
 
-        a_obj = a_args([a_args([terminal(10**i)]) for i in range(10)])
+        a_obj = a_args([a_args([terminal(10 ** i)]) for i in range(10)])
         self.assertEqual(str(values(a_obj)), "VALUES%s" % str(a_obj))
 
     def test_expect(self):
@@ -193,20 +193,20 @@ class TestParser(unittest.TestCase):
         from google.cloud.spanner_dbapi import exceptions
 
         with self.assertRaises(exceptions.ProgrammingError):
-            expect(word='', token=ARGS)
+            expect(word="", token=ARGS)
         with self.assertRaises(exceptions.ProgrammingError):
-            expect(word='ABC', token=ARGS)
+            expect(word="ABC", token=ARGS)
         with self.assertRaises(exceptions.ProgrammingError):
-            expect(word='(', token=ARGS)
+            expect(word="(", token=ARGS)
 
         expected = "", pyfmt_str
-        self.assertEqual(expect('%s', EXPR), expected)
+        self.assertEqual(expect("%s", EXPR), expected)
 
-        expected = expect('function()', FUNC)
-        self.assertEqual(expect('function()', EXPR), expected)
+        expected = expect("function()", FUNC)
+        self.assertEqual(expect("function()", EXPR), expected)
 
         with self.assertRaises(exceptions.ProgrammingError):
-            expect(word='', token='ABC')
+            expect(word="", token="ABC")
 
     def test_expect_values(self):
         from google.cloud.spanner_dbapi.parser import VALUES

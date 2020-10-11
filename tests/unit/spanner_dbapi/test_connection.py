@@ -7,6 +7,7 @@
 """Cloud Spanner DB-API Connection class unit tests."""
 
 import unittest
+
 from unittest import mock
 
 

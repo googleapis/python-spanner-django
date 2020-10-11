@@ -47,7 +47,7 @@ code_to_display_size = {
 }
 
 
-def execute_insert_heterogenous(transaction, sql_params_list):
+def _execute_insert_heterogenous(transaction, sql_params_list):
     for sql, params in sql_params_list:
         sql, params = sql_pyformat_args_to_spanner(sql, params)
         param_types = get_param_types(params)
@@ -59,7 +59,7 @@ def execute_insert_heterogenous(transaction, sql_params_list):
         _ = list(res)
 
 
-def execute_insert_homogenous(transaction, parts):
+def _execute_insert_homogenous(transaction, parts):
     # Perform an insert in one shot.
     table = parts.get("table")
     columns = parts.get("columns")
@@ -87,14 +87,14 @@ def handle_insert(connection, sql, params):
         # The common case of multiple values being passed in
         # non-complex pyformat args and need to be uploaded in one RPC.
         return connection.database.run_in_transaction(
-            execute_insert_homogenous, parts
+            _execute_insert_homogenous, parts
         )
     else:
         # All the other cases that are esoteric and need
         #   transaction.execute_sql
         sql_params_list = parts.get("sql_params_list")
         return connection.database.run_in_transaction(
-            execute_insert_heterogenous, sql_params_list
+            _execute_insert_heterogenous, sql_params_list
         )
 
 

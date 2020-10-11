@@ -145,8 +145,9 @@ class TestCursor(unittest.TestCase):
                 "google.cloud.spanner_dbapi.cursor.Cursor._handle_DQL",
                 return_value=parse_utils.STMT_NON_UPDATING,
             ) as mock_handle_ddl:
-                cursor.execute(sql="sql")
-                mock_handle_ddl.assert_called()
+                sql = "sql"
+                cursor.execute(sql=sql)
+                mock_handle_ddl.assert_called_once_with(sql, None)
 
         with mock.patch(
             "google.cloud.spanner_dbapi.parse_utils.classify_stmt",

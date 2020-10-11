@@ -4,12 +4,12 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from unittest import TestCase
+import unittest
 
 from google.cloud.spanner_dbapi.utils import PeekIterator
 
 
-class UtilsTests(TestCase):
+class TestUtils(unittest.TestCase):
     def test_PeekIterator(self):
         cases = [
             ("list", [1, 2, 3, 4, 6, 7], [1, 2, 3, 4, 6, 7]),
@@ -51,3 +51,18 @@ class UtilsTests(TestCase):
         got = list(pi)
         want = ["a", "b", "c", "d", "e"]
         self.assertEqual(got, want, "Values should be returned unchanged")
+
+    def test_backtick_unicode(self):
+        from google.cloud.spanner_dbapi.utils import backtick_unicode
+
+        cases = [
+            ("SELECT (1) as foo WHERE 1=1", "SELECT (1) as foo WHERE 1=1"),
+            ("SELECT (1) as föö", "SELECT (1) as `föö`"),
+            ("SELECT (1) as `föö`", "SELECT (1) as `föö`"),
+            ("SELECT (1) as `föö` `umläut", "SELECT (1) as `föö` `umläut"),
+            ("SELECT (1) as `föö", "SELECT (1) as `föö"),
+        ]
+        for sql, want in cases:
+            with self.subTest(sql=sql):
+                got = backtick_unicode(sql)
+                self.assertEqual(got, want)

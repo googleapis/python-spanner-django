@@ -45,15 +45,11 @@ class Cursor(object):
         self._itr = None
         self._result_set = None
         self._row_count = _UNSET_COUNT
-        self._connection = connection
+        self.connection = connection
         self._is_closed = False
 
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
-
-    @property
-    def connection(self):
-        return self._connection
 
     @property
     def is_closed(self):
@@ -63,7 +59,7 @@ class Cursor(object):
         :returns: True if the cursor or the parent connection is closed,
                   otherwise False.
         """
-        return self._is_closed or self._connection.is_closed
+        return self._is_closed or self.connection.is_closed
 
     @property
     def description(self):
@@ -143,7 +139,7 @@ class Cursor(object):
         :type args: list
         :param args: Additional parameters to supplement the SQL query.
         """
-        if not self._connection:
+        if not self.connection:
             raise ProgrammingError("Cursor is not connected to the database")
 
         self._raise_if_closed()
@@ -154,20 +150,20 @@ class Cursor(object):
         try:
             classification = parse_utils.classify_stmt(sql)
             if classification == parse_utils.STMT_DDL:
-                self._connection.ddl_statements.append(sql)
+                self.connection.ddl_statements.append(sql)
                 return
 
             # For every other operation, we've got to ensure that
             # any prior DDL statements were run.
             # self._run_prior_DDL_statements()
-            self._connection.run_prior_DDL_statements()
+            self.connection.run_prior_DDL_statements()
 
             if classification == parse_utils.STMT_NON_UPDATING:
                 self._handle_DQL(sql, args or None)
             elif classification == parse_utils.STMT_INSERT:
-                _helpers.handle_insert(self._connection, sql, args or None)
+                _helpers.handle_insert(self.connection, sql, args or None)
             else:
-                self._connection.database.run_in_transaction(
+                self.connection.database.run_in_transaction(
                     self._do_execute_update, sql, args or None
                 )
         except (AlreadyExists, FailedPrecondition) as e:
@@ -249,7 +245,7 @@ class Cursor(object):
         self._raise_if_closed()
 
     def _handle_DQL(self, sql, params):
-        with self._connection.database.snapshot() as snapshot:
+        with self.connection.database.snapshot() as snapshot:
             # Reference
             #  https://googleapis.dev/python/spanner/latest/session-api.html#google.cloud.spanner_v1.session.Session.execute_sql
             sql, params = parse_utils.sql_pyformat_args_to_spanner(sql, params)
@@ -298,9 +294,9 @@ class Cursor(object):
     def run_sql_in_snapshot(self, sql, params=None, param_types=None):
         # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
         # hence this method exists to circumvent that limit.
-        self._connection.run_prior_DDL_statements()
+        self.connection.run_prior_DDL_statements()
 
-        with self._connection.database.snapshot() as snapshot:
+        with self.connection.database.snapshot() as snapshot:
             res = snapshot.execute_sql(
                 sql, params=params, param_types=param_types
             )

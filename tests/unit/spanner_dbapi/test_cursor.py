@@ -111,7 +111,7 @@ class TestCursor(unittest.TestCase):
 
         connection = self._make_connection(self.INSTANCE, self.DATABASE)
         cursor = self._make_one(connection)
-        cursor._connection = None
+        cursor.connection = None
         with self.assertRaises(ProgrammingError):
             cursor.execute(sql="")
 
@@ -135,7 +135,7 @@ class TestCursor(unittest.TestCase):
             sql = "sql"
             cursor.execute(sql=sql)
             mock_classify_stmt.assert_called_once_with(sql)
-            self.assertEqual(cursor._connection.ddl_statements, [sql])
+            self.assertEqual(cursor.connection.ddl_statements, [sql])
 
         with mock.patch(
             "google.cloud.spanner_dbapi.parse_utils.classify_stmt",

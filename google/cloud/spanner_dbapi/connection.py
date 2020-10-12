@@ -88,7 +88,7 @@ class Connection:
         return self.database.snapshot()
 
     def in_transaction(self, fn, *args, **kwargs):
-        """Perform a unit of work in a linked Transaction, retrying on abort.
+        """Perform a unit of work in the Transaction, retrying on abort.
 
         :type fn: callable
         :param fn: takes a required positional argument, the transaction,
@@ -122,11 +122,7 @@ class Connection:
         self._ddl_statements.append(ddl_statement)
 
     def run_prior_DDL_statements(self):
-        """Run prior Operation.
-
-        :rtype: str
-        :returns: Updated statements.
-        """
+        """Run prior DDL statements."""
         self._raise_if_closed()
 
         if not self._ddl_statements:
@@ -187,7 +183,7 @@ class Connection:
         :param table_name: Name of the table.
 
         :rtype: dict
-        :returns: Column description.
+        :returns: Dictionary with description for every column.
         """
         rows = self.run_sql_in_snapshot(
             """SELECT

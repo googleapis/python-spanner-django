@@ -53,7 +53,7 @@ re_UNICODE_POINTS = re.compile(r"([^\s]*[\u0080-\uFFFF]+[^\s]*)")
 
 
 def backtick_unicode(sql):
-    """Check sql to be valid and splits it by segments.
+    """Check sql to be valid and split it by segments.
 
     :type sql: str
     :param sql: SQL request.

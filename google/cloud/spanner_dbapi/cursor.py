@@ -77,7 +77,7 @@ class Cursor:
         :param sql: A SQL statement.
 
         :type *args: list
-        :param *args: (Optional) variadic argument list.
+        :param *args: (Optional) a list of variadic arguments.
 
         :type **kwargs: list
         :param **kwargs: (Optional) key worded arguments.
@@ -243,7 +243,7 @@ class Cursor:
 
     @property
     def rowcount(self):
-        """Return number of rows in the table.
+        """Count number of rows in the table after last execution.
 
         :rtype: int
         :returns: Number of rows that last .execute*() produced.
@@ -309,7 +309,7 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
-        """Fetch next resulting row of the last ran query.
+        """Fetch the next resulting row of the last ran query.
 
         :returns: The next element if it is possible, None otherwise.
         """

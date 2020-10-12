@@ -62,8 +62,10 @@ class Connection:
         :type value: bool
         :param value: New autocommit mode state.
         """
-        if self._autocommit != value:
+        if value and not self._autocommit:
             self.commit()
+
+        self._autocommit = value
 
     def session_checkout(self):
         """Get a Cloud Spanner session.

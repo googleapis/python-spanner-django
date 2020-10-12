@@ -49,8 +49,9 @@ class TestConnection(unittest.TestCase):
             connection.cursor()
 
     @mock.patch("warnings.warn")
-    def test_transaction_management_warnings(self, warn_mock):
+    def test_transaction_autocommit_warnings(self, warn_mock):
         connection = self._make_connection()
+        connection.autocommit = True
 
         connection.commit()
         warn_mock.assert_called_with(

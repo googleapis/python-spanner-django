@@ -128,7 +128,7 @@ class a_args:
         return True
 
     def all_have_same_argc(self):
-        """Check arguments' length.
+        """Check length of arguments sequence.
 
         :rtype: bool
         :return: False if sequences of arguments have the same length.

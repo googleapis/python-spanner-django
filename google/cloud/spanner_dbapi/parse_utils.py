@@ -497,24 +497,8 @@ def sql_pyformat_args_to_spanner(sql, params):
     return sanitize_literals_for_upload(sql), named_args
 
 
-<<<<<<< HEAD
-def cast_for_spanner(param):
-    """Convert param to its Cloud Spanner equivalent type.
-
-    :type param: Any
-    :param param: Django type parameter.
-
-    :rtype: Any
-    :returns: Cloud spanner equivalent type.
-    """
-    if isinstance(param, decimal.Decimal):
-        return float(param)
-    else:
-        return param
-=======
 def cast_for_spanner(value):
     """Convert the param to its Cloud Spanner equivalent type.
->>>>>>> bbd7c2c5e40eb202215f66500c763e7aca3df786
 
     :type value: Any
     :param value: Value to convert to a Cloud Spanner type.
@@ -522,17 +506,6 @@ def cast_for_spanner(value):
     :rtype: Any
     :returns: Value converted to a Cloud Spanner type.
     """
-<<<<<<< HEAD
-    Return a dictionary of :class:`spanner.param_types` for a dictionary of
-    parameters.
-
-    :type params: dict
-    :param params: A dictionary of Django parameters.
-
-    :rtype: dict
-    :returns: None if params are empty, dictionary of
-              :class:`spanner.param_types` otherwise.
-=======
     if isinstance(value, decimal.Decimal):
         return float(value)
     return value
@@ -546,7 +519,6 @@ def get_param_types(params):
 
     :rtype: :class:`dict`
     :returns: The types index for the given parameters.
->>>>>>> bbd7c2c5e40eb202215f66500c763e7aca3df786
     """
     if params is None:
         return

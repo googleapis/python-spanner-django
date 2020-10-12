@@ -34,8 +34,8 @@ class Connection:
     """
 
     def __init__(self, instance, database):
-        self._sessions_pool = BurstyPool()
-        self._sessions_pool.bind(database)
+        self._pool = BurstyPool()
+        self._pool.bind(database)
 
         self.instance = instance
         self.database = database
@@ -44,15 +44,34 @@ class Connection:
         self.transactions = []
 
         self.is_closed = False
-        self.autocommit = True
+        self._autocommit = False
 
-    def session(self):
+    @property
+    def autocommit(self):
+        """Autocommit mode flag for this connection.
+
+        :rtype: bool
+        :returns: Autocommit mode flag value.
+        """
+        return self._autocommit
+
+    @autocommit.setter
+    def autocommit(self, value):
+        """Change this connection autocommit mode.
+
+        :type value: bool
+        :param value: New autocommit mode state.
+        """
+        if self._autocommit != value:
+            self.commit()
+
+    def session_checkout(self):
         """Get a Cloud Spanner session.
 
         :rtype: :class:`google.cloud.spanner_v1.session.Session`
         :returns: Cloud Spanner session object ready to use.
         """
-        return self._sessions_pool.get()
+        return self._pool.get()
 
     def cursor(self):
         self._raise_if_closed()
@@ -153,8 +172,12 @@ class Connection:
     def close(self):
         """Close this connection.
 
-        The connection will be unusable from this point forward.
+        The connection will be unusable from this point forward. Rollback
+        will be performed on all the pending transactions.
         """
+        for transaction in self.transactions:
+            transaction.rollback()
+
         self.__dbhandle = None
         self.is_closed = True
 

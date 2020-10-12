@@ -95,7 +95,7 @@ class Cursor:
                 or self.transaction.committed
                 or self.transaction.rolled_back
             ):
-                self.transaction = self._connection.session().transaction()
+                self.transaction = self._connection.session_checkout().transaction()
                 self.transaction.begin()
                 self._connection.transactions.append(self.transaction)
 

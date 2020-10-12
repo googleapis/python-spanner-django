@@ -98,15 +98,19 @@ def setUpModule():
 
 
 def tearDownModule():
+    """Delete the test instance, if it was created."""
     if CREATE_INSTANCE:
         Config.INSTANCE.delete()
 
 
 class TestTransactionsManagement(unittest.TestCase):
+    """Transactions management support tests."""
+
     DATABASE_NAME = "db-api-transactions-management"
 
     @classmethod
     def setUpClass(cls):
+        """Create a test database."""
         cls._db = Config.INSTANCE.database(
             cls.DATABASE_NAME,
             ddl_statements=DDL_STATEMENTS,
@@ -116,25 +120,26 @@ class TestTransactionsManagement(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Delete the test database."""
         cls._db.drop()
 
     def tearDown(self):
-        with self._db.snapshot() as snapshot:
-            snapshot.execute_sql("DELETE FROM contacts WHERE true")
+        """Clear the test table after every test."""
+        self._db.run_in_transaction(clear_table)
 
     def test_commit(self):
+        """Test committing a transaction with several statements."""
         want_row = (
             1,
             "updated-first-name",
             "last-name",
             "test.email_updated@domen.ru",
         )
-        # connecting to the test database
+        # connect to the test database
         conn = Connection(Config.INSTANCE, self._db)
-        conn.autocommit = False
         cursor = conn.cursor()
 
-        # executing several DML statements with one transaction
+        # execute several DML statements within one transaction
         cursor.execute(
             """
 INSERT INTO contacts (contact_id, first_name, last_name, email)
@@ -157,9 +162,125 @@ WHERE email = 'test.email@domen.ru'
         )
         conn.commit()
 
-        # reading the resulting data from the database
+        # read the resulting data from the database
         cursor.execute("SELECT * FROM contacts")
         got_rows = cursor.fetchall()
         conn.commit()
 
         self.assertEqual(got_rows, [want_row])
+
+    def test_rollback(self):
+        """Test rollbacking a transaction with several statements."""
+        want_row = (2, "first-name", "last-name", "test.email@domen.ru")
+        # connect to the test database
+        conn = Connection(Config.INSTANCE, self._db)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+INSERT INTO contacts (contact_id, first_name, last_name, email)
+VALUES (2, 'first-name', 'last-name', 'test.email@domen.ru')
+        """
+        )
+        conn.commit()
+
+        # execute several DMLs with one transaction
+        cursor.execute(
+            """
+UPDATE contacts
+SET first_name = 'updated-first-name'
+WHERE first_name = 'first-name'
+"""
+        )
+        cursor.execute(
+            """
+UPDATE contacts
+SET email = 'test.email_updated@domen.ru'
+WHERE email = 'test.email@domen.ru'
+"""
+        )
+        conn.rollback()
+
+        # read the resulting data from the database
+        cursor.execute("SELECT * FROM contacts")
+        got_rows = cursor.fetchall()
+        conn.commit()
+
+        self.assertEqual(got_rows, [want_row])
+
+    def test_autocommit_mode_change(self):
+        """Test auto committing a transaction on `autocommit` mode change."""
+        want_row = (
+            2,
+            "updated-first-name",
+            "last-name",
+            "test.email@domen.ru",
+        )
+        # connect to the test database
+        conn = Connection(Config.INSTANCE, self._db)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+INSERT INTO contacts (contact_id, first_name, last_name, email)
+VALUES (2, 'first-name', 'last-name', 'test.email@domen.ru')
+        """
+        )
+        cursor.execute(
+            """
+UPDATE contacts
+SET first_name = 'updated-first-name'
+WHERE first_name = 'first-name'
+"""
+        )
+        conn.autocommit = True
+
+        # read the resulting data from the database
+        cursor.execute("SELECT * FROM contacts")
+        got_rows = cursor.fetchall()
+        conn.commit()
+
+        self.assertEqual(got_rows, [want_row])
+
+    def test_rollback_on_connection_closing(self):
+        """
+        When closing a connection all the pending transactions
+        must be rollbacked. Testing if it's working this way.
+        """
+        want_row = (1, "first-name", "last-name", "test.email@domen.ru")
+        # connect to the test database
+        conn = Connection(Config.INSTANCE, self._db)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+INSERT INTO contacts (contact_id, first_name, last_name, email)
+VALUES (1, 'first-name', 'last-name', 'test.email@domen.ru')
+        """
+        )
+        conn.commit()
+
+        cursor.execute(
+            """
+UPDATE contacts
+SET first_name = 'updated-first-name'
+WHERE first_name = 'first-name'
+"""
+        )
+        conn.close()
+
+        # connect again, as the previous connection is no-op after closing
+        conn = Connection(Config.INSTANCE, self._db)
+        cursor = conn.cursor()
+
+        # read the resulting data from the database
+        cursor.execute("SELECT * FROM contacts")
+        got_rows = cursor.fetchall()
+        conn.commit()
+
+        self.assertEqual(got_rows, [want_row])
+
+
+def clear_table(transaction):
+    """Clear the test table."""
+    transaction.execute_update("DELETE FROM contacts WHERE true")

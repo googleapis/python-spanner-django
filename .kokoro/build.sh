@@ -51,7 +51,7 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 # a) It doesn't support INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE
 # b) Cannot accept parameters whose types aren't known, so can't be used for
 #    Python and other dynamic languages.
-export USE_SPANNER_EMULATOR=0
+export USE_SPANNER_EMULATOR=1
 
 pip3 install .
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
@@ -82,7 +82,7 @@ then
 else
     export DJANGO_WORKER_COUNT=$(ls .kokoro/presubmit/worker* | wc -l)
     # Install and start the Spanner emulator
-    VERSION=0.7.3
+    VERSION=1.1.0
     wget https://storage.googleapis.com/cloud-spanner-emulator/releases/${VERSION}/cloud-spanner-emulator_linux_amd64-${VERSION}.tar.gz 2&>/dev/null
     tar zxvf cloud-spanner-emulator_linux_amd64-${VERSION}.tar.gz 2&>/dev/null
     chmod +x emulator_main

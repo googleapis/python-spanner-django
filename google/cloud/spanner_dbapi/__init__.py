@@ -47,6 +47,10 @@ paramstyle = "format"  # ANSI C printf format codes, e.g. ...WHERE name=%s.
 # threadsafety level.
 threadsafety = 1
 
+# Cloud Spanner sessions pool, used by
+# default for the whole DB API package
+default_pool = spanner_v1.BurstyPool()
+
 
 def connect(
     instance_id, database_id, project=None, credentials=None, user_agent=None
@@ -93,7 +97,7 @@ def connect(
     if not database.exists():
         raise ValueError("database '%s' does not exist." % database_id)
 
-    return Connection(instance, database)
+    return Connection(instance, database, default_pool)
 
 
 __all__ = [

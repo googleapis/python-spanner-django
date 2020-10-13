@@ -68,7 +68,6 @@ class Cursor:
         self._connection = connection
         self._is_closed = False
 
-        self.transaction = None
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
 
@@ -90,16 +89,9 @@ class Cursor:
         self._res = None
 
         if not self._connection.autocommit:
-            if (
-                not self.transaction
-                or self.transaction.committed
-                or self.transaction.rolled_back
-            ):
-                self.transaction = self._connection.session_checkout().transaction()
-                self.transaction.begin()
-                self._connection.transactions.append(self.transaction)
+            transaction = self._connection.transaction_checkout()
 
-            self._res = self.transaction.execute_sql(sql)
+            self._res = transaction.execute_sql(sql)
             self._itr = PeekIterator(self._res)
             return
 

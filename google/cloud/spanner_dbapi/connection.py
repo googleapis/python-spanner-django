@@ -31,17 +31,21 @@ class Connection:
 
     :type database: :class:`~google.cloud.spanner_v1.database.Database`
     :param database: Cloud Spanner database to connect to.
+
+    :type pool: :class:`~google.cloud.spanner_v1.pool.AbstractSessionPool`
+    :param pool: (Optional) Cloud Spanner sessions pool.
     """
 
-    def __init__(self, instance, database):
-        self._pool = BurstyPool()
+    def __init__(self, instance, database, pool=None):
+        self._pool = pool or BurstyPool()
         self._pool.bind(database)
 
         self.instance = instance
         self.database = database
 
         self._ddl_statements = []
-        self.transactions = []
+        self._transaction = None
+        self._session = None
 
         self.is_closed = False
         self._autocommit = False
@@ -67,13 +71,47 @@ class Connection:
 
         self._autocommit = value
 
-    def session_checkout(self):
-        """Get a Cloud Spanner session.
+    def _session_checkout(self):
+        """Get a Cloud Spanner session from a pool.
+
+        If there is already a session associated with
+        this connection, it'll be used otherwise.
 
         :rtype: :class:`google.cloud.spanner_v1.session.Session`
         :returns: Cloud Spanner session object ready to use.
         """
-        return self._pool.get()
+        if not self._session:
+            self._session = self._pool.get()
+
+        return self._session
+
+    def _release_session(self):
+        """Release the currently used Spanner session.
+
+        The session will be returned into the sessions pool.
+        """
+        self._pool.put(self._session)
+        self._session = None
+
+    def transaction_checkout(self):
+        """Get a Cloud Spanner transaction.
+
+        Begin a new transaction, if there is no transaction in
+        this connection yet. Return the begun one otherwise.
+
+        :rtype: :class:`google.cloud.spanner_v1.transaction.Transaction`
+        :returns: Cloud Spanner transaction object ready to use.
+        """
+        if not self.autocommit:
+            if (
+                not self._transaction
+                or self._transaction.committed
+                or self._transaction.rolled_back
+            ):
+                self._transaction = self._session_checkout().transaction()
+                self._transaction.begin()
+
+            return self._transaction
 
     def cursor(self):
         self._raise_if_closed()
@@ -174,11 +212,11 @@ class Connection:
     def close(self):
         """Close this connection.
 
-        The connection will be unusable from this point forward. Rollback
-        will be performed on all the pending transactions.
+        The connection will be unusable from this point forward. If the
+        connection has an active transaction, it will be rolled back.
         """
-        for transaction in self.transactions:
-            transaction.rollback()
+        if self._transaction and not self._transaction.committed:
+            self._transaction.rollback()
 
         self.__dbhandle = None
         self.is_closed = True
@@ -187,21 +225,17 @@ class Connection:
         """Commit all the pending transactions."""
         if self.autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
-        else:
-            for transaction in self.transactions:
-                transaction.commit()
-
-            self.transactions = []
+        elif self._transaction:
+            self._transaction.commit()
+            self._release_session()
 
     def rollback(self):
         """Rollback all the pending transactions."""
         if self.autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
-        else:
-            for transaction in self.transactions:
-                transaction.rollback()
-
-            self.transactions = []
+        elif self._transaction:
+            self._transaction.rollback()
+            self._release_session()
 
     def __enter__(self):
         return self

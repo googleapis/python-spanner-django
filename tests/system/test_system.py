@@ -169,6 +169,9 @@ WHERE email = 'test.email@domen.ru'
 
         self.assertEqual(got_rows, [want_row])
 
+        cursor.close()
+        conn.close()
+
     def test_rollback(self):
         """Test rollbacking a transaction with several statements."""
         want_row = (2, "first-name", "last-name", "test.email@domen.ru")
@@ -208,6 +211,9 @@ WHERE email = 'test.email@domen.ru'
 
         self.assertEqual(got_rows, [want_row])
 
+        cursor.close()
+        conn.close()
+
     def test_autocommit_mode_change(self):
         """Test auto committing a transaction on `autocommit` mode change."""
         want_row = (
@@ -238,9 +244,11 @@ WHERE first_name = 'first-name'
         # read the resulting data from the database
         cursor.execute("SELECT * FROM contacts")
         got_rows = cursor.fetchall()
-        conn.commit()
 
         self.assertEqual(got_rows, [want_row])
+
+        cursor.close()
+        conn.close()
 
     def test_rollback_on_connection_closing(self):
         """
@@ -279,6 +287,9 @@ WHERE first_name = 'first-name'
         conn.commit()
 
         self.assertEqual(got_rows, [want_row])
+
+        cursor.close()
+        conn.close()
 
 
 def clear_table(transaction):

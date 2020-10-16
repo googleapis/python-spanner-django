@@ -20,6 +20,7 @@ from test_utils.system import unique_resource_id
 CREATE_INSTANCE = (
     os.getenv("GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE") is not None
 )
+USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 
 if CREATE_INSTANCE:
     INSTANCE_ID = "google-cloud" + unique_resource_id("-")
@@ -57,7 +58,16 @@ def _list_instances():
 
 
 def setUpModule():
-    Config.CLIENT = Client()
+    if USE_EMULATOR:
+        from google.auth.credentials import AnonymousCredentials
+
+        emulator_project = os.getenv("GCLOUD_PROJECT", "emulator-test-project")
+        Config.CLIENT = Client(
+            project=emulator_project, credentials=AnonymousCredentials()
+        )
+    else:
+        Config.CLIENT = Client()
+
     retry = RetryErrors(exceptions.ServiceUnavailable)
 
     configs = list(retry(Config.CLIENT.list_instance_configs)())

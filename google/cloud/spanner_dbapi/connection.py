@@ -215,7 +215,11 @@ class Connection:
         The connection will be unusable from this point forward. If the
         connection has an active transaction, it will be rolled back.
         """
-        if self._transaction and not self._transaction.committed:
+        if (
+            self._transaction
+            and not self._transaction.committed
+            and not self._transaction.rolled_back
+        ):
             self._transaction.rollback()
 
         self.__dbhandle = None

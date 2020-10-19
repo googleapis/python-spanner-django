@@ -169,10 +169,10 @@ def classify_stmt(query):
     """Determine SQL query type.
 
     :type query: str
-    :param query: SQL query.
+    :param query: A SQL query.
 
     :rtype: str
-    :returns: Query type name.
+    :returns: The query type name.
     """
     if RE_DDL.match(query):
         return STMT_DDL
@@ -247,13 +247,13 @@ def parse_insert(insert_sql, params):
             }
 
     :type insert_sql: str
-    :param insert_sql: SQL insert request.
+    :param insert_sql: A SQL insert request.
 
     :type params: list
     :param params: A list of parameters.
 
     :rtype: dict
-    :returns: A dictionary of name to list of parameters.
+    :returns: A dictionary of the name to the list of parameters.
     """  # noqa
     match = RE_INSERT.search(insert_sql)
 
@@ -345,13 +345,13 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
         Params: [(1, 2, 3,), (4, 5, 6,), (7, 8, 9,)]
 
     :type columns: list
-    :param columns: A list of columns of a table.
+    :param columns: A list of the columns of the table.
 
     :type params: list
     :param params: A list of parameters.
 
     :rtype: list
-    :returns: A list of tuples of parameters.
+    :returns: A list of tuples of the parameters.
     """  # noqa
 
     if not pyformat_args:
@@ -451,13 +451,13 @@ def sql_pyformat_args_to_spanner(sql, params):
         Params:   {'a0': 'a', 'a1': 23, 'a2': '888***'}
 
     :type sql: str
-    :param sql: An initial SQL request.
+    :param sql: A SQL request.
 
     :type params: list
     :param params: A list of parameters.
 
     :rtype: (str, dict)
-    :returns: A tuple of sanitized SQL and dictionary of named arguments.
+    :returns: A tuple of sanitized SQL and dictionary of the named arguments.
     """
     if not params:
         return sanitize_literals_for_upload(sql), params
@@ -501,10 +501,10 @@ def cast_for_spanner(value):
     """Convert the param to its Cloud Spanner equivalent type.
 
     :type value: Any
-    :param value: Value to convert to a Cloud Spanner type.
+    :param value: The value to convert to a Cloud Spanner type.
 
     :rtype: Any
-    :returns: Value converted to a Cloud Spanner type.
+    :returns: The value converted to a Cloud Spanner type.
     """
     if isinstance(value, decimal.Decimal):
         return float(value)
@@ -514,10 +514,10 @@ def cast_for_spanner(value):
 def get_param_types(params):
     """Determine Cloud Spanner types for the given parameters.
 
-    :type params: :class:`dict`
+    :type params: dict
     :param params: Parameters requiring to find Cloud Spanner types.
 
-    :rtype: :class:`dict`
+    :rtype: dict
     :returns: The types index for the given parameters.
     """
     if params is None:
@@ -539,10 +539,10 @@ def ensure_where_clause(sql):
     Add a dummy WHERE clause if necessary.
 
     :type sql: str
-    :param sql: SQL request.
+    :param sql: A SQL request.
 
     :rtype: str
-    :returns: SQL request with dummy WHERE clause if necessary.
+    :returns: A SQL request with dummy WHERE clause if necessary.
     """
     if any(
         isinstance(token, sqlparse.sql.Where)
@@ -558,10 +558,10 @@ def escape_name(name):
     ' ', or is a Cloud Spanner's reserved keyword.
 
     :type name: :class:`str`
-    :param name: Name to escape.
+    :param name: The name to escape.
 
     :rtype: :class:`str`
-    :returns: Name escaped if it has to be escaped.
+    :returns: The name escaped if it has to be escaped.
     """
     if "-" in name or " " in name or name.upper() in SPANNER_RESERVED_KEYWORDS:
         return "`" + name + "`"

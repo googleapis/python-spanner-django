@@ -69,7 +69,7 @@ class a_args:
     """Expression arguments.
 
     :type argv: list
-    :param argv: A List of expression arguments;
+    :param argv: A List of expression arguments.
     """
 
     def __init__(self, argv):
@@ -108,11 +108,11 @@ class a_args:
         return self.argv[index]
 
     def homogenous(self):
-        """Check arguments to be homogenous.
+        """Check arguments of the expression to be homogeneous.
 
         :rtype: bool
-        :return: True if all arguments are in pyformat and have the same number
-                 of arguments, False otherwise
+        :return: True if all the arguments are in pyformat and have the same
+                 number of arguments, False otherwise
         """
         if not self.all_have_same_argc():
             return False
@@ -128,10 +128,10 @@ class a_args:
         return True
 
     def all_have_same_argc(self):
-        """Check length of arguments sequence.
+        """Check the length of arguments sequence.
 
         :rtype: bool
-        :return: False if sequences of arguments have the same length.
+        :return: False if the sequences of arguments have the same length.
         """
         if len(self) == 0:
             return True
@@ -145,10 +145,10 @@ class a_args:
 
 
 class values(a_args):
-    """Wrapper for values.
+    """A wrapper for values.
 
     :rtype: str
-    :returns: A string of values expression in tree view.
+    :returns: A string of the values expression in a tree view.
     """
 
     def __str__(self):
@@ -170,7 +170,7 @@ def expect(word, token):
     :rtype: (str, Any)
     :returns: A tuple of the rest expression string and tree of already parsed
               expression.
-    :raises: :class:`ProgrammingError` if there is parsing error.
+    :raises :class:`ProgrammingError`: If there is parsing error.
     """
     word = word.strip()
     if token == VALUES:
@@ -267,13 +267,13 @@ def expect(word, token):
 
 
 def as_values(values_stmt):
-    """Return parsed values.
+    """Return the parsed values.
 
     :type values_stmt: str
     :param values_stmt: Raw values.
 
     :rtype: Any
-    :returns: A tree of already parsed expression.
+    :returns: A tree of the already parsed expression.
     """
     _, values = expect(values_stmt, VALUES)
     return values

@@ -20,7 +20,7 @@ def google_client_info(user_agent=None):
     containing the user_agent and python_version for this library.
 
     :type user_agent: str
-    :param user_agent: (Optional) User agent with its version.
+    :param user_agent: (Optional) The user agent with its version.
 
     :rtype: :class:`~google.api_core.gapic_v1.client_info.ClientInfo`
     :returns: An object with client information.

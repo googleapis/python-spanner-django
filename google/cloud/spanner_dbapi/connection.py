@@ -95,11 +95,11 @@ class Connection:
                    and additional positional / keyword arguments as supplied
                    by the caller.
 
-        :type *args: tuple
-        :param *args: additional positional arguments to be passed to ``fn``.
+        :type args: tuple
+        :param args: additional positional arguments to be passed to ``fn``.
 
-        :type **kwargs: dict
-        :param **kwargs: (Optional) keyword arguments to be passed to ``fn``.
+        :type kwargs: dict
+        :param kwargs: (Optional) keyword arguments to be passed to ``fn``.
                          If passed, "timeout_secs" will be removed and used to
                          override the default retry timeout which defines
                          maximum timestamp to continue retrying the transaction.
@@ -111,8 +111,9 @@ class Connection:
         return self.database.run_in_transaction(fn, *args, **kwargs)
 
     def append_ddl_statement(self, ddl_statement):
-        """Append DDL statement to the existing list of DDL statements in
-        linked database.
+        """
+        Append a DDL statement to the existing list of DDL statements in
+        the linked database.
 
         :type ddl_statements: list
         :param ddl_statements: A list of DDL statements, each without a
@@ -177,13 +178,13 @@ class Connection:
             return list(res)
 
     def get_table_column_schema(self, table_name):
-        """Get table column schema.
+        """Get the table column schema.
 
         :type table_name: str
-        :param table_name: Name of the table.
+        :param table_name: The name of the table.
 
         :rtype: dict
-        :returns: Dictionary with description for every column.
+        :returns: A dictionary containing descriptions for every column.
         """
         rows = self.run_sql_in_snapshot(
             """SELECT

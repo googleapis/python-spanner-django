@@ -15,7 +15,7 @@ class PeekIterator:
     to conform with DBAPI v2's sequence expectations.
 
     :type source: list
-    :param source: A list of source for Iterator.
+    :param source: A list of source for the Iterator.
     """
 
     def __init__(self, source):
@@ -53,13 +53,13 @@ re_UNICODE_POINTS = re.compile(r"([^\s]*[\u0080-\uFFFF]+[^\s]*)")
 
 
 def backtick_unicode(sql):
-    """Check sql to be valid and split it by segments.
+    """Check the SQL to be valid and split it by segments.
 
     :type sql: str
-    :param sql: SQL request.
+    :param sql: A SQL request.
 
     :rtype: str
-    :returns: SQL parsed by segments in unicode if initial
+    :returns: A SQL parsed by segments in unicode if initial
              SQL is valid, initial string otherwise.
     """
     matches = list(re_UNICODE_POINTS.finditer(sql))
@@ -92,9 +92,9 @@ def sanitize_literals_for_upload(s):
     * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
 
     :type s: str
-    :param s: string with literals to be fitted for consumption
+    :param s: A string with literals to be fitted for the consumption.
 
     :rtype: str
-    :returns: Sanitized string for uploading.
+    :returns: A sanitized string for uploading.
     """
     return backtick_unicode(s.replace("%%", "%"))

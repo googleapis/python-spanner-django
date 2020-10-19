@@ -54,7 +54,7 @@ code_to_display_size = {
 
 
 class Cursor:
-    """Database cursor to manage the context of a fetch operation.
+    """Database cursor to manage the context of fetch operations.
 
     :type connection: :class:`spanner_dbapi.connection.Connection`
     :param connection: Parent connection object for this Cursor.
@@ -71,21 +71,21 @@ class Cursor:
         self.arraysize = 1
 
     def execute(self, sql, args=None):
-        """Abstracts and implements execute SQL statements on Cloud Spanner.
+        """Abstract and execute SQL statements on Cloud Spanner.
 
         :type sql: str
         :param sql: A SQL statement.
 
-        :type *args: list
-        :param *args: (Optional) a list of variadic arguments.
+        :type args: list
+        :param args: (Optional) a list of variadic arguments.
 
-        :type **kwargs: list
-        :param **kwargs: (Optional) key worded arguments.
+        :type kwargs: list
+        :param kwargs: (Optional) key worded arguments.
 
-        :raises: :class:`IntegrityError` if precondition failed or argument
+        :raises: :class:`IntegrityError`, if precondition failed or the argument
                  already exists, :class:`ProgrammingError` if there is
-                 invalid argument, :class:`OperationalError` if there is
-                 internal server error.
+                 an invalid argument, :class:`OperationalError` if there is
+                 an internal server error.
         """
         self._raise_if_closed()
 
@@ -218,8 +218,16 @@ class Cursor:
 
     @property
     def description(self):
-        """Give description of the table.
+        """Read-only attribute containing a sequence of the following items:
 
+        -   ``name``
+        -   ``type_code``
+        -   ``display_size``
+        -   ``internal_size``
+        -   ``precision``
+        -   ``scale``
+        -   ``null_ok``
+        # Todo review
         :rtype: tuple
         :returns: A tuple of columns' information.
         """
@@ -246,7 +254,7 @@ class Cursor:
         """Count number of rows in the table after last execution.
 
         :rtype: int
-        :returns: Number of rows that last .execute*() produced.
+        :returns: The number of rows that last .execute*() produced.
         """
         return self._row_count
 
@@ -290,8 +298,8 @@ class Cursor:
         :type seq_of_params: list
         :param seq_of_params: Sequence of params to run the query with.
 
-        :raises: :class:`ProgrammingError` if cursor is not connected to
-                 database.
+        :raises: :class:`ProgrammingError` if the cursor is not connected to
+                 the database.
         """
         self._raise_if_closed()
 
@@ -309,9 +317,10 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
+        # TODO review
         """Fetch the next resulting row of the last ran query.
 
-        :returns: The next element if it is possible, None otherwise.
+        :returns: The next element if possible, None otherwise.
         """
         self._raise_if_closed()
 
@@ -321,10 +330,12 @@ class Cursor:
             return None
 
     def fetchall(self):
-        """Fetch all elements.
+        """
+        Fetch all (remaining) rows of a query result, returning them as a
+        sequence of sequences (e.g. a list of tuples).
 
         :rtype: list
-        :returns: A list of fetched elements.
+        :returns: A list of fetched rows of a query result.
         """
         self._raise_if_closed()
 
@@ -336,11 +347,12 @@ class Cursor:
         An empty sequence is returned when no more rows are available.
 
         :type size: int
-        :param size: (Optional) maximum number of results to fetch.
+        :param size: (Optional) The maximum number of results to fetch.
 
 
-        :raises: An error if the previous call to .execute*() did not produce
-                 any result set or if no call was issued yet.
+        :raises InterfaceError: If the previous call to .execute*() did not
+                                produce any result set or if no call was
+                                issued yet.
         """
         self._raise_if_closed()
 
@@ -370,10 +382,10 @@ class Cursor:
         return self._connection.run_prior_DDL_statements()
 
     def list_tables(self):
-        """List tables of linked Database.
+        """List the tables of the linked Database.
 
-        :rtype: str
-        :returns: Tables with theirs' corresponding information.
+        :rtype: list
+        :returns: The list of tables within the Database.
         """
         return self._connection.list_tables()
 
@@ -381,45 +393,45 @@ class Cursor:
         """Run SQL in snapshot.
 
         :type sql: str
-        :param sql: SQL request.
+        :param sql: A SQL request.
 
         :rtype: list
-        :returns: Result of operation.
+        :returns: A list of :class:`~google.cloud.spanner_v1.streamed.StreamedResultSet`.
         """
         return self._connection.run_sql_in_snapshot(sql)
 
     def get_table_column_schema(self, table_name):
-        """Get table column schema.
+        """Get the table column schema.
 
         :type table_name: str
-        :param table_name: Name of the table.
+        :param table_name: The name of the table.
 
         :rtype: dict
-        :returns: A dictionary of table column schema.
+        :returns: A dictionary containing the table column schema.
         """
         return self._connection.get_table_column_schema(table_name)
 
 
 class ColumnInfo:
-    """Object defines column of the table in linked Database.
+    """The object defines the column of the table in the linked Database.
 
     :type name: str
-    :param name: Name of the column.
+    :param name: The name of the column.
 
     :type type_code: int
-    :param type_code: Code of the value type.
+    :param type_code: The code of the value type.
 
     :type display_size: int
-    :param display_size: (Optional) Display size.
+    :param display_size: (Optional) A display size.
 
     :type internal_size: int
-    :param internal_size: (Optional) Internal size.
+    :param internal_size: (Optional) An internal size.
 
     :type precision: int
-    :param precision: (Optional) Number of significant digits.
+    :param precision: (Optional) The number of significant digits.
 
     :type scale: float
-    :param scale: (Optional) Scale.
+    :param scale: (Optional) The scale.
 
     :type null_ok: bool
     :param null_ok: (Optional) Allows column value to be None. Default is False.

@@ -11,7 +11,7 @@ from unittest import mock
 
 import google.auth.credentials
 from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud.spanner_dbapi import connect, Connection
+from google.cloud.spanner_dbapi import config, connect, Connection
 
 
 def _make_credentials():
@@ -108,3 +108,20 @@ class Test_connect(unittest.TestCase):
                 database_mock.assert_called_once_with(DATABASE, pool=mock.ANY)
 
         self.assertIsInstance(connection, Connection)
+
+    def test_pool_reuse(self):
+        DATABASE = "test-database"
+        DATABASE2 = "test-database2"
+
+        with mock.patch("google.cloud.spanner_v1.instance.Instance.database"):
+            with mock.patch(
+                "google.cloud.spanner_v1.instance.Instance.exists",
+                return_value=True,
+            ):
+                connection = connect("test-instance", DATABASE)
+
+                self.assertIsNotNone(config.default_pool)
+                self.assertEqual(connection._pool, config.default_pool)
+
+                connection2 = connect("test-instance", DATABASE2)
+                self.assertEqual(connection._pool, connection2._pool)

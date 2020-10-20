@@ -105,7 +105,9 @@ class Cursor:
 
                 sql, params = sql_pyformat_args_to_spanner(sql, args)
 
-                self._res = transaction.execute_sql(sql, params)
+                self._res = transaction.execute_sql(
+                    sql, params, param_types=get_param_types(params)
+                )
                 self._itr = PeekIterator(self._res)
                 return
 

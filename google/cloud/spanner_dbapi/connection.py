@@ -13,7 +13,7 @@ from google.cloud import spanner_v1
 from google.cloud.spanner_v1.pool import BurstyPool
 
 from .cursor import Cursor
-from .exceptions import InterfaceError
+from .exceptions import InterfaceError, ProgrammingError
 
 AUTOCOMMIT_MODE_WARNING = "This method is non-operational in autocommit mode"
 
@@ -40,8 +40,8 @@ class Connection:
         self._pool = pool or BurstyPool()
         self._pool.bind(database)
 
-        self.instance = instance
-        self.database = database
+        self._instance = instance
+        self._database = database
 
         self._ddl_statements = []
         self._transaction = None
@@ -71,11 +71,49 @@ class Connection:
 
         self._autocommit = value
 
+    @property
+    def database(self):
+        """Database to which this connection relates.
+
+        :rtype: :class:`~google.cloud.spanner_v1.database.Database`
+        :returns: The related database object.
+        """
+        return self._database
+
+    @database.setter
+    def database(self, _):
+        """Related database setter.
+
+        Restricts replacing the related database.
+        """
+        raise ProgrammingError(
+            "Replacing the related database of the existing connection is restricted."
+        )
+
+    @property
+    def instance(self):
+        """Instance to which this connection relates.
+
+        :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
+        :returns: The related instance object.
+        """
+        return self._instance
+
+    @instance.setter
+    def instance(self, _):
+        """Related instance setter.
+
+        Restricts replacing the related instance.
+        """
+        raise ProgrammingError(
+            "Replacing the related instance of the existing connection is restricted."
+        )
+
     def _session_checkout(self):
         """Get a Cloud Spanner session from a pool.
 
         If there is already a session associated with
-        this connection, it'll be used otherwise.
+        this connection, it'll be used instead.
 
         :rtype: :class:`google.cloud.spanner_v1.session.Session`
         :returns: Cloud Spanner session object ready to use.
@@ -222,7 +260,6 @@ class Connection:
         ):
             self._transaction.rollback()
 
-        self.__dbhandle = None
         self.is_closed = True
 
     def commit(self):

@@ -6,8 +6,11 @@
 
 """Connection-based DB API for Cloud Spanner."""
 
+import atexit
+
 from google.cloud import spanner_v1
 
+from google.cloud.spanner_dbapi import config
 from .connection import Connection
 from .exceptions import (
     DatabaseError,
@@ -46,10 +49,6 @@ paramstyle = "format"  # ANSI C printf format codes, e.g. ...WHERE name=%s.
 # Eventually once transactions are working properly, we'll update the
 # threadsafety level.
 threadsafety = 1
-
-# Cloud Spanner sessions pool, used by
-# default for the whole DB API package
-default_pool = spanner_v1.BurstyPool()
 
 
 def connect(
@@ -97,7 +96,17 @@ def connect(
     if not database.exists():
         raise ValueError("database '%s' does not exist." % database_id)
 
-    return Connection(instance, database, default_pool)
+    if config.default_pool is None:
+        config.default_pool = spanner_v1.BurstyPool()
+
+    return Connection(instance, database, config.default_pool)
+
+
+@atexit.register
+def _cleanup():
+    """Clear the sessions pool on a program termination."""
+    if config.default_pool is not None:
+        config.default_pool.clear()
 
 
 __all__ = [

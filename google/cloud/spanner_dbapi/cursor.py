@@ -227,7 +227,7 @@ class Cursor:
         -   ``precision``
         -   ``scale``
         -   ``null_ok``
-        # Todo review
+
         :rtype: tuple
         :returns: A tuple of columns' information.
         """
@@ -317,8 +317,9 @@ class Cursor:
         return self._itr
 
     def fetchone(self):
-        # TODO review
-        """Fetch the next resulting row of the last ran query.
+        """
+        Fetch the next row of a query result set, returning a single sequence,
+        or None when no more data is available.
 
         :returns: The next element if possible, None otherwise.
         """

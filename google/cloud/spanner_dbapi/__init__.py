@@ -6,11 +6,8 @@
 
 """Connection-based DB API for Cloud Spanner."""
 
-import atexit
-
 from google.cloud import spanner_v1
 
-from google.cloud.spanner_dbapi import config
 from .connection import Connection
 from .exceptions import (
     DatabaseError,
@@ -52,7 +49,12 @@ threadsafety = 1
 
 
 def connect(
-    instance_id, database_id, project=None, credentials=None, user_agent=None
+    instance_id,
+    database_id,
+    project=None,
+    credentials=None,
+    pool=None,
+    user_agent=None,
 ):
     """
     Create a connection to Cloud Spanner database.
@@ -74,6 +76,13 @@ def connect(
                         If none are specified, the client will attempt to ascertain
                         the credentials from the environment.
 
+    :type pool: Concrete subclass of
+                :class:`~google.cloud.spanner_v1.pool.AbstractSessionPool`.
+    :param pool: (Optional). Session pool to be used by database.
+
+    :type user_agent: :class:`str`
+    :param user_agent: (Optional) User agent to be used with this connection requests.
+
     :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
     :returns: Connection object associated with the given Cloud Spanner resource.
 
@@ -90,23 +99,11 @@ def connect(
     if not instance.exists():
         raise ValueError("instance '%s' does not exist." % instance_id)
 
-    database = instance.database(
-        database_id, pool=spanner_v1.pool.BurstyPool()
-    )
+    database = instance.database(database_id, pool=pool)
     if not database.exists():
         raise ValueError("database '%s' does not exist." % database_id)
 
-    if config.default_pool is None:
-        config.default_pool = spanner_v1.BurstyPool()
-
-    return Connection(instance, database, config.default_pool)
-
-
-@atexit.register
-def _cleanup():
-    """Clear the sessions pool on a program termination."""
-    if config.default_pool is not None:
-        config.default_pool.clear()
+    return Connection(instance, database)
 
 
 __all__ = [

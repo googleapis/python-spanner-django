@@ -10,10 +10,9 @@ from collections import namedtuple
 import warnings
 
 from google.cloud import spanner_v1
-from google.cloud.spanner_v1.pool import BurstyPool
 
 from .cursor import Cursor
-from .exceptions import InterfaceError, ProgrammingError
+from .exceptions import InterfaceError
 
 AUTOCOMMIT_MODE_WARNING = "This method is non-operational in autocommit mode"
 
@@ -31,15 +30,9 @@ class Connection:
 
     :type database: :class:`~google.cloud.spanner_v1.database.Database`
     :param database: Cloud Spanner database to connect to.
-
-    :type pool: :class:`~google.cloud.spanner_v1.pool.AbstractSessionPool`
-    :param pool: (Optional) Cloud Spanner sessions pool.
     """
 
-    def __init__(self, instance, database, pool=None):
-        self._pool = pool or BurstyPool()
-        self._pool.bind(database)
-
+    def __init__(self, instance, database):
         self._instance = instance
         self._database = database
 
@@ -80,16 +73,6 @@ class Connection:
         """
         return self._database
 
-    @database.setter
-    def database(self, _):
-        """Related database setter.
-
-        Restricts replacing the related database.
-        """
-        raise ProgrammingError(
-            "Replacing the related database of the existing connection is restricted."
-        )
-
     @property
     def instance(self):
         """Instance to which this connection relates.
@@ -99,18 +82,8 @@ class Connection:
         """
         return self._instance
 
-    @instance.setter
-    def instance(self, _):
-        """Related instance setter.
-
-        Restricts replacing the related instance.
-        """
-        raise ProgrammingError(
-            "Replacing the related instance of the existing connection is restricted."
-        )
-
     def _session_checkout(self):
-        """Get a Cloud Spanner session from a pool.
+        """Get a Cloud Spanner session from the pool.
 
         If there is already a session associated with
         this connection, it'll be used instead.
@@ -119,7 +92,7 @@ class Connection:
         :returns: Cloud Spanner session object ready to use.
         """
         if not self._session:
-            self._session = self._pool.get()
+            self._session = self.database._pool.get()
 
         return self._session
 
@@ -128,7 +101,7 @@ class Connection:
 
         The session will be returned into the sessions pool.
         """
-        self._pool.put(self._session)
+        self.database._pool.put(self._session)
         self._session = None
 
     def transaction_checkout(self):
@@ -138,7 +111,7 @@ class Connection:
         this connection yet. Return the begun one otherwise.
 
         :rtype: :class:`google.cloud.spanner_v1.transaction.Transaction`
-        :returns: Cloud Spanner transaction object ready to use.
+        :returns: A Cloud Spanner transaction object, ready to use.
         """
         if not self.autocommit:
             if (

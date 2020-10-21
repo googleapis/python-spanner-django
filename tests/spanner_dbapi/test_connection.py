@@ -11,11 +11,7 @@ from unittest import mock
 
 # import google.cloud.spanner_dbapi.exceptions as dbapi_exceptions
 
-from google.cloud.spanner_dbapi import (
-    Connection,
-    InterfaceError,
-    ProgrammingError,
-)
+from google.cloud.spanner_dbapi import Connection, InterfaceError
 from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 from google.cloud.spanner_v1.database import Database
 from google.cloud.spanner_v1.instance import Instance
@@ -71,7 +67,7 @@ class TestConnection(unittest.TestCase):
         self.assertIsInstance(connection.database, Database)
         self.assertEqual(connection.database, connection._database)
 
-        with self.assertRaises(ProgrammingError):
+        with self.assertRaises(AttributeError):
             connection.database = None
 
     def test_instance_property(self):
@@ -79,5 +75,5 @@ class TestConnection(unittest.TestCase):
         self.assertIsInstance(connection.instance, Instance)
         self.assertEqual(connection.instance, connection._instance)
 
-        with self.assertRaises(ProgrammingError):
+        with self.assertRaises(AttributeError):
             connection.instance = None

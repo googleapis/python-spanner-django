@@ -11,7 +11,8 @@ from unittest import mock
 
 import google.auth.credentials
 from google.api_core.gapic_v1.client_info import ClientInfo
-from google.cloud.spanner_dbapi import config, connect, Connection
+from google.cloud.spanner_dbapi import connect, Connection
+from google.cloud.spanner_v1.pool import FixedSizePool
 
 
 def _make_credentials():
@@ -43,7 +44,7 @@ class Test_connect(unittest.TestCase):
                     "test-database",
                     PROJECT,
                     CREDENTIALS,
-                    USER_AGENT,
+                    user_agent=USER_AGENT,
                 )
 
                 self.assertIsInstance(connection, Connection)
@@ -109,19 +110,26 @@ class Test_connect(unittest.TestCase):
 
         self.assertIsInstance(connection, Connection)
 
-    def test_pool_reuse(self):
-        DATABASE = "test-database"
-        DATABASE2 = "test-database2"
-
+    def test_default_sessions_pool(self):
         with mock.patch("google.cloud.spanner_v1.instance.Instance.database"):
             with mock.patch(
                 "google.cloud.spanner_v1.instance.Instance.exists",
                 return_value=True,
             ):
-                connection = connect("test-instance", DATABASE)
+                connection = connect("test-instance", "test-database")
 
-                self.assertIsNotNone(config.default_pool)
-                self.assertEqual(connection._pool, config.default_pool)
+                self.assertIsNotNone(connection.database._pool)
 
-                connection2 = connect("test-instance", DATABASE2)
-                self.assertEqual(connection._pool, connection2._pool)
+    def test_sessions_pool(self):
+        database_id = "test-database"
+        pool = FixedSizePool()
+
+        with mock.patch(
+            "google.cloud.spanner_v1.instance.Instance.database"
+        ) as database_mock:
+            with mock.patch(
+                "google.cloud.spanner_v1.instance.Instance.exists",
+                return_value=True,
+            ):
+                connect("test-instance", database_id, pool=pool)
+                database_mock.assert_called_once_with(database_id, pool=pool)

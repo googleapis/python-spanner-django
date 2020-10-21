@@ -456,7 +456,7 @@ def sql_pyformat_args_to_spanner(sql, params):
     :type params: list
     :param params: A list of parameters.
 
-    :rtype: (str, dict)
+    :rtype: tuple(str, dict)
     :returns: A tuple of sanitized SQL and dictionary of the named arguments.
     """
     if not params:

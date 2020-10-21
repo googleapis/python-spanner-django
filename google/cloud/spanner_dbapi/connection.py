@@ -113,7 +113,7 @@ class Connection:
     def append_ddl_statement(self, ddl_statement):
         """
         Append a DDL statement to the existing list of DDL statements in
-        the linked database.
+        in the current :class:`Connection` class.
 
         :type ddl_statements: list
         :param ddl_statements: A list of DDL statements, each without a

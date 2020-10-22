@@ -112,7 +112,7 @@ class a_args:
 
         :rtype: bool
         :return: True if all the arguments are in pyformat and have the same
-                 number of arguments, False otherwise
+                 number of arguments, False otherwise.
         """
         if not self.all_have_same_argc():
             return False

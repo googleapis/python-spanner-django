@@ -110,6 +110,8 @@ class Connection:
         Begin a new transaction, if there is no transaction in
         this connection yet. Return the begun one otherwise.
 
+        The method is non operational in autocommit mode.
+
         :rtype: :class:`google.cloud.spanner_v1.transaction.Transaction`
         :returns: A Cloud Spanner transaction object, ready to use.
         """

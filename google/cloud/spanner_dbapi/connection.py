@@ -11,6 +11,7 @@ import warnings
 
 from google.cloud import spanner_v1
 
+from .checksum import ResultsChecksum
 from .cursor import Cursor
 from .exceptions import InterfaceError
 
@@ -39,6 +40,9 @@ class Connection:
         self._ddl_statements = []
         self._transaction = None
         self._session = None
+        # SQL statements, which were executed
+        # within the current transaction
+        self._statements = []
 
         self.is_closed = False
         self._autocommit = False
@@ -178,6 +182,42 @@ class Connection:
 
         return self.__handle_update_ddl(ddl_statements)
 
+    def run_statement(self, sql, params, param_types):
+        """Run single SQL statement in begun transaction.
+
+        This method is never used in autocommit mode. In
+        !autocommit mode however it remembers every executed
+        SQL statement with its parameters.
+
+        :type sql: :class:`str`
+        :param sql: SQL statement to execute.
+
+        :type params: :class:`dict`
+        :param params: Params to be used by the given statement.
+
+        :type param_types: :class:`dict`
+        :param param_types: Statement parameters types description.
+
+        :rtype: :class:`google.cloud.spanner_v1.streamed.StreamedResultSet`,
+                :class:`google.cloud.spanner_dbapi.checksum.ResultsChecksum`
+        :returns: Streamed result set of the statement and a
+                  checksum of this statement results.
+        """
+        transaction = self.transaction_checkout()
+
+        statement = {
+            "sql": sql,
+            "params": params,
+            "param_types": param_types,
+            "checksum": ResultsChecksum(),
+        }
+        self._statements.append(statement)
+
+        return (
+            transaction.execute_sql(sql, params, param_types=param_types),
+            statement["checksum"],
+        )
+
     def list_tables(self):
         return self.run_sql_in_snapshot(
             """
@@ -244,6 +284,7 @@ class Connection:
         elif self._transaction:
             self._transaction.commit()
             self._release_session()
+            self._statements = []
 
     def rollback(self):
         """Rollback all the pending transactions."""
@@ -252,6 +293,7 @@ class Connection:
         elif self._transaction:
             self._transaction.rollback()
             self._release_session()
+            self._statements = []
 
     def __enter__(self):
         return self

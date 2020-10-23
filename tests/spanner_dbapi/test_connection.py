@@ -12,6 +12,7 @@ from unittest import mock
 # import google.cloud.spanner_dbapi.exceptions as dbapi_exceptions
 
 from google.cloud.spanner_dbapi import Connection, InterfaceError
+from google.cloud.spanner_dbapi.checksum import ResultsChecksum
 from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 from google.cloud.spanner_v1.database import Database
 from google.cloud.spanner_v1.instance import Instance
@@ -77,3 +78,59 @@ class TestConnection(unittest.TestCase):
 
         with self.assertRaises(AttributeError):
             connection.instance = None
+
+    def test_run_statement(self):
+        """Check that Connection remembers executed statements."""
+        statement = """SELECT 23 FROM table WHERE id = @a1"""
+        params = {"a1": "value"}
+        param_types = {"a1": str}
+
+        connection = self._make_connection()
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.connection.Connection.transaction_checkout"
+        ):
+            connection.run_statement(statement, params, param_types)
+
+        self.assertEqual(connection._statements[0]["sql"], statement)
+        self.assertEqual(connection._statements[0]["params"], params)
+        self.assertEqual(connection._statements[0]["param_types"], param_types)
+        self.assertIsInstance(
+            connection._statements[0]["checksum"], ResultsChecksum
+        )
+
+    def test_clear_statements_on_commit(self):
+        """
+        Check that all the saved statements are
+        cleared, when the transaction is commited.
+        """
+        connection = self._make_connection()
+        connection._transaction = mock.Mock()
+        connection._statements = [{}, {}]
+
+        self.assertEqual(len(connection._statements), 2)
+
+        with mock.patch(
+            "google.cloud.spanner_v1.transaction.Transaction.commit"
+        ):
+            connection.commit()
+
+        self.assertEqual(len(connection._statements), 0)
+
+    def test_clear_statements_on_rollback(self):
+        """
+        Check that all the saved statements are
+        cleared, when the transaction is roll backed.
+        """
+        connection = self._make_connection()
+        connection._transaction = mock.Mock()
+        connection._statements = [{}, {}]
+
+        self.assertEqual(len(connection._statements), 2)
+
+        with mock.patch(
+            "google.cloud.spanner_v1.transaction.Transaction.commit"
+        ):
+            connection.rollback()
+
+        self.assertEqual(len(connection._statements), 0)

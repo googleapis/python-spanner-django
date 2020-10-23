@@ -4,8 +4,10 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import unittest
+import hashlib
+import pickle
 import os
+import unittest
 
 from google.api_core import exceptions
 
@@ -288,6 +290,34 @@ WHERE first_name = 'first-name'
 
         cursor.close()
         conn.close()
+
+    def test_results_checksum(self):
+        """Test that results checksum is calculated properly."""
+        conn = Connection(Config.INSTANCE, self._db)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+INSERT INTO contacts (contact_id, first_name, last_name, email)
+VALUES
+    (1, 'first-name', 'last-name', 'test.email@domen.ru'),
+    (2, 'first-name2', 'last-name2', 'test.email2@domen.ru')
+        """
+        )
+        self.assertEqual(len(conn._statements), 1)
+        conn.commit()
+
+        cursor.execute("SELECT * FROM contacts")
+        got_rows = cursor.fetchall()
+
+        self.assertEqual(len(conn._statements), 1)
+        conn.commit()
+
+        checksum = hashlib.sha256()
+        checksum.update(pickle.dumps(got_rows[0]))
+        checksum.update(pickle.dumps(got_rows[1]))
+
+        self.assertEqual(cursor._checksum.checksum.digest(), checksum.digest())
 
 
 def clear_table(transaction):

@@ -67,6 +67,8 @@ class Cursor:
         self._row_count = _UNSET_COUNT
         self._connection = connection
         self._is_closed = False
+        # the currently running SQL statement results checksum
+        self._checksum = None
 
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
@@ -101,11 +103,9 @@ class Cursor:
             self._run_prior_DDL_statements()
 
             if not self._connection.autocommit:
-                transaction = self._connection.transaction_checkout()
-
                 sql, params = sql_pyformat_args_to_spanner(sql, args)
 
-                self._res = transaction.execute_sql(
+                self._res, self._checksum = self._connection.run_statement(
                     sql, params, param_types=get_param_types(params)
                 )
                 self._itr = PeekIterator(self._res)
@@ -305,14 +305,19 @@ class Cursor:
         self._raise_if_closed()
 
         try:
-            return next(self)
+            res = next(self)
+            self._checksum.consume_result(res)
+            return res
         except StopIteration:
             return None
 
     def fetchall(self):
         self._raise_if_closed()
 
-        return list(self.__iter__())
+        res = list(self.__iter__())
+        for row in res:
+            self._checksum.consume_result(row)
+        return res
 
     def fetchmany(self, size=None):
         """
@@ -335,7 +340,9 @@ class Cursor:
         items = []
         for i in range(size):
             try:
-                items.append(tuple(self.__next__()))
+                res = next(self)
+                self._checksum.consume_result(res)
+                items.append(res)
             except StopIteration:
                 break
 

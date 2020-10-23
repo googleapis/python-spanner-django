@@ -47,7 +47,7 @@ setup_emulator_if_needed() {
     then
         echo "Running the emulator at: $SPANNER_EMULATOR_HOST"
         ./emulator_main --host_port "$SPANNER_EMULATOR_HOST" &
-        SPANNER_INSTANCE=$INSTANCE python3 .kokoro/ensure_instance_exists.py
+        # SPANNER_INSTANCE=$INSTANCE python3 .kokoro/ensure_instance_exists.py
     fi
 }
 

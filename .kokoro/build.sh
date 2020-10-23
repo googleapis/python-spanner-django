@@ -31,9 +31,6 @@ export PROJECT_ID=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 
 python3.6 -m pip install --upgrade --quiet pip
 
-# Remove old nox
-python3.6 -m pip uninstall --yes --quiet nox-automation
-
 # Install nox
 python3.6 -m pip install --upgrade --quiet nox
 python3.6 -m nox --version
@@ -55,9 +52,10 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 # a) It doesn't support INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE
 # b) Cannot accept parameters whose types aren't known, so can't be used for
 #    Python and other dynamic languages.
-export USE_SPANNER_EMULATOR=1
+export USE_SPANNER_EMULATOR=0
 
-pip3 install .
+python3.6 -m pip install .
+
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"

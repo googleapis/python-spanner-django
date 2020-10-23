@@ -235,6 +235,7 @@ class Connection:
         ):
             self._transaction.rollback()
 
+        self.database._pool.clear()
         self.is_closed = True
 
     def commit(self):

@@ -77,3 +77,11 @@ class TestConnection(unittest.TestCase):
 
         with self.assertRaises(AttributeError):
             connection.instance = None
+
+    def test_clearing_pool_on_close(self):
+        connection = self._make_connection()
+        with mock.patch.object(
+            connection.database._pool, "clear"
+        ) as pool_clear_mock:
+            connection.close()
+            pool_clear_mock.assert_called_once()

@@ -87,5 +87,3 @@ else
     tar zxvf cloud-spanner-emulator_linux_amd64-${VERSION}.tar.gz 2&>/dev/null
     chmod +x emulator_main
 fi
-
-./bin/parallelize_tests_linux

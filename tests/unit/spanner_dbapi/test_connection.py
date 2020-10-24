@@ -79,6 +79,21 @@ class TestConnection(unittest.TestCase):
             connection._session_checkout()
             self.assertEqual(connection._session, 'db_session')
 
+    def test__release_session(self):
+        from google.cloud.spanner_dbapi import Connection
+
+        with mock.patch(
+            "google.cloud.spanner_v1.database.Database",
+        ) as mock_database:
+            mock_database._pool = mock.MagicMock()
+            mock_database._pool.put = mock.MagicMock()
+            connection = Connection(self.INSTANCE, mock_database)
+            connection._session = 'session'
+
+            connection._release_session()
+            mock_database._pool.put.assert_called_once_with('session')
+            self.assertIsNone(connection._session)
+
     def test_transaction_checkout(self):
         from google.cloud.spanner_dbapi import Connection
 

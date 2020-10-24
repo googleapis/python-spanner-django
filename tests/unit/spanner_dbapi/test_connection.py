@@ -42,6 +42,25 @@ class TestConnection(unittest.TestCase):
         database = instance.database(self.DATABASE)
         return Connection(instance, database)
 
+    def test_property_autocommit_setter(self):
+        from google.cloud.spanner_dbapi import Connection
+
+        connection = Connection(self.INSTANCE, self.DATABASE)
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.connection.Connection.commit"
+        ) as mock_commit:
+            connection.autocommit = True
+            mock_commit.assert_called_once_with()
+            self.assertEqual(connection._autocommit, True)
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.connection.Connection.commit"
+        ) as mock_commit:
+            connection.autocommit = False
+            mock_commit.assert_not_called()
+            self.assertEqual(connection._autocommit, False)
+
     def test_close(self):
         from google.cloud.spanner_dbapi import connect, InterfaceError
 

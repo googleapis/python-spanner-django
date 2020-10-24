@@ -161,7 +161,7 @@ class Connection:
 
     def rollback(self):
         """Rollback all the pending transactions."""
-        if self.autocommit:
+        if self._autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
         elif self._transaction:
             self._transaction.rollback()

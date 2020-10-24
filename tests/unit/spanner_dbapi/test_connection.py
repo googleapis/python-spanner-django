@@ -103,9 +103,9 @@ class TestConnection(unittest.TestCase):
         connection.transaction_checkout()
         mock_checkout.assert_called_once_with()
 
-        connection._transaction = mock_xaction = mock.MagicMock()
-        mock_xaction.committed = mock_xaction.rolled_back = False
-        self.assertEqual(connection.transaction_checkout(), mock_xaction)
+        connection._transaction = mock_transaction = mock.MagicMock()
+        mock_transaction.committed = mock_transaction.rolled_back = False
+        self.assertEqual(connection.transaction_checkout(), mock_transaction)
 
         connection._autocommit = True
         self.assertIsNone(connection.transaction_checkout())
@@ -130,9 +130,9 @@ class TestConnection(unittest.TestCase):
         with self.assertRaises(InterfaceError):
             connection.cursor()
 
-        connection._transaction = mock_xaction = mock.MagicMock()
-        mock_xaction.committed = mock_xaction.rolled_back = False
-        mock_xaction.rollback = mock_rollback = mock.MagicMock()
+        connection._transaction = mock_transaction = mock.MagicMock()
+        mock_transaction.committed = mock_transaction.rolled_back = False
+        mock_transaction.rollback = mock_rollback = mock.MagicMock()
         connection.close()
         mock_rollback.assert_called_once_with()
 
@@ -142,6 +142,13 @@ class TestConnection(unittest.TestCase):
         from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 
         connection = Connection(self.INSTANCE, self.DATABASE)
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.connection.Connection._release_session"
+        ) as mock_release:
+            connection.commit()
+            mock_release.assert_not_called()
+
         connection._transaction = mock_transaction = mock.MagicMock()
         mock_transaction.commit = mock_commit = mock.MagicMock()
 
@@ -156,25 +163,32 @@ class TestConnection(unittest.TestCase):
         connection.commit()
         mock_warn.assert_called_once_with(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
 
-    def test_rollback(self):
+    @mock.patch.object(warnings, 'warn')
+    def test_rollback(self, mock_warn):
         from google.cloud.spanner_dbapi import Connection
+        from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 
         connection = Connection(self.INSTANCE, self.DATABASE)
 
-        # with mock.patch(
-        #     "google.cloud.spanner_dbapi.connection.Connection._raise_if_closed"
-        # ) as check_closed_mock:
-        #     connection.rollback()
-        #     check_closed_mock.assert_called_once_with()
+        with mock.patch(
+            "google.cloud.spanner_dbapi.connection.Connection._release_session"
+        ) as mock_release:
+            connection.rollback()
+            mock_release.assert_not_called()
 
         connection._transaction = mock_transaction = mock.MagicMock()
         mock_transaction.rollback = mock_rollback = mock.MagicMock()
+
         with mock.patch(
             "google.cloud.spanner_dbapi.connection.Connection._release_session"
         ) as mock_release:
             connection.rollback()
             mock_rollback.assert_called_once_with()
             mock_release.assert_called_once_with()
+
+        connection._autocommit = True
+        connection.rollback()
+        mock_warn.assert_called_once_with(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
 
     def test_run_prior_DDL_statements(self):
         from google.cloud.spanner_dbapi import Connection, InterfaceError

@@ -26,8 +26,7 @@ from google.cloud.spanner_dbapi._helpers import code_to_display_size
 
 from google.cloud.spanner_dbapi import parse_utils
 from google.cloud.spanner_dbapi.parse_utils import get_param_types
-
-from .utils import PeekIterator
+from google.cloud.spanner_dbapi.utils import PeekIterator
 
 _UNSET_COUNT = -1
 
@@ -150,13 +149,26 @@ class Cursor(object):
         try:
             classification = parse_utils.classify_stmt(sql)
             if classification == parse_utils.STMT_DDL:
-                self.connection.ddl_statements.append(sql)
+                self.connection._ddl_statements.append(sql)
                 return
 
             # For every other operation, we've got to ensure that
             # any prior DDL statements were run.
             # self._run_prior_DDL_statements()
             self.connection.run_prior_DDL_statements()
+
+            if not self.connection.autocommit:
+                transaction = self.connection.transaction_checkout()
+
+                sql, params = parse_utils.sql_pyformat_args_to_spanner(
+                    sql, args
+                )
+
+                self._result_set = transaction.execute_sql(
+                    sql, params, param_types=get_param_types(params)
+                )
+                self._itr = PeekIterator(self._result_set)
+                return
 
             if classification == parse_utils.STMT_NON_UPDATING:
                 self._handle_DQL(sql, args or None)

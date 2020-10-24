@@ -130,7 +130,7 @@ class TestCursor(unittest.TestCase):
         cursor.connection._autocommit = False
         cursor.connection.transaction_checkout = mock.MagicMock(autospec=True)
 
-        cursor.execute('sql')
+        cursor.execute("sql")
         self.assertIsInstance(cursor._result_set, mock.MagicMock)
         self.assertIsInstance(cursor._itr, PeekIterator)
 
@@ -178,7 +178,7 @@ class TestCursor(unittest.TestCase):
 
         with mock.patch(
             "google.cloud.spanner_dbapi.parse_utils.classify_stmt",
-            return_value='other_statement',
+            return_value="other_statement",
         ):
             cursor.connection._database = mock_db = mock.MagicMock()
             mock_db.run_in_transaction = mock_run_in = mock.MagicMock()

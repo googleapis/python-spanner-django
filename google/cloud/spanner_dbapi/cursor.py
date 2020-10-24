@@ -26,8 +26,7 @@ from google.cloud.spanner_dbapi._helpers import code_to_display_size
 
 from google.cloud.spanner_dbapi import parse_utils
 from google.cloud.spanner_dbapi.parse_utils import get_param_types
-
-from .utils import PeekIterator
+from google.cloud.spanner_dbapi.utils import PeekIterator
 
 _UNSET_COUNT = -1
 

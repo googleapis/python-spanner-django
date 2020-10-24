@@ -122,6 +122,18 @@ class TestCursor(unittest.TestCase):
         with self.assertRaises(AttributeError):
             cursor.execute(sql="")
 
+    def test_execute_autocommit_off(self):
+        from google.cloud.spanner_dbapi.utils import PeekIterator
+
+        connection = self._make_connection(self.INSTANCE, mock.MagicMock())
+        cursor = self._make_one(connection)
+        cursor.connection._autocommit = False
+        cursor.connection.transaction_checkout = mock.MagicMock(autospec=True)
+
+        cursor.execute('sql')
+        self.assertIsInstance(cursor._result_set, mock.MagicMock)
+        self.assertIsInstance(cursor._itr, PeekIterator)
+
     def test_execute_statement(self):
         from google.cloud.spanner_dbapi import parse_utils
 
@@ -163,6 +175,18 @@ class TestCursor(unittest.TestCase):
                 mock_handle_insert.assert_called_once_with(
                     connection, sql, None
                 )
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.parse_utils.classify_stmt",
+            return_value='other_statement',
+        ):
+            cursor.connection._database = mock_db = mock.MagicMock()
+            mock_db.run_in_transaction = mock_run_in = mock.MagicMock()
+            sql = "sql"
+            cursor.execute(sql=sql)
+            mock_run_in.assert_called_once_with(
+                cursor._do_execute_update, sql, None
+            )
 
     def test_execute_integrity_error(self):
         from google.api_core import exceptions

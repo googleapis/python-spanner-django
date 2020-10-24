@@ -79,6 +79,21 @@ class TestConnection(unittest.TestCase):
             connection._session_checkout()
             self.assertEqual(connection._session, 'db_session')
 
+    def test_transaction_checkout(self):
+        from google.cloud.spanner_dbapi import Connection
+
+        connection = Connection(self.INSTANCE, self.DATABASE)
+        connection._session_checkout = mock_checkout = mock.MagicMock(autospec=True)
+        connection.transaction_checkout()
+        mock_checkout.assert_called_once_with()
+
+        connection._transaction = mock_xaction = mock.MagicMock()
+        mock_xaction.committed = mock_xaction.rolled_back = False
+        self.assertEqual(connection.transaction_checkout(), mock_xaction)
+
+        connection._autocommit = True
+        self.assertIsNone(connection.transaction_checkout())
+
     def test_close(self):
         from google.cloud.spanner_dbapi import connect, InterfaceError
 

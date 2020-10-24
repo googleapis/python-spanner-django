@@ -153,7 +153,7 @@ class Connection:
 
     def commit(self):
         """Commits any pending transaction to the database."""
-        if self.autocommit:
+        if self._autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
         elif self._transaction:
             self._transaction.commit()

@@ -7,6 +7,7 @@
 """Cloud Spanner DB-API Connection class unit tests."""
 
 import unittest
+import warnings
 
 from unittest import mock
 
@@ -135,19 +136,15 @@ class TestConnection(unittest.TestCase):
         connection.close()
         mock_rollback.assert_called_once_with()
 
-    def test_commit(self):
-        from google.cloud.spanner_dbapi import Connection, InterfaceError
+    @mock.patch.object(warnings, 'warn')
+    def test_commit(self, mock_warn):
+        from google.cloud.spanner_dbapi import Connection
+        from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
 
         connection = Connection(self.INSTANCE, self.DATABASE)
-
-        # with mock.patch(
-        #     "google.cloud.spanner_dbapi.connection.Connection.run_prior_DDL_statements"
-        # ) as run_ddl_mock:
-        #     connection.commit()
-        #     run_ddl_mock.assert_called_once_with()
-
         connection._transaction = mock_transaction = mock.MagicMock()
         mock_transaction.commit = mock_commit = mock.MagicMock()
+
         with mock.patch(
             "google.cloud.spanner_dbapi.connection.Connection._release_session"
         ) as mock_release:
@@ -155,10 +152,9 @@ class TestConnection(unittest.TestCase):
             mock_commit.assert_called_once_with()
             mock_release.assert_called_once_with()
 
-        # connection.is_closed = True
-        #
-        # with self.assertRaises(InterfaceError):
-        #     connection.commit()
+        connection._autocommit = True
+        connection.commit()
+        mock_warn.assert_called_once_with(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
 
     def test_rollback(self):
         from google.cloud.spanner_dbapi import Connection

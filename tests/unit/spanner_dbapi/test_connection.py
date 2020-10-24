@@ -129,6 +129,12 @@ class TestConnection(unittest.TestCase):
         with self.assertRaises(InterfaceError):
             connection.cursor()
 
+        connection._transaction = mock_xaction = mock.MagicMock()
+        mock_xaction.committed = mock_xaction.rolled_back = False
+        mock_xaction.rollback = mock_rollback = mock.MagicMock()
+        connection.close()
+        mock_rollback.assert_called_once_with()
+
     def test_commit(self):
         from google.cloud.spanner_dbapi import Connection, InterfaceError
 

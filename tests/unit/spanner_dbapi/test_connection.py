@@ -38,7 +38,7 @@ class TestConnection(unittest.TestCase):
         from google.cloud.spanner_dbapi import Connection
         from google.cloud.spanner_v1.instance import Instance
 
-        # we don't need real Client object to test the constructor
+        # We don't need a real Client object to test the constructor
         instance = Instance(self.INSTANCE, client=None)
         database = instance.database(self.DATABASE)
         return Connection(instance, database)
@@ -62,6 +62,20 @@ class TestConnection(unittest.TestCase):
             mock_commit.assert_not_called()
             self.assertEqual(connection._autocommit, False)
 
+    def test_property_database(self):
+        from google.cloud.spanner_v1.database import Database
+
+        connection = self._make_connection()
+        self.assertIsInstance(connection.database, Database)
+        self.assertEqual(connection.database, connection._database)
+
+    def test_property_instance(self):
+        from google.cloud.spanner_v1.instance import Instance
+
+        connection = self._make_connection()
+        self.assertIsInstance(connection.instance, Instance)
+        self.assertEqual(connection.instance, connection._instance)
+
     def test__session_checkout(self):
         from google.cloud.spanner_dbapi import Connection
 
@@ -69,16 +83,18 @@ class TestConnection(unittest.TestCase):
             "google.cloud.spanner_v1.database.Database",
         ) as mock_database:
             mock_database._pool = mock.MagicMock()
-            mock_database._pool.get = mock.MagicMock(return_value='db_session_pool')
+            mock_database._pool.get = mock.MagicMock(
+                return_value="db_session_pool"
+            )
             connection = Connection(self.INSTANCE, mock_database)
 
             connection._session_checkout()
             mock_database._pool.get.assert_called_once_with()
-            self.assertEqual(connection._session, 'db_session_pool')
+            self.assertEqual(connection._session, "db_session_pool")
 
-            connection._session = 'db_session'
+            connection._session = "db_session"
             connection._session_checkout()
-            self.assertEqual(connection._session, 'db_session')
+            self.assertEqual(connection._session, "db_session")
 
     def test__release_session(self):
         from google.cloud.spanner_dbapi import Connection
@@ -89,17 +105,19 @@ class TestConnection(unittest.TestCase):
             mock_database._pool = mock.MagicMock()
             mock_database._pool.put = mock.MagicMock()
             connection = Connection(self.INSTANCE, mock_database)
-            connection._session = 'session'
+            connection._session = "session"
 
             connection._release_session()
-            mock_database._pool.put.assert_called_once_with('session')
+            mock_database._pool.put.assert_called_once_with("session")
             self.assertIsNone(connection._session)
 
     def test_transaction_checkout(self):
         from google.cloud.spanner_dbapi import Connection
 
         connection = Connection(self.INSTANCE, self.DATABASE)
-        connection._session_checkout = mock_checkout = mock.MagicMock(autospec=True)
+        connection._session_checkout = mock_checkout = mock.MagicMock(
+            autospec=True
+        )
         connection.transaction_checkout()
         mock_checkout.assert_called_once_with()
 
@@ -136,10 +154,12 @@ class TestConnection(unittest.TestCase):
         connection.close()
         mock_rollback.assert_called_once_with()
 
-    @mock.patch.object(warnings, 'warn')
+    @mock.patch.object(warnings, "warn")
     def test_commit(self, mock_warn):
         from google.cloud.spanner_dbapi import Connection
-        from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
+        from google.cloud.spanner_dbapi.connection import (
+            AUTOCOMMIT_MODE_WARNING,
+        )
 
         connection = Connection(self.INSTANCE, self.DATABASE)
 
@@ -161,12 +181,16 @@ class TestConnection(unittest.TestCase):
 
         connection._autocommit = True
         connection.commit()
-        mock_warn.assert_called_once_with(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        mock_warn.assert_called_once_with(
+            AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2
+        )
 
-    @mock.patch.object(warnings, 'warn')
+    @mock.patch.object(warnings, "warn")
     def test_rollback(self, mock_warn):
         from google.cloud.spanner_dbapi import Connection
-        from google.cloud.spanner_dbapi.connection import AUTOCOMMIT_MODE_WARNING
+        from google.cloud.spanner_dbapi.connection import (
+            AUTOCOMMIT_MODE_WARNING,
+        )
 
         connection = Connection(self.INSTANCE, self.DATABASE)
 
@@ -188,7 +212,9 @@ class TestConnection(unittest.TestCase):
 
         connection._autocommit = True
         connection.rollback()
-        mock_warn.assert_called_once_with(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        mock_warn.assert_called_once_with(
+            AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2
+        )
 
     def test_run_prior_DDL_statements(self):
         from google.cloud.spanner_dbapi import Connection, InterfaceError
@@ -290,23 +316,3 @@ class TestConnection(unittest.TestCase):
             ):
                 connect("test-instance", database_id, pool=pool)
                 database_mock.assert_called_once_with(database_id, pool=pool)
-
-    def test_database_property(self):
-        from google.cloud.spanner_v1.database import Database
-
-        connection = self._make_connection()
-        self.assertIsInstance(connection.database, Database)
-        self.assertEqual(connection.database, connection._database)
-
-        with self.assertRaises(AttributeError):
-            connection.database = None
-
-    def test_instance_property(self):
-        from google.cloud.spanner_v1.instance import Instance
-
-        connection = self._make_connection()
-        self.assertIsInstance(connection.instance, Instance)
-        self.assertEqual(connection.instance, connection._instance)
-
-        with self.assertRaises(AttributeError):
-            connection.instance = None

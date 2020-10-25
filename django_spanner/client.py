@@ -8,5 +8,5 @@ from django.db.backends.base.client import BaseDatabaseClient
 
 
 class DatabaseClient(BaseDatabaseClient):
-    def runshell(self):
-        raise NotImplementedError("dbshell is not implemented.")
+    def runshell(self, parameters):
+        raise RuntimeError("This method is not supported.")

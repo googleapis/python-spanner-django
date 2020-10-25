@@ -5,7 +5,9 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from django.db.backends.base.base import BaseDatabaseWrapper
-from google.cloud import spanner_dbapi as Database, spanner_v1 as spanner
+
+import google.cloud.spanner_dbapi as Database
+import google.cloud.spanner_v1 as spanner
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -81,8 +83,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # special characters for REGEXP_CONTAINS operators (e.g. \, *, _) must be
     # escaped on database side.
     pattern_esc = r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"), "_", r"\_")'
-    # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
-    # lookups.
+
+    # These are all no-ops in favor of using REGEXP_CONTAINS
+    # in the customized lookups.
     pattern_ops = {
         "contains": "",
         "icontains": "",
@@ -124,7 +127,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return Database.connect(**conn_params)
 
     def init_connection_state(self):
-        pass
+        self.connection.close()
+        database = self.connection.database
+        self.connection.__init__(self.instance, database)
 
     def create_cursor(self, name=None):
         return self.connection.cursor()
@@ -134,12 +139,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             self.connection.autocommit = autocommit
 
     def is_usable(self):
-        if self.connection is None:
+        if self.connection is None or self.connection.is_closed:
             return False
+
         try:
             # Use a cursor directly, bypassing Django's utilities.
             self.connection.cursor().execute("SELECT 1")
         except Database.Error:
             return False
-        else:
-            return True
+
+        return True

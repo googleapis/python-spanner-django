@@ -55,7 +55,8 @@ class Connection:
 
     @autocommit.setter
     def autocommit(self, value):
-        """Change this connection autocommit mode.
+        """Change this connection autocommit mode. Setting this value to True
+        while a transaction is active will commit the current transaction.
 
         :type value: bool
         :param value: New autocommit mode state.
@@ -152,7 +153,10 @@ class Connection:
         self.is_closed = True
 
     def commit(self):
-        """Commits any pending transaction to the database."""
+        """Commits any pending transaction to the database.
+
+        This method is non-operational in autocommit mode.
+        """
         if self._autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
         elif self._transaction:
@@ -160,7 +164,11 @@ class Connection:
             self._release_session()
 
     def rollback(self):
-        """Rollback all the pending transactions."""
+        """Rolls back any pending transaction.
+
+        This is a no-op if there is no active transaction or if the connection
+        is in autocommit mode.
+        """
         if self._autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
         elif self._transaction:

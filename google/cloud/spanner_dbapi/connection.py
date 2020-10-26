@@ -6,12 +6,12 @@
 
 """Cloud Spanner DB connection object."""
 
-from collections import namedtuple
 import warnings
+from collections import namedtuple
 
 from google.cloud import spanner_v1
 
-from .checksum import ResultsChecksum
+from .checksum import _compare_checksums, ResultsChecksum
 from .cursor import Cursor
 from .exceptions import InterfaceError
 
@@ -108,6 +108,25 @@ class Connection:
         self.database._pool.put(self._session)
         self._session = None
 
+    def retry_transaction(self):
+        """Retry the aborted transaction.
+
+        All the statements executed in the transaction
+        will be re-executed. Results checksums of the original
+        statements and the retried ones will be compared.
+
+        :raises: :class:`google.api_core.exceptions.Aborted`
+            If results checksum of the retried statement is
+            not equal to the checksum of the original one.
+        """
+        for statement in self._statements:
+            res_iter, retried_checksum = self.run_statement(
+                statement, retried=True
+            )
+            for res in res_iter:
+                retried_checksum.consume_result(res)
+                _compare_checksums(statement["checksum"], retried_checksum)
+
     def transaction_checkout(self):
         """Get a Cloud Spanner transaction.
 
@@ -182,21 +201,15 @@ class Connection:
 
         return self.__handle_update_ddl(ddl_statements)
 
-    def run_statement(self, sql, params, param_types):
+    def run_statement(self, statement, retried=False):
         """Run single SQL statement in begun transaction.
 
         This method is never used in autocommit mode. In
         !autocommit mode however it remembers every executed
         SQL statement with its parameters.
 
-        :type sql: :class:`str`
-        :param sql: SQL statement to execute.
-
-        :type params: :class:`dict`
-        :param params: Params to be used by the given statement.
-
-        :type param_types: :class:`dict`
-        :param param_types: Statement parameters types description.
+        :type statement: :class:`dict`
+        :param statement: SQL statement to execute.
 
         :rtype: :class:`google.cloud.spanner_v1.streamed.StreamedResultSet`,
                 :class:`google.cloud.spanner_dbapi.checksum.ResultsChecksum`
@@ -204,18 +217,15 @@ class Connection:
                   checksum of this statement results.
         """
         transaction = self.transaction_checkout()
-
-        statement = {
-            "sql": sql,
-            "params": params,
-            "param_types": param_types,
-            "checksum": ResultsChecksum(),
-        }
         self._statements.append(statement)
 
         return (
-            transaction.execute_sql(sql, params, param_types=param_types),
-            statement["checksum"],
+            transaction.execute_sql(
+                statement["sql"],
+                statement["params"],
+                param_types=statement["param_types"],
+            ),
+            ResultsChecksum() if retried else statement["checksum"],
         )
 
     def list_tables(self):

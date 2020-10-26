@@ -7,6 +7,7 @@
 """Database cursor API."""
 
 from google.api_core.exceptions import (
+    Aborted,
     AlreadyExists,
     FailedPrecondition,
     InternalServerError,
@@ -14,6 +15,7 @@ from google.api_core.exceptions import (
 )
 from google.cloud.spanner_v1 import param_types
 
+from .checksum import ResultsChecksum
 from .exceptions import (
     IntegrityError,
     InterfaceError,
@@ -105,8 +107,14 @@ class Cursor:
             if not self._connection.autocommit:
                 sql, params = sql_pyformat_args_to_spanner(sql, args)
 
+                statement = {
+                    "sql": sql,
+                    "params": params,
+                    "param_types": get_param_types(params),
+                    "checksum": ResultsChecksum(),
+                }
                 self._res, self._checksum = self._connection.run_statement(
-                    sql, params, param_types=get_param_types(params)
+                    statement
                 )
                 self._itr = PeekIterator(self._res)
                 return
@@ -309,14 +317,21 @@ class Cursor:
             self._checksum.consume_result(res)
             return res
         except StopIteration:
-            return None
+            return
+        except Aborted:
+            self._connection.retry_transaction()
 
     def fetchall(self):
         self._raise_if_closed()
 
-        res = list(self.__iter__())
-        for row in res:
-            self._checksum.consume_result(row)
+        res = []
+        try:
+            for row in self.__iter__():
+                self._checksum.consume_result(row)
+                res.append(row)
+        except Aborted:
+            self._connection.retry_transaction()
+
         return res
 
     def fetchmany(self, size=None):
@@ -345,6 +360,8 @@ class Cursor:
                 items.append(res)
             except StopIteration:
                 break
+            except Aborted:
+                self._connection.retry_transaction()
 
         return items
 

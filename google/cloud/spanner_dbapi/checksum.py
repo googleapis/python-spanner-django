@@ -9,6 +9,8 @@
 import hashlib
 import pickle
 
+from google.api_core.exceptions import Aborted
+
 
 class ResultsChecksum:
     """Cumulative checksum.
@@ -65,8 +67,7 @@ def _compare_checksums(original, retried):
 
     :raises: :exc:`RuntimeError` in case if checksums are not equal.
     """
-    if original is not None:
-        if len(retried) == len(original) and retried != original:
-            raise RuntimeError(
-                "The underlying data being changed while retrying an aborted transaction."
-            )
+    if len(retried) == len(original) and retried != original:
+        raise Aborted(
+            "The transaction was aborted and could not be retried due to a concurrent modification."
+        )

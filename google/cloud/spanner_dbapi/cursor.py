@@ -170,10 +170,10 @@ class Cursor(object):
                     "param_types": get_param_types(params),
                     "checksum": ResultsChecksum(),
                 }
-                self._res, self._checksum = self.connection.run_statement(
+                self._result_set, self._checksum = self.connection.run_statement(
                     statement
                 )
-                self._itr = PeekIterator(self._res)
+                self._itr = PeekIterator(self._result_set)
                 return
 
             if classification == parse_utils.STMT_NON_UPDATING:

@@ -419,7 +419,7 @@ class TestConnection(unittest.TestCase):
         Check retrying an aborted transaction
         with results checksums mismatch.
         """
-        from google.cloud.api_core.exceptions import Aborted
+        from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
 
         row = ["field1", "field2"]

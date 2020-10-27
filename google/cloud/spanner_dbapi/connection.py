@@ -7,11 +7,12 @@
 """DB-API Connection for the Google Cloud Spanner."""
 
 import warnings
-from collections import namedtuple
 
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import spanner_v1 as spanner
 
+from google.cloud.spanner_dbapi.checksum import _compare_checksums
+from google.cloud.spanner_dbapi.checksum import ResultsChecksum
 from google.cloud.spanner_dbapi.cursor import Cursor
 from google.cloud.spanner_dbapi.exceptions import InterfaceError
 from google.cloud.spanner_dbapi.version import DEFAULT_USER_AGENT
@@ -229,6 +230,33 @@ class Connection:
 
             return self.database.update_ddl(ddl_statements).result()
 
+    def run_statement(self, statement, retried=False):
+        """Run single SQL statement in begun transaction.
+
+        This method is never used in autocommit mode. In
+        !autocommit mode however it remembers every executed
+        SQL statement with its parameters.
+
+        :type statement: :class:`dict`
+        :param statement: SQL statement to execute.
+
+        :rtype: :class:`google.cloud.spanner_v1.streamed.StreamedResultSet`,
+                :class:`google.cloud.spanner_dbapi.checksum.ResultsChecksum`
+        :returns: Streamed result set of the statement and a
+                  checksum of this statement results.
+        """
+        transaction = self.transaction_checkout()
+        self._statements.append(statement)
+
+        return (
+            transaction.execute_sql(
+                statement["sql"],
+                statement["params"],
+                param_types=statement["param_types"],
+            ),
+            ResultsChecksum() if retried else statement["checksum"],
+        )
+
     def __enter__(self):
         return self
 
@@ -282,11 +310,11 @@ def connect(
     """
 
     client_info = ClientInfo(
-        user_agent=user_agent or DEFAULT_USER_AGENT, python_version=PY_VERSION,
+        user_agent=user_agent or DEFAULT_USER_AGENT, python_version=PY_VERSION
     )
 
     client = spanner.Client(
-        project=project, credentials=credentials, client_info=client_info,
+        project=project, credentials=credentials, client_info=client_info
     )
 
     instance = client.instance(instance_id)

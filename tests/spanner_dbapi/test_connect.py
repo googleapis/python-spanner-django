@@ -29,31 +29,20 @@ class Test_connect(unittest.TestCase):
         PROJECT = "test-project"
         USER_AGENT = "user-agent"
         CREDENTIALS = _make_credentials()
-        CLIENT_INFO = ClientInfo(user_agent=USER_AGENT)
 
-        with mock.patch(
-            "google.cloud.spanner_dbapi.spanner_v1.Client"
-        ) as client_mock:
-            with mock.patch(
-                "google.cloud.spanner_dbapi.google_client_info",
-                return_value=CLIENT_INFO,
-            ) as client_info_mock:
+        with mock.patch("google.cloud.spanner_v1.Client") as client_mock:
+            connection = connect(
+                "test-instance",
+                "test-database",
+                PROJECT,
+                CREDENTIALS,
+                user_agent=USER_AGENT,
+            )
 
-                connection = connect(
-                    "test-instance",
-                    "test-database",
-                    PROJECT,
-                    CREDENTIALS,
-                    user_agent=USER_AGENT,
-                )
-
-                self.assertIsInstance(connection, Connection)
-                client_info_mock.assert_called_once_with(USER_AGENT)
+            self.assertIsInstance(connection, Connection)
 
             client_mock.assert_called_once_with(
-                project=PROJECT,
-                credentials=CREDENTIALS,
-                client_info=CLIENT_INFO,
+                project=PROJECT, credentials=CREDENTIALS, client_info=mock.ANY
             )
 
     def test_instance_not_found(self):

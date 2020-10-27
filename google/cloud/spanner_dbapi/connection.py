@@ -123,8 +123,22 @@ class Connection:
             res_iter, retried_checksum = self.run_statement(
                 statement, retried=True
             )
-            for res in res_iter:
-                retried_checksum.consume_result(res)
+            # executing all the completed statements
+            if statement != self._statements[-1]:
+                for res in res_iter:
+                    retried_checksum.consume_result(res)
+
+                _compare_checksums(statement["checksum"], retried_checksum)
+            # executing the failed statement
+            else:
+                # streaming up to the failed result
+                while len(retried_checksum) < len(statement["checksum"]):
+                    try:
+                        res = next(iter(res_iter))
+                        retried_checksum.consume_result(res)
+                    except StopIteration:
+                        break
+
                 _compare_checksums(statement["checksum"], retried_checksum)
 
     def transaction_checkout(self):

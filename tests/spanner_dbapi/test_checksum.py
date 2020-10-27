@@ -29,7 +29,8 @@ class Test_compare_checksums(unittest.TestCase):
 
         retried = ResultsChecksum()
 
-        self.assertIsNone(_compare_checksums(original, retried))
+        with self.assertRaises(Aborted):
+            _compare_checksums(original, retried)
 
     def test_more_results(self):
         original = ResultsChecksum()
@@ -39,7 +40,8 @@ class Test_compare_checksums(unittest.TestCase):
         retried.consume_result(5)
         retried.consume_result(2)
 
-        self.assertIsNone(_compare_checksums(original, retried))
+        with self.assertRaises(Aborted):
+            _compare_checksums(original, retried)
 
     def test_mismatch(self):
         original = ResultsChecksum()

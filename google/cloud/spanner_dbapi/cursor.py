@@ -320,6 +320,7 @@ class Cursor:
             return
         except Aborted:
             self._connection.retry_transaction()
+            return self.fetchone()
 
     def fetchall(self):
         self._raise_if_closed()
@@ -331,6 +332,7 @@ class Cursor:
                 res.append(row)
         except Aborted:
             self._connection.retry_transaction()
+            return self.fetchall()
 
         return res
 
@@ -362,6 +364,7 @@ class Cursor:
                 break
             except Aborted:
                 self._connection.retry_transaction()
+                return self.fetchmany(size)
 
         return items
 

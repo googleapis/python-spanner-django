@@ -500,11 +500,11 @@ class TestCursor(unittest.TestCase):
                 retry_mock.assert_called_with()
 
     def test_fetchone_retry_aborted_statements(self):
+        """Check that retried transaction executing the same statements."""
         from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
 
-        """Check that retried transaction executing the same statements."""
         row = ["field1", "field2"]
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists",

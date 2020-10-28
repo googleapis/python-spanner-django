@@ -444,3 +444,47 @@ class TestConnection(unittest.TestCase):
         ):
             with self.assertRaises(Aborted):
                 connection.retry_transaction()
+
+    def test_commit_retry_aborted_statements(self):
+        """Check that retried transaction executing the same statements."""
+        from google.api_core.exceptions import Aborted
+        from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.connection import connect
+
+        row = ["field1", "field2"]
+        with mock.patch(
+            "google.cloud.spanner_v1.instance.Instance.exists",
+            return_value=True,
+        ):
+            with mock.patch(
+                "google.cloud.spanner_v1.database.Database.exists",
+                return_value=True,
+            ):
+                connection = connect("test-instance", "test-database")
+
+        cursor = connection.cursor()
+        cursor._checksum = ResultsChecksum()
+        cursor._checksum.consume_result(row)
+
+        statement = {
+            "sql": "SELECT 1",
+            "params": [],
+            "param_types": {},
+            "checksum": cursor._checksum,
+        }
+        connection._statements.append(statement)
+        connection._transaction = mock.Mock()
+
+        with mock.patch.object(
+            connection._transaction,
+            "commit",
+            side_effect=(Aborted("Aborted"), None),
+        ):
+            with mock.patch(
+                "google.cloud.spanner_dbapi.connection.Connection.run_statement",
+                return_value=([row], ResultsChecksum()),
+            ) as run_mock:
+
+                connection.commit()
+
+                run_mock.assert_called_with(statement, retried=True)

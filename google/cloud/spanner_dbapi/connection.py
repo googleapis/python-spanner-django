@@ -8,6 +8,7 @@
 
 import warnings
 
+from google.api_core.exceptions import Aborted
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import spanner_v1 as spanner
 
@@ -198,9 +199,13 @@ class Connection:
         if self._autocommit:
             warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
         elif self._transaction:
-            self._transaction.commit()
-            self._release_session()
-            self._statements = []
+            try:
+                self._transaction.commit()
+                self._release_session()
+                self._statements = []
+            except Aborted:
+                self.retry_transaction()
+                self.commit()
 
     def rollback(self):
         """Rolls back any pending transaction.

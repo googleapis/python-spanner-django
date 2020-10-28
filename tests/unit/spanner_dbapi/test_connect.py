@@ -10,8 +10,6 @@ import unittest
 from unittest import mock
 
 import google.auth.credentials
-from google.cloud.spanner_dbapi import connect, Connection
-from google.cloud.spanner_v1.pool import FixedSizePool
 
 
 def _make_credentials():
@@ -25,6 +23,9 @@ def _make_credentials():
 
 class Test_connect(unittest.TestCase):
     def test_connect(self):
+        from google.cloud.spanner_dbapi import connect
+        from google.cloud.spanner_dbapi import Connection
+
         PROJECT = "test-project"
         USER_AGENT = "user-agent"
         CREDENTIALS = _make_credentials()
@@ -45,6 +46,8 @@ class Test_connect(unittest.TestCase):
             )
 
     def test_instance_not_found(self):
+        from google.cloud.spanner_dbapi import connect
+
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists",
             return_value=False,
@@ -56,6 +59,8 @@ class Test_connect(unittest.TestCase):
             exists_mock.assert_called_once_with()
 
     def test_database_not_found(self):
+        from google.cloud.spanner_dbapi import connect
+
         with mock.patch(
             "google.cloud.spanner_v1.instance.Instance.exists",
             return_value=True,
@@ -71,6 +76,9 @@ class Test_connect(unittest.TestCase):
                 exists_mock.assert_called_once_with()
 
     def test_connect_instance_id(self):
+        from google.cloud.spanner_dbapi import connect
+        from google.cloud.spanner_dbapi import Connection
+
         INSTANCE = "test-instance"
 
         with mock.patch(
@@ -83,6 +91,9 @@ class Test_connect(unittest.TestCase):
         self.assertIsInstance(connection, Connection)
 
     def test_connect_database_id(self):
+        from google.cloud.spanner_dbapi import connect
+        from google.cloud.spanner_dbapi import Connection
+
         DATABASE = "test-database"
 
         with mock.patch(
@@ -99,6 +110,8 @@ class Test_connect(unittest.TestCase):
         self.assertIsInstance(connection, Connection)
 
     def test_default_sessions_pool(self):
+        from google.cloud.spanner_dbapi import connect
+
         with mock.patch("google.cloud.spanner_v1.instance.Instance.database"):
             with mock.patch(
                 "google.cloud.spanner_v1.instance.Instance.exists",
@@ -109,6 +122,9 @@ class Test_connect(unittest.TestCase):
                 self.assertIsNotNone(connection.database._pool)
 
     def test_sessions_pool(self):
+        from google.cloud.spanner_dbapi import connect
+        from google.cloud.spanner_v1.pool import FixedSizePool
+
         database_id = "test-database"
         pool = FixedSizePool()
 

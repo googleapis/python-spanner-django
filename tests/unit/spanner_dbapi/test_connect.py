@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 import google.auth.credentials
-from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud.spanner_dbapi import connect, Connection
 from google.cloud.spanner_v1.pool import FixedSizePool
 

@@ -497,7 +497,7 @@ class TestCursor(unittest.TestCase):
 
                 cursor.fetchone()
 
-                retry_mock.assert_called_once()
+                retry_mock.assert_called_with()
 
     def test_fetchone_retry_aborted_statements(self):
         from google.api_core.exceptions import Aborted

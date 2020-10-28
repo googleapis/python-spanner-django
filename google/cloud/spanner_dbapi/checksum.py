@@ -56,18 +56,17 @@ class ResultsChecksum:
 def _compare_checksums(original, retried):
     """Compare the given checksums.
 
-    Raise an error if the given checksums has
-    different length, or are not equal.
+    Raise an error if the given checksums are not equal.
 
-    :type original: :class:`~google.cloud.spanner_v1.transaction.ResultsChecksum`
+    :type original: :class:`~google.cloud.spanner_dbapi.checksum.ResultsChecksum`
     :param original: results checksum of the original transaction.
 
-    :type retried: :class:`~google.cloud.spanner_v1.transaction.ResultsChecksum`
+    :type retried: :class:`~google.cloud.spanner_dbapi.checksum.ResultsChecksum`
     :param retried: results checksum of the retried transaction.
 
     :raises: :exc:`google.api_core.exceptions.Aborted` in case if checksums are not equal.
     """
-    if len(retried) != len(original) or retried != original:
+    if retried != original:
         raise Aborted(
             "The transaction was aborted and could not be retried due to a concurrent modification."
         )

@@ -132,18 +132,18 @@ class Connection:
                 for res in res_iter:
                     retried_checksum.consume_result(res)
 
-                _compare_checksums(statement["checksum"], retried_checksum)
+                _compare_checksums(statement.checksum, retried_checksum)
             # executing the failed statement
             else:
                 # streaming up to the failed result
-                while len(retried_checksum) < len(statement["checksum"]):
+                while len(retried_checksum) < len(statement.checksum):
                     try:
                         res = next(iter(res_iter))
                         retried_checksum.consume_result(res)
                     except StopIteration:
                         break
 
-                _compare_checksums(statement["checksum"], retried_checksum)
+                _compare_checksums(statement.checksum, retried_checksum)
 
     def transaction_checkout(self):
         """Get a Cloud Spanner transaction.
@@ -204,7 +204,13 @@ class Connection:
                 self._release_session()
                 self._statements = []
             except Aborted:
-                self.retry_transaction()
+                while True:
+                    try:
+                        self.retry_transaction()
+                        break
+                    except Aborted:
+                        pass
+
                 self.commit()
 
     def rollback(self):
@@ -255,11 +261,11 @@ class Connection:
 
         return (
             transaction.execute_sql(
-                statement["sql"],
-                statement["params"],
-                param_types=statement["param_types"],
+                statement.sql,
+                statement.params,
+                param_types=statement.param_types,
             ),
-            ResultsChecksum() if retried else statement["checksum"],
+            ResultsChecksum() if retried else statement.checksum,
         )
 
     def __enter__(self):

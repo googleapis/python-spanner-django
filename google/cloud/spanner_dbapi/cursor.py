@@ -33,6 +33,7 @@ from google.cloud.spanner_dbapi.utils import PeekIterator
 _UNSET_COUNT = -1
 
 ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
+Statement = namedtuple("Statement", "sql, params, param_types, checksum")
 
 
 class Cursor(object):
@@ -164,12 +165,12 @@ class Cursor(object):
             if not self.connection.autocommit:
                 sql, params = sql_pyformat_args_to_spanner(sql, args)
 
-                statement = {
-                    "sql": sql,
-                    "params": params,
-                    "param_types": get_param_types(params),
-                    "checksum": ResultsChecksum(),
-                }
+                statement = Statement(
+                    sql,
+                    params,
+                    get_param_types(params),
+                    ResultsChecksum(),
+                )
                 (
                     self._result_set,
                     self._checksum,
@@ -231,7 +232,7 @@ class Cursor(object):
 
         res = []
         try:
-            for row in self.__iter__():
+            for row in self:
                 self._checksum.consume_result(row)
                 res.append(row)
         except Aborted:

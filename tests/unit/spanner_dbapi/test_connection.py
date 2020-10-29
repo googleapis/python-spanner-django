@@ -320,6 +320,7 @@ class TestConnection(unittest.TestCase):
     def test_run_statement(self):
         """Check that Connection remembers executed statements."""
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         sql = """SELECT 23 FROM table WHERE id = @a1"""
         params = {"a1": "value"}
@@ -327,23 +328,22 @@ class TestConnection(unittest.TestCase):
 
         connection = self._make_connection()
 
-        statement = {
-            "sql": sql,
-            "params": params,
-            "param_types": param_types,
-            "checksum": ResultsChecksum(),
-        }
-
+        statement = Statement(
+            sql,
+            params,
+            param_types,
+            ResultsChecksum(),
+        )
         with mock.patch(
             "google.cloud.spanner_dbapi.connection.Connection.transaction_checkout"
         ):
             connection.run_statement(statement)
 
-        self.assertEqual(connection._statements[0]["sql"], sql)
-        self.assertEqual(connection._statements[0]["params"], params)
-        self.assertEqual(connection._statements[0]["param_types"], param_types)
+        self.assertEqual(connection._statements[0].sql, sql)
+        self.assertEqual(connection._statements[0].params, params)
+        self.assertEqual(connection._statements[0].param_types, param_types)
         self.assertIsInstance(
-            connection._statements[0]["checksum"], ResultsChecksum
+            connection._statements[0].checksum, ResultsChecksum
         )
 
     def test_clear_statements_on_commit(self):
@@ -385,6 +385,7 @@ class TestConnection(unittest.TestCase):
     def test_retry_transaction(self):
         """Check retrying an aborted transaction."""
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         row = ["field1", "field2"]
         connection = self._make_connection()
@@ -393,12 +394,12 @@ class TestConnection(unittest.TestCase):
         checksum.consume_result(row)
         retried_checkum = ResultsChecksum()
 
-        statement = {
-            "sql": "SELECT 1",
-            "params": [],
-            "param_types": {},
-            "checksum": checksum,
-        }
+        statement = Statement(
+            "SELECT 1",
+            [],
+            {},
+            checksum,
+        )
         connection._statements.append(statement)
 
         with mock.patch(
@@ -421,6 +422,7 @@ class TestConnection(unittest.TestCase):
         """
         from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         row = ["field1", "field2"]
         retried_row = ["field3", "field4"]
@@ -430,12 +432,12 @@ class TestConnection(unittest.TestCase):
         checksum.consume_result(row)
         retried_checkum = ResultsChecksum()
 
-        statement = {
-            "sql": "SELECT 1",
-            "params": [],
-            "param_types": {},
-            "checksum": checksum,
-        }
+        statement = Statement(
+            "SELECT 1",
+            [],
+            {},
+            checksum,
+        )
         connection._statements.append(statement)
 
         with mock.patch(
@@ -450,6 +452,7 @@ class TestConnection(unittest.TestCase):
         from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         row = ["field1", "field2"]
         with mock.patch(
@@ -466,12 +469,12 @@ class TestConnection(unittest.TestCase):
         cursor._checksum = ResultsChecksum()
         cursor._checksum.consume_result(row)
 
-        statement = {
-            "sql": "SELECT 1",
-            "params": [],
-            "param_types": {},
-            "checksum": cursor._checksum,
-        }
+        statement = Statement(
+            "SELECT 1",
+            [],
+            {},
+            cursor._checksum,
+        )
         connection._statements.append(statement)
         connection._transaction = mock.Mock()
 

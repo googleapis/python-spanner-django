@@ -504,6 +504,7 @@ class TestCursor(unittest.TestCase):
         from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         row = ["field1", "field2"]
         with mock.patch(
@@ -520,12 +521,12 @@ class TestCursor(unittest.TestCase):
         cursor._checksum = ResultsChecksum()
         cursor._checksum.consume_result(row)
 
-        statement = {
-            "sql": "SELECT 1",
-            "params": [],
-            "param_types": {},
-            "checksum": cursor._checksum,
-        }
+        statement = Statement(
+            "SELECT 1",
+            [],
+            {},
+            cursor._checksum,
+        )
         connection._statements.append(statement)
 
         with mock.patch(
@@ -546,6 +547,7 @@ class TestCursor(unittest.TestCase):
         from google.api_core.exceptions import Aborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
+        from google.cloud.spanner_dbapi.cursor import Statement
 
         row = ["field1", "field2"]
         row2 = ["updated_field1", "field2"]
@@ -564,12 +566,12 @@ class TestCursor(unittest.TestCase):
         cursor._checksum = ResultsChecksum()
         cursor._checksum.consume_result(row)
 
-        statement = {
-            "sql": "SELECT 1",
-            "params": [],
-            "param_types": {},
-            "checksum": cursor._checksum,
-        }
+        statement = Statement(
+            "SELECT 1",
+            [],
+            {},
+            cursor._checksum,
+        )
         connection._statements.append(statement)
 
         with mock.patch(

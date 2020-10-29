@@ -33,7 +33,7 @@ FUNC = "FUNC"
 VALUES = "VALUES"
 
 
-class func:
+class func(object):
     def __init__(self, func_name, args):
         self.name = func_name
         self.args = args
@@ -65,7 +65,7 @@ class terminal(str):
     pass
 
 
-class a_args:
+class a_args(object):
     """Expression arguments.
 
     :type argv: list
@@ -93,13 +93,11 @@ class a_args:
         if type(self) != type(other):
             return False
 
-        s_len, o_len = len(self), len(other)
-        if s_len != o_len:
+        if len(self) != len(other):
             return False
 
-        for i, s_item in enumerate(self):
-            o_item = other[i]
-            if s_item != o_item:
+        for i, item in enumerate(self):
+            if item != other[i]:
                 return False
 
         return True
@@ -114,7 +112,7 @@ class a_args:
         :return: True if all the arguments are in pyformat and have the same
                  number of arguments, False otherwise.
         """
-        if not self.all_have_same_argc():
+        if not self._is_equal_length():
             return False
 
         for arg in self.argv:
@@ -127,8 +125,8 @@ class a_args:
                 return False
         return True
 
-    def all_have_same_argc(self):
-        """Check the length of arguments sequence.
+    def _is_equal_length(self):
+        """Return False if all the arguments have the same length.
 
         :rtype: bool
         :return: False if the sequences of arguments have the same length.
@@ -223,7 +221,7 @@ def expect(word, token):
         #   (%s, %s...)
         if not (word and word.startswith("(")):
             raise ProgrammingError(
-                "ARGS: supposed to begin with `(` in `%s`" % (word)
+                "ARGS: supposed to begin with `(` in `%s`" % word
             )
 
         word = word[1:]
@@ -249,7 +247,7 @@ def expect(word, token):
 
         if not (word and word.startswith(")")):
             raise ProgrammingError(
-                "ARGS: supposed to end with `)` in `%s`" % (word)
+                "ARGS: supposed to end with `)` in `%s`" % word
             )
 
         word = word[1:]
@@ -258,7 +256,7 @@ def expect(word, token):
     elif token == EXPR:
         if word == "%s":
             # Terminal symbol.
-            return "", (pyfmt_str)
+            return "", pyfmt_str
 
         # Otherwise we expect a function.
         return expect(word, FUNC)
@@ -275,5 +273,5 @@ def as_values(values_stmt):
     :rtype: Any
     :returns: A tree of the already parsed expression.
     """
-    _, values = expect(values_stmt, VALUES)
-    return values
+    _, _values = parse_values(values_stmt)
+    return _values

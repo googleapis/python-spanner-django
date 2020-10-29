@@ -4,27 +4,24 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-"""Cloud Spanner DB connection object."""
+"""DB-API Connection for the Google Cloud Spanner."""
 
-from collections import namedtuple
 import warnings
 
-from google.cloud import spanner_v1
+from google.api_core.gapic_v1.client_info import ClientInfo
+from google.cloud import spanner_v1 as spanner
 
-from .cursor import Cursor
-from .exceptions import InterfaceError
+from google.cloud.spanner_dbapi.cursor import Cursor
+from google.cloud.spanner_dbapi.exceptions import InterfaceError
+from google.cloud.spanner_dbapi.version import DEFAULT_USER_AGENT
+from google.cloud.spanner_dbapi.version import PY_VERSION
 
-AUTOCOMMIT_MODE_WARNING = (
-    "This method is non-operational, as Cloud Spanner"
-    "DB API always works in `autocommit` mode."
-    "See https://github.com/googleapis/python-spanner-django#transaction-management-isnt-supported"
-)
 
-ColumnDetails = namedtuple("column_details", ["null_ok", "spanner_type"])
+AUTOCOMMIT_MODE_WARNING = "This method is non-operational in autocommit mode"
 
 
 class Connection:
-    """Representation of a connection to a Cloud Spanner database.
+    """Representation of a DB-API connection to a Cloud Spanner database.
 
     You most likely don't need to instantiate `Connection` objects
     directly, use the `connect` module function instead.
@@ -33,194 +30,165 @@ class Connection:
     :param instance: Cloud Spanner instance to connect to.
 
     :type database: :class:`~google.cloud.spanner_v1.database.Database`
-    :param database: Cloud Spanner database to connect to.
+    :param database: The database to which the connection is linked.
     """
 
     def __init__(self, instance, database):
-        self.instance = instance
-        self.database = database
-        self.is_closed = False
-
+        self._instance = instance
+        self._database = database
         self._ddl_statements = []
 
-    def cursor(self):
-        """Factory to create a :class:`Cursor` linked to this Connection.
+        self._transaction = None
+        self._session = None
 
-        :rtype: :class:`Cursor`
-        :returns: A database cursor, which is used to manage the context of a
-                  fetch operation.
+        self.is_closed = False
+        self._autocommit = False
+
+    @property
+    def autocommit(self):
+        """Autocommit mode flag for this connection.
+
+        :rtype: bool
+        :returns: Autocommit mode flag value.
         """
-        self._raise_if_closed()
+        return self._autocommit
 
-        return Cursor(self)
+    @autocommit.setter
+    def autocommit(self, value):
+        """Change this connection autocommit mode. Setting this value to True
+        while a transaction is active will commit the current transaction.
+
+        :type value: bool
+        :param value: New autocommit mode state.
+        """
+        if value and not self._autocommit:
+            self.commit()
+
+        self._autocommit = value
+
+    @property
+    def database(self):
+        """Database to which this connection relates.
+
+        :rtype: :class:`~google.cloud.spanner_v1.database.Database`
+        :returns: The related database object.
+        """
+        return self._database
+
+    @property
+    def instance(self):
+        """Instance to which this connection relates.
+
+        :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
+        :returns: The related instance object.
+        """
+        return self._instance
+
+    def _session_checkout(self):
+        """Get a Cloud Spanner session from the pool.
+
+        If there is already a session associated with
+        this connection, it'll be used instead.
+
+        :rtype: :class:`google.cloud.spanner_v1.session.Session`
+        :returns: Cloud Spanner session object ready to use.
+        """
+        if not self._session:
+            self._session = self.database._pool.get()
+
+        return self._session
+
+    def _release_session(self):
+        """Release the currently used Spanner session.
+
+        The session will be returned into the sessions pool.
+        """
+        self.database._pool.put(self._session)
+        self._session = None
+
+    def transaction_checkout(self):
+        """Get a Cloud Spanner transaction.
+
+        Begin a new transaction, if there is no transaction in
+        this connection yet. Return the begun one otherwise.
+
+        The method is non operational in autocommit mode.
+
+        :rtype: :class:`google.cloud.spanner_v1.transaction.Transaction`
+        :returns: A Cloud Spanner transaction object, ready to use.
+        """
+        if not self.autocommit:
+            if (
+                not self._transaction
+                or self._transaction.committed
+                or self._transaction.rolled_back
+            ):
+                self._transaction = self._session_checkout().transaction()
+                self._transaction.begin()
+
+            return self._transaction
 
     def _raise_if_closed(self):
-        """Raise an exception if this connection is closed.
+        """Helper to check the connection state before running a query.
+        Raises an exception if this connection is closed.
 
-        Helper to check the connection state before
-        running a SQL/DDL/DML query.
-
-        :raises: :class:`InterfaceError` if this connection is closed.
+        :raises: :class:`InterfaceError`: if this connection is closed.
         """
         if self.is_closed:
             raise InterfaceError("connection is already closed")
 
-    def __handle_update_ddl(self, ddl_statements):
-        """
-        Run the list of Data Definition Language (DDL) statements on the underlying
-        database. Each DDL statement MUST NOT contain a semicolon.
-
-        :type ddl_statements: list
-        :param ddl_statements: A list of DDL statements, each without a
-                               semicolon.
-        """
-        self._raise_if_closed()
-        # Synchronously wait on the operation's completion.
-        return self.database.update_ddl(ddl_statements).result()
-
-    def read_snapshot(self):
-        """Return a Snapshot of the linked Database.
-
-        :rtype: :class:`~google.cloud.spanner_v1.snapshot.Snapshot`
-        :returns: A snapshot of the linked Database.
-        """
-        self._raise_if_closed()
-        return self.database.snapshot()
-
-    def in_transaction(self, fn, *args, **kwargs):
-        """Perform a unit of work in the Transaction, retrying on abort.
-
-        :type fn: callable
-        :param fn: takes a required positional argument, the transaction,
-                   and additional positional / keyword arguments as supplied
-                   by the caller.
-
-        :type args: tuple
-        :param args: additional positional arguments to be passed to ``fn``.
-
-        :type kwargs: dict
-        :param kwargs: (Optional) keyword arguments to be passed to ``fn``.
-                         If passed, "timeout_secs" will be removed and used to
-                         override the default retry timeout which defines
-                         maximum timestamp to continue retrying the transaction.
-
-        :rtype: Any
-        :returns: Runs the given function as it would be a transaction.
-        """
-        self._raise_if_closed()
-        return self.database.run_in_transaction(fn, *args, **kwargs)
-
-    def append_ddl_statement(self, ddl_statement):
-        """
-        Append a DDL statement to the existing list of DDL statements in
-        in the current :class:`Connection` class.
-
-        :type ddl_statements: list
-        :param ddl_statements: A list of DDL statements, each without a
-                               semicolon.
-        """
-        self._raise_if_closed()
-        self._ddl_statements.append(ddl_statement)
-
-    def run_prior_DDL_statements(self):
-        """Run prior DDL statements."""
-        self._raise_if_closed()
-
-        if not self._ddl_statements:
-            return
-
-        ddl_statements = self._ddl_statements
-        self._ddl_statements = []
-
-        return self.__handle_update_ddl(ddl_statements)
-
-    def list_tables(self):
-        """List tables contained within the linked Database.
-
-        :rtype: list
-        :returns: Tables with corresponding information.
-        """
-        return self.run_sql_in_snapshot(
-            """
-            SELECT
-              t.table_name
-            FROM
-              information_schema.tables AS t
-            WHERE
-              t.table_catalog = '' and t.table_schema = ''
-            """
-        )
-
-    def run_sql_in_snapshot(self, sql, params=None, param_types=None):
-        """Run an SQL request on the linked Database snapshot.
-
-        :type sql: str
-        :param sql: SQL request.
-
-        :type params: list
-        :param params: (Optional) List of parameters.
-
-        :type param_types: dict
-        :param param_types: (Optional) List of parameters' types.
-
-        :rtype: list
-        :returns: A list of :class:`~google.cloud.spanner_v1.streamed.StreamedResultSet`
-                  results.
-        """
-        # Some SQL e.g. for INFORMATION_SCHEMA cannot be run in read-write transactions
-        # hence this method exists to circumvent that limit.
-        self.run_prior_DDL_statements()
-
-        with self.database.snapshot() as snapshot:
-            res = snapshot.execute_sql(
-                sql, params=params, param_types=param_types
-            )
-            return list(res)
-
-    def get_table_column_schema(self, table_name):
-        """Get the table column schema.
-
-        :type table_name: str
-        :param table_name: The name of the table.
-
-        :rtype: dict
-        :returns: A dictionary containing descriptions for every column.
-        """
-        rows = self.run_sql_in_snapshot(
-            """SELECT
-                COLUMN_NAME, IS_NULLABLE, SPANNER_TYPE
-            FROM
-                INFORMATION_SCHEMA.COLUMNS
-            WHERE
-                TABLE_SCHEMA = ''
-            AND
-                TABLE_NAME = @table_name""",
-            params={"table_name": table_name},
-            param_types={"table_name": spanner_v1.param_types.STRING},
-        )
-
-        column_details = {}
-        for column_name, is_nullable, spanner_type in rows:
-            column_details[column_name] = ColumnDetails(
-                null_ok=is_nullable == "YES", spanner_type=spanner_type
-            )
-        return column_details
-
     def close(self):
-        """Close this connection.
+        """Closes this connection.
 
-        .. note:: The connection will be unusable from this point forward.
+        The connection will be unusable from this point forward. If the
+        connection has an active transaction, it will be rolled back.
         """
-        self.__dbhandle = None
+        if (
+            self._transaction
+            and not self._transaction.committed
+            and not self._transaction.rolled_back
+        ):
+            self._transaction.rollback()
+
         self.is_closed = True
 
     def commit(self):
-        """Commit all the pending transactions."""
-        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        """Commits any pending transaction to the database.
+
+        This method is non-operational in autocommit mode.
+        """
+        if self._autocommit:
+            warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        elif self._transaction:
+            self._transaction.commit()
+            self._release_session()
 
     def rollback(self):
-        """Rollback all the pending transactions."""
-        warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        """Rolls back any pending transaction.
+
+        This is a no-op if there is no active transaction or if the connection
+        is in autocommit mode.
+        """
+        if self._autocommit:
+            warnings.warn(AUTOCOMMIT_MODE_WARNING, UserWarning, stacklevel=2)
+        elif self._transaction:
+            self._transaction.rollback()
+            self._release_session()
+
+    def cursor(self):
+        """Factory to create a DB-API Cursor."""
+        self._raise_if_closed()
+
+        return Cursor(self)
+
+    def run_prior_DDL_statements(self):
+        self._raise_if_closed()
+
+        if self._ddl_statements:
+            ddl_statements = self._ddl_statements
+            self._ddl_statements = []
+
+            return self.database.update_ddl(ddl_statements).result()
 
     def __enter__(self):
         return self
@@ -228,3 +196,66 @@ class Connection:
     def __exit__(self, etype, value, traceback):
         self.commit()
         self.close()
+
+
+def connect(
+    instance_id,
+    database_id,
+    project=None,
+    credentials=None,
+    pool=None,
+    user_agent=None,
+):
+    """Creates a connection to a Google Cloud Spanner database.
+
+    :type instance_id: str
+    :param instance_id: The ID of the instance to connect to.
+
+    :type database_id: str
+    :param database_id: The ID of the database to connect to.
+
+    :type project: str
+    :param project: (Optional) The ID of the project which owns the
+                    instances, tables and data. If not provided, will
+                    attempt to determine from the environment.
+
+    :type credentials: :class:`~google.auth.credentials.Credentials`
+    :param credentials: (Optional) The authorization credentials to attach to
+                        requests. These credentials identify this application
+                        to the service. If none are specified, the client will
+                        attempt to ascertain the credentials from the
+                        environment.
+
+    :type pool: Concrete subclass of
+                :class:`~google.cloud.spanner_v1.pool.AbstractSessionPool`.
+    :param pool: (Optional). Session pool to be used by database.
+
+    :type user_agent: str
+    :param user_agent: (Optional) User agent to be used with this connection's
+                       requests.
+
+    :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
+    :returns: Connection object associated with the given Google Cloud Spanner
+              resource.
+
+    :raises: :class:`ValueError` in case of given instance/database
+             doesn't exist.
+    """
+
+    client_info = ClientInfo(
+        user_agent=user_agent or DEFAULT_USER_AGENT, python_version=PY_VERSION,
+    )
+
+    client = spanner.Client(
+        project=project, credentials=credentials, client_info=client_info,
+    )
+
+    instance = client.instance(instance_id)
+    if not instance.exists():
+        raise ValueError("instance '%s' does not exist." % instance_id)
+
+    database = instance.database(database_id, pool=pool)
+    if not database.exists():
+        raise ValueError("database '%s' does not exist." % database_id)
+
+    return Connection(instance, database)

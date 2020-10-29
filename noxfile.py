@@ -69,14 +69,14 @@ def default(session):
     session.run(
         "py.test",
         "--quiet",
-        "--cov=django_spanner",
+        # "--cov=django_spanner",
         "--cov=google.cloud",
-        "--cov=tests.spanner_dbapi",
+        "--cov=tests.unit",
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=0",
-        os.path.join("tests", "spanner_dbapi"),
+        "--cov-fail-under=90",
+        os.path.join("tests", "unit"),
         *session.posargs
     )
 
@@ -94,7 +94,9 @@ def system(session):
     system_test_folder_path = os.path.join("tests", "system")
 
     # Sanity check: Only run tests if the environment variable is set.
-    if not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", ""):
+    if not os.environ.get(
+        "GOOGLE_APPLICATION_CREDENTIALS", ""
+    ) and not os.environ.get("SPANNER_EMULATOR_HOST", ""):
         session.skip("Credentials must be set via environment variable")
 
     system_test_exists = os.path.exists(system_test_path)

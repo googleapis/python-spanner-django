@@ -153,6 +153,10 @@ class values(a_args):
         return "VALUES%s" % super().__str__()
 
 
+def parse_values(stmt):
+    return expect(stmt, VALUES)
+
+
 pyfmt_str = terminal("%s")
 
 

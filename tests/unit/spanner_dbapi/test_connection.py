@@ -328,12 +328,7 @@ class TestConnection(unittest.TestCase):
 
         connection = self._make_connection()
 
-        statement = Statement(
-            sql,
-            params,
-            param_types,
-            ResultsChecksum(),
-        )
+        statement = Statement(sql, params, param_types, ResultsChecksum(),)
         with mock.patch(
             "google.cloud.spanner_dbapi.connection.Connection.transaction_checkout"
         ):
@@ -394,12 +389,7 @@ class TestConnection(unittest.TestCase):
         checksum.consume_result(row)
         retried_checkum = ResultsChecksum()
 
-        statement = Statement(
-            "SELECT 1",
-            [],
-            {},
-            checksum,
-        )
+        statement = Statement("SELECT 1", [], {}, checksum,)
         connection._statements.append(statement)
 
         with mock.patch(
@@ -432,12 +422,7 @@ class TestConnection(unittest.TestCase):
         checksum.consume_result(row)
         retried_checkum = ResultsChecksum()
 
-        statement = Statement(
-            "SELECT 1",
-            [],
-            {},
-            checksum,
-        )
+        statement = Statement("SELECT 1", [], {}, checksum,)
         connection._statements.append(statement)
 
         with mock.patch(
@@ -469,12 +454,7 @@ class TestConnection(unittest.TestCase):
         cursor._checksum = ResultsChecksum()
         cursor._checksum.consume_result(row)
 
-        statement = Statement(
-            "SELECT 1",
-            [],
-            {},
-            cursor._checksum,
-        )
+        statement = Statement("SELECT 1", [], {}, cursor._checksum,)
         connection._statements.append(statement)
         connection._transaction = mock.Mock()
 

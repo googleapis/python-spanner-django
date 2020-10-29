@@ -243,11 +243,14 @@ def connect(
     """
 
     client_info = ClientInfo(
-        user_agent=user_agent or DEFAULT_USER_AGENT, python_version=PY_VERSION,
+        user_agent=user_agent or DEFAULT_USER_AGENT,
+        python_version=PY_VERSION,
     )
 
     client = spanner.Client(
-        project=project, credentials=credentials, client_info=client_info,
+        project=project,
+        credentials=credentials,
+        client_info=client_info,
     )
 
     instance = client.instance(instance_id)

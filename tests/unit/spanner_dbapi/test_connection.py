@@ -485,3 +485,53 @@ class TestConnection(unittest.TestCase):
         # will only drop the transaction object
         connection.retry_transaction()
         self.assertIsNone(connection._transaction)
+
+    def test_retry_aborted_retry(self):
+        """
+        Check that in case of a retried transaction failed,
+        the connection will retry it once again.
+        """
+        from google.api_core.exceptions import Aborted
+        from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.connection import connect
+        from google.cloud.spanner_dbapi.cursor import Statement
+
+        row = ["field1", "field2"]
+
+        with mock.patch(
+            "google.cloud.spanner_v1.instance.Instance.exists",
+            return_value=True,
+        ):
+            with mock.patch(
+                "google.cloud.spanner_v1.database.Database.exists",
+                return_value=True,
+            ):
+                connection = connect("test-instance", "test-database")
+
+        cursor = connection.cursor()
+        cursor._checksum = ResultsChecksum()
+        cursor._checksum.consume_result(row)
+
+        statement = Statement("SELECT 1", [], {}, cursor._checksum,)
+        connection._statements.append(statement)
+
+        metadata_mock = mock.Mock()
+        metadata_mock.trailing_metadata.return_value = {}
+
+        with mock.patch.object(
+            connection,
+            "run_statement",
+            side_effect=(
+                Aborted("Aborted", errors=[metadata_mock]),
+                ([row], ResultsChecksum()),
+            ),
+        ) as retry_mock:
+
+            connection.retry_transaction()
+
+            retry_mock.assert_has_calls(
+                (
+                    mock.call(statement, retried=True),
+                    mock.call(statement, retried=True),
+                )
+            )

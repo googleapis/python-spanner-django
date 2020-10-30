@@ -6,11 +6,13 @@
 
 """DB-API Connection for the Google Cloud Spanner."""
 
+import time
 import warnings
 
 from google.api_core.exceptions import Aborted
 from google.api_core.gapic_v1.client_info import ClientInfo
 from google.cloud import spanner_v1 as spanner
+from google.cloud.spanner_v1.session import _get_retry_delay
 
 from google.cloud.spanner_dbapi.checksum import _compare_checksums
 from google.cloud.spanner_dbapi.checksum import ResultsChecksum
@@ -21,6 +23,7 @@ from google.cloud.spanner_dbapi.version import PY_VERSION
 
 
 AUTOCOMMIT_MODE_WARNING = "This method is non-operational in autocommit mode"
+MAX_INTERNAL_RETRIES = 50
 
 
 class Connection:
@@ -123,8 +126,26 @@ class Connection:
             If results checksum of the retried statement is
             not equal to the checksum of the original one.
         """
-        self._transaction = None
+        attempt = 0
+        while True:
+            self._transaction = None
+            attempt += 1
+            if attempt > MAX_INTERNAL_RETRIES:
+                raise
 
+            try:
+                self._rerun_previous_statements()
+                break
+            except Aborted as exc:
+                delay = _get_retry_delay(exc.errors[0], attempt)
+                if delay:
+                    time.sleep(delay)
+
+    def _rerun_previous_statements(self):
+        """
+        Helper to run all the remembered statements
+        from the last transaction.
+        """
         for statement in self._statements:
             res_iter, retried_checksum = self.run_statement(
                 statement, retried=True

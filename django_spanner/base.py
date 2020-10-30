@@ -4,10 +4,10 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from django.db.backends.base.base import BaseDatabaseWrapper
-
-import google.cloud.spanner_dbapi as Database
 import google.cloud.spanner_v1 as spanner
+
+from django.db.backends.base.base import BaseDatabaseWrapper
+from google.cloud import spanner_dbapi
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -84,8 +84,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # escaped on database side.
     pattern_esc = r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"), "_", r"\_")'
 
-    # These are all no-ops in favor of using REGEXP_CONTAINS
-    # in the customized lookups.
+    # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
+    # lookups.
     pattern_ops = {
         "contains": "",
         "icontains": "",
@@ -95,7 +95,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "iendswith": "",
     }
 
-    Database = Database
+    Database = spanner_dbapi
     SchemaEditorClass = DatabaseSchemaEditor
     creation_class = DatabaseCreation
     features_class = DatabaseFeatures
@@ -124,7 +124,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         }
 
     def get_new_connection(self, conn_params):
-        return Database.connect(**conn_params)
+        return self.Database.connect(**conn_params)
 
     def init_connection_state(self):
         self.connection.close()
@@ -145,7 +145,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         try:
             # Use a cursor directly, bypassing Django's utilities.
             self.connection.cursor().execute("SELECT 1")
-        except Database.Error:
+        except self.Database.Error:
             return False
 
         return True

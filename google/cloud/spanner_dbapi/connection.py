@@ -115,14 +115,16 @@ class Connection:
     def retry_transaction(self):
         """Retry the aborted transaction.
 
-        All the statements executed in the transaction
-        will be re-executed. Results checksums of the original
-        statements and the retried ones will be compared.
+        All the statements executed in the original transaction
+        will be re-executed in new one. Results checksums of the
+        original statements and the retried ones will be compared.
 
-        :raises: :class:`google.api_core.exceptions.Aborted`
+        :raises: :class:`google.cloud.spanner_dbapi.exceptions.AbortedRetried`
             If results checksum of the retried statement is
             not equal to the checksum of the original one.
         """
+        self._transaction = None
+
         for statement in self._statements:
             res_iter, retried_checksum = self.run_statement(
                 statement, retried=True
@@ -135,7 +137,8 @@ class Connection:
                 _compare_checksums(statement.checksum, retried_checksum)
             # executing the failed statement
             else:
-                # streaming up to the failed result
+                # streaming up to the failed result or
+                # to the end of the streaming iterator
                 while len(retried_checksum) < len(statement.checksum):
                     try:
                         res = next(iter(res_iter))

@@ -218,7 +218,13 @@ class Cursor(object):
         except StopIteration:
             return
         except Aborted:
-            self.connection.retry_transaction()
+            while True:
+                try:
+                    self.connection.retry_transaction()
+                    break
+                except Aborted:
+                    pass
+
             return self.fetchone()
 
     def fetchall(self):
@@ -233,7 +239,13 @@ class Cursor(object):
                 self._checksum.consume_result(row)
                 res.append(row)
         except Aborted:
-            self._connection.retry_transaction()
+            while True:
+                try:
+                    self._connection.retry_transaction()
+                    break
+                except Aborted:
+                    pass
+
             return self.fetchall()
 
         return res
@@ -263,7 +275,13 @@ class Cursor(object):
             except StopIteration:
                 break
             except Aborted:
-                self._connection.retry_transaction()
+                while True:
+                    try:
+                        self._connection.retry_transaction()
+                        break
+                    except Aborted:
+                        pass
+
                 return self.fetchmany(size)
 
         return items

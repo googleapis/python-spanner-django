@@ -9,7 +9,7 @@
 import hashlib
 import pickle
 
-from google.api_core.exceptions import Aborted
+from google.cloud.spanner_dbapi.exceptions import AbortedRetried
 
 
 class ResultsChecksum:
@@ -64,9 +64,9 @@ def _compare_checksums(original, retried):
     :type retried: :class:`~google.cloud.spanner_dbapi.checksum.ResultsChecksum`
     :param retried: results checksum of the retried transaction.
 
-    :raises: :exc:`google.api_core.exceptions.Aborted` in case if checksums are not equal.
+    :raises: :exc:`google.cloud.spanner_dbapi.exceptions.AbortedRetried` in case if checksums are not equal.
     """
     if retried != original:
-        raise Aborted(
+        raise AbortedRetried(
             "The transaction was aborted and could not be retried due to a concurrent modification."
         )

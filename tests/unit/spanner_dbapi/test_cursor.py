@@ -540,6 +540,7 @@ class TestCursor(unittest.TestCase):
     def test_fetchone_retry_aborted_statements_checksums_mismatch(self):
         """Check transaction retrying with underlying data being changed."""
         from google.api_core.exceptions import Aborted
+        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
         from google.cloud.spanner_dbapi.cursor import Statement
@@ -566,14 +567,50 @@ class TestCursor(unittest.TestCase):
 
         with mock.patch(
             "google.cloud.spanner_dbapi.cursor.Cursor.__next__",
-            side_effect=Aborted("Aborted"),
+            side_effect=(Aborted("Aborted"), None),
         ):
             with mock.patch(
                 "google.cloud.spanner_dbapi.connection.Connection.run_statement",
                 return_value=([row2], ResultsChecksum()),
             ) as run_mock:
 
-                with self.assertRaises(Aborted):
+                with self.assertRaises(AbortedRetried):
                     cursor.fetchone()
 
                 run_mock.assert_called_with(statement, retried=True)
+
+    def test_fetchone_retry_aborted_retry(self):
+        """
+        Check that in case of a retried transaction failed,
+        the connection will retry it once again.
+        """
+        from google.api_core.exceptions import Aborted
+        from google.cloud.spanner_dbapi.checksum import ResultsChecksum
+        from google.cloud.spanner_dbapi.connection import connect
+
+        with mock.patch(
+            "google.cloud.spanner_v1.instance.Instance.exists",
+            return_value=True,
+        ):
+            with mock.patch(
+                "google.cloud.spanner_v1.database.Database.exists",
+                return_value=True,
+            ):
+                connection = connect("test-instance", "test-database")
+
+        cursor = connection.cursor()
+        cursor._checksum = ResultsChecksum()
+
+        with mock.patch(
+            "google.cloud.spanner_dbapi.cursor.Cursor.__next__",
+            side_effect=(Aborted("Aborted"), None),
+        ):
+            with mock.patch.object(
+                connection,
+                "retry_transaction",
+                side_effect=(Aborted("Aborted"), None),
+            ) as retry_mock:
+
+                cursor.fetchone()
+
+                retry_mock.assert_has_calls((mock.call(), mock.call()))

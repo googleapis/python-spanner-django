@@ -6,7 +6,7 @@
 
 import unittest
 
-from google.api_core.exceptions import Aborted
+from google.cloud.spanner_dbapi.exceptions import AbortedRetried
 
 
 class Test_compare_checksums(unittest.TestCase):
@@ -31,7 +31,7 @@ class Test_compare_checksums(unittest.TestCase):
 
         retried = ResultsChecksum()
 
-        with self.assertRaises(Aborted):
+        with self.assertRaises(AbortedRetried):
             _compare_checksums(original, retried)
 
     def test_more_results(self):
@@ -45,7 +45,7 @@ class Test_compare_checksums(unittest.TestCase):
         retried.consume_result(5)
         retried.consume_result(2)
 
-        with self.assertRaises(Aborted):
+        with self.assertRaises(AbortedRetried):
             _compare_checksums(original, retried)
 
     def test_mismatch(self):
@@ -58,5 +58,5 @@ class Test_compare_checksums(unittest.TestCase):
         retried = ResultsChecksum()
         retried.consume_result(2)
 
-        with self.assertRaises(Aborted):
+        with self.assertRaises(AbortedRetried):
             _compare_checksums(original, retried)

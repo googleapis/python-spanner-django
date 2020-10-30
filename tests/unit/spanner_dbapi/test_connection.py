@@ -410,7 +410,7 @@ class TestConnection(unittest.TestCase):
         Check retrying an aborted transaction
         with results checksums mismatch.
         """
-        from google.api_core.exceptions import Aborted
+        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.cursor import Statement
 
@@ -429,7 +429,7 @@ class TestConnection(unittest.TestCase):
             "google.cloud.spanner_dbapi.connection.Connection.run_statement",
             return_value=([retried_row], retried_checkum),
         ):
-            with self.assertRaises(Aborted):
+            with self.assertRaises(AbortedRetried):
                 connection.retry_transaction()
 
     def test_commit_retry_aborted_statements(self):
@@ -471,3 +471,17 @@ class TestConnection(unittest.TestCase):
                 connection.commit()
 
                 run_mock.assert_called_with(statement, retried=True)
+
+    def test_retry_transaction_drop_transaction(self):
+        """
+        Check that before retrying an aborted transaction
+        connection drops the original aborted transaction.
+        """
+        connection = self._make_connection()
+        transaction_mock = mock.Mock()
+        connection._transaction = transaction_mock
+
+        # as we didn't set any statements, the method
+        # will only drop the transaction object
+        connection.retry_transaction()
+        self.assertIsNone(connection._transaction)

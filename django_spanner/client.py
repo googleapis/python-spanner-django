@@ -5,8 +5,9 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from django.db.backends.base.client import BaseDatabaseClient
+from google.cloud.spanner_dbapi.exceptions import NotSupportedError
 
 
 class DatabaseClient(BaseDatabaseClient):
     def runshell(self, parameters):
-        raise RuntimeError("This method is not supported.")
+        raise NotSupportedError("This method is not supported.")

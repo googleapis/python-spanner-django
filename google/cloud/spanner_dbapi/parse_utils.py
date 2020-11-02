@@ -253,7 +253,9 @@ def parse_insert(insert_sql, params):
     :param params: A list of parameters.
 
     :rtype: dict
-    :returns: A dictionary of the name to the list of parameters.
+    :returns: A dictionary that maps `sql_params_list` to the list of
+              parameters in cases a), b), d) or the dictionary with
+              information about the resulting table in case c).
     """  # noqa
     match = RE_INSERT.search(insert_sql)
 
@@ -358,7 +360,7 @@ def rows_for_insert_or_update(columns, params, pyformat_args=None):
     :param params: A list of parameters.
 
     :rtype: list
-    :returns: A list of tuples of the parameters.
+    :returns: A properly restructured list of the parameters.
     """  # noqa
 
     if not pyformat_args:
@@ -464,7 +466,7 @@ def sql_pyformat_args_to_spanner(sql, params):
     :param params: A list of parameters.
 
     :rtype: tuple(str, dict)
-    :returns: A tuple of sanitized SQL and dictionary of the named arguments.
+    :returns: A tuple of the sanitized SQL and a dictionary of the named arguments.
     """
     if not params:
         return sanitize_literals_for_upload(sql), params

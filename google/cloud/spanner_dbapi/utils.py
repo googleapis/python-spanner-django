@@ -60,7 +60,7 @@ def backtick_unicode(sql):
 
     :rtype: str
     :returns: A SQL parsed by segments in unicode if initial
-             SQL is valid, initial string otherwise.
+              SQL is valid, initial string otherwise.
     """
     matches = list(re_UNICODE_POINTS.finditer(sql))
     if not matches:

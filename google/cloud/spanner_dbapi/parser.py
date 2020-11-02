@@ -109,8 +109,8 @@ class a_args(object):
         """Check arguments of the expression to be homogeneous.
 
         :rtype: bool
-        :return: True if all the arguments are in pyformat and have the same
-                 number of arguments, False otherwise.
+        :return: True if all the arguments of the expression are in pyformat
+                 and each has the same length, False otherwise.
         """
         if not self._is_equal_length():
             return False
@@ -129,7 +129,7 @@ class a_args(object):
         """Return False if all the arguments have the same length.
 
         :rtype: bool
-        :return: False if the sequences of arguments have the same length.
+        :return: False if the sequences of the arguments have the same length.
         """
         if len(self) == 0:
             return True
@@ -170,9 +170,9 @@ def expect(word, token):
     :param token: An expression token.
 
     :rtype: (str, Any)
-    :returns: A tuple of the rest expression string and tree of already parsed
-              expression.
-    :raises :class:`ProgrammingError`: If there is parsing error.
+    :returns: A tuple containing the rest of the expression string and the tree
+              of the already parsed.
+    :raises :class:`ProgrammingError`: If there is a parsing error.
     """
     word = word.strip()
     if token == VALUES:

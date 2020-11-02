@@ -99,7 +99,7 @@ class Cursor(object):
         """The number of rows produced by the last `.execute()`.
 
         :rtype: int
-        :returns: The number of rows that last .execute*() produced.
+        :returns: The number of rows produced by the last .execute*().
         """
         return self._row_count
 

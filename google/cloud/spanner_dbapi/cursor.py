@@ -44,6 +44,7 @@ class Cursor(object):
     def __init__(self, connection):
         self._itr = None
         self._result_set = None
+        self._many_result_set = None
         self._row_count = _UNSET_COUNT
         self.connection = connection
         self._is_closed = False

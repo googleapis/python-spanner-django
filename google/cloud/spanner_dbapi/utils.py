@@ -47,6 +47,49 @@ class PeekIterator:
         return self
 
 
+class StreamedManyResultSets:
+    """Iterator to walk through several `StreamedResultsSet` iterators.
+
+    This type of iterator is used by `Cursor.executemany()`
+    method to iterate through several `StreamedResultsSet`
+    iterators like they all are merged into single iterator.
+    """
+
+    def __init__(self):
+        self._iterators = []
+        self._index = 0
+
+    def add_iter(self, iterator):
+        """Add new iterator into this one.
+
+        :type iterator: :class:`google.cloud.spanner_v1.streamed.StreamedResultSet`
+        :param iterator: Iterator to merge into this one.
+        """
+        self._iterators.append(iterator)
+
+    def __next__(self):
+        """Return the next value from the currently streamed iterator.
+
+        If the current iterator is streamed to the end,
+        start to stream the next one.
+
+        :rtype: list
+        :returns: The next result row.
+        """
+        try:
+            res = next(self._iterators[self._index])
+        except StopIteration:
+            self._index += 1
+            res = self.__next__()
+        except IndexError:
+            raise StopIteration
+
+        return res
+
+    def __iter__(self):
+        return self
+
+
 re_UNICODE_POINTS = re.compile(r"([^\s]*[\u0080-\uFFFF]+[^\s]*)")
 
 

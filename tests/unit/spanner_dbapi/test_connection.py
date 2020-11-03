@@ -334,4 +334,4 @@ class TestConnection(unittest.TestCase):
             connection.database._pool, "clear"
         ) as pool_clear_mock:
             connection.close()
-            pool_clear_mock.assert_not_called()
+            assert not pool_clear_mock.called

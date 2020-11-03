@@ -326,7 +326,7 @@ class TestConnection(unittest.TestCase):
             connection.database._pool, "clear"
         ) as pool_clear_mock:
             connection.close()
-            pool_clear_mock.assert_called_once()
+            pool_clear_mock.assert_called_once_with()
 
     def test_global_pool(self):
         connection = self._make_connection(pool=mock.Mock())

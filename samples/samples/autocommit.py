@@ -41,7 +41,9 @@ def enable_autocommit_mode(instance_id, database_id):
     )
 
     connection.close()
-    # [END enable_autocommit_mode]
+
+
+# [END enable_autocommit_mode]
 
 
 if __name__ == "__main__":

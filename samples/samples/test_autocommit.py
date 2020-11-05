@@ -15,12 +15,12 @@ import autocommit
 
 def unique_instance_id():
     """ Creates a unique id for the database. """
-    return f"test-instance-{uuid.uuid4().hex[:10]}"
+    return "test-instance-{}".format(uuid.uuid4().hex[:10])
 
 
 def unique_database_id():
     """ Creates a unique id for the database. """
-    return f"test-db-{uuid.uuid4().hex[:10]}"
+    return "test-db-{}".format(uuid.uuid4().hex[:10])
 
 
 INSTANCE_ID = unique_instance_id()

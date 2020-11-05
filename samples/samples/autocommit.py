@@ -8,9 +8,10 @@ import argparse
 
 from google.cloud.spanner_dbapi import connect
 
-# [START enable_autocommit_mode]
+
 def enable_autocommit_mode(instance_id, database_id):
-    """ Enables autocommit mode. """
+    """Enables autocommit mode."""
+    # [START enable_autocommit_mode]
     connection = connect(instance_id, database_id)
     connection.autocommit = True
     print("Autocommit mode is enabled.")
@@ -41,9 +42,7 @@ def enable_autocommit_mode(instance_id, database_id):
     )
 
     connection.close()
-
-
-# [END enable_autocommit_mode]
+    # [END enable_autocommit_mode]
 
 
 if __name__ == "__main__":

@@ -14,12 +14,12 @@ import autocommit
 
 
 def unique_instance_id():
-    """ Creates a unique id for the database. """
+    """Creates a unique id for the database."""
     return "test-instance-{}".format(uuid.uuid4().hex[:10])
 
 
 def unique_database_id():
-    """ Creates a unique id for the database. """
+    """Creates a unique id for the database."""
     return "test-db-{}".format(uuid.uuid4().hex[:10])
 
 

@@ -276,8 +276,11 @@ class TestCursor(unittest.TestCase):
                 connection = connect("test-instance", "test-database")
 
         cursor = connection.cursor()
+
+        cursor._result_set = [1, 2, 3]
+        cursor._itr = iter([1, 2, 3])
         with mock.patch(
-            "google.cloud.spanner_dbapi.cursor.Cursor.execute"
+            "google.cloud.spanner_dbapi.cursor.Cursor.execute",
         ) as execute_mock:
             cursor.executemany(operation, params_seq)
 

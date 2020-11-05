@@ -44,11 +44,9 @@ class Cursor(object):
     def __init__(self, connection):
         self._itr = None
         self._result_set = None
-        self._many_result_set = None
         self._row_count = _UNSET_COUNT
         self.connection = connection
         self._is_closed = False
-        self._executed_many = False
 
         # the number of rows to fetch at a time with fetchmany()
         self.arraysize = 1
@@ -147,7 +145,6 @@ class Cursor(object):
         self._raise_if_closed()
 
         self._result_set = None
-        self._executed_many = False
 
         # Classify whether this is a read-only SQL statement.
         try:
@@ -202,12 +199,13 @@ class Cursor(object):
         """
         self._raise_if_closed()
 
-        self._many_result_set = StreamedManyResultSets()
+        many_result_set = StreamedManyResultSets()
         for params in seq_of_params:
             self.execute(operation, params)
-            self._many_result_set.add_iter(self._itr)
+            many_result_set.add_iter(self._itr)
 
-        self._executed_many = True
+        self._result_set = many_result_set
+        self._itr = many_result_set
 
     def fetchone(self):
         """Fetch the next row of a query result set, returning a single
@@ -301,17 +299,11 @@ class Cursor(object):
     def __next__(self):
         if self._itr is None:
             raise ProgrammingError("no results to return")
-        if self._executed_many:
-            return next(self._many_result_set)
-
         return next(self._itr)
 
     def __iter__(self):
         if self._itr is None:
             raise ProgrammingError("no results to return")
-        if self._executed_many:
-            return self._many_result_set
-
         return self._itr
 
     def list_tables(self):

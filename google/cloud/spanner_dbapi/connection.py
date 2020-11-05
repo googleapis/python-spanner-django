@@ -126,7 +126,7 @@ class Connection:
         will be re-executed in new one. Results checksums of the
         original statements and the retried ones will be compared.
 
-        :raises: :class:`google.cloud.spanner_dbapi.exceptions.AbortedRetried`
+        :raises: :class:`google.cloud.spanner_dbapi.exceptions.RetryAborted`
             If results checksum of the retried statement is
             not equal to the checksum of the original one.
         """
@@ -288,7 +288,8 @@ class Connection:
                   checksum of this statement results.
         """
         transaction = self.transaction_checkout()
-        self._statements.append(statement)
+        if not retried:
+            self._statements.append(statement)
 
         return (
             transaction.execute_sql(

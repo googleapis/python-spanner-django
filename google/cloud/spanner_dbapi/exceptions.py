@@ -94,7 +94,7 @@ class NotSupportedError(DatabaseError):
     pass
 
 
-class AbortedRetried(OperationalError):
+class RetryAborted(OperationalError):
     """
     Error for case of no aborted transaction retry
     is available, because of underlying data being

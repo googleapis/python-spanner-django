@@ -540,7 +540,7 @@ class TestCursor(unittest.TestCase):
     def test_fetchone_retry_aborted_statements_checksums_mismatch(self):
         """Check transaction retrying with underlying data being changed."""
         from google.api_core.exceptions import Aborted
-        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
+        from google.cloud.spanner_dbapi.exceptions import RetryAborted
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
         from google.cloud.spanner_dbapi.connection import connect
         from google.cloud.spanner_dbapi.cursor import Statement
@@ -574,7 +574,7 @@ class TestCursor(unittest.TestCase):
                 return_value=([row2], ResultsChecksum()),
             ) as run_mock:
 
-                with self.assertRaises(AbortedRetried):
+                with self.assertRaises(RetryAborted):
                     cursor.fetchone()
 
                 run_mock.assert_called_with(statement, retried=True)

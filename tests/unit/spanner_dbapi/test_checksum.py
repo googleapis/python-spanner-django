@@ -23,20 +23,20 @@ class Test_compare_checksums(unittest.TestCase):
     def test_less_results(self):
         from google.cloud.spanner_dbapi.checksum import _compare_checksums
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
-        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
+        from google.cloud.spanner_dbapi.exceptions import RetryAborted
 
         original = ResultsChecksum()
         original.consume_result(5)
 
         retried = ResultsChecksum()
 
-        with self.assertRaises(AbortedRetried):
+        with self.assertRaises(RetryAborted):
             _compare_checksums(original, retried)
 
     def test_more_results(self):
         from google.cloud.spanner_dbapi.checksum import _compare_checksums
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
-        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
+        from google.cloud.spanner_dbapi.exceptions import RetryAborted
 
         original = ResultsChecksum()
         original.consume_result(5)
@@ -45,13 +45,13 @@ class Test_compare_checksums(unittest.TestCase):
         retried.consume_result(5)
         retried.consume_result(2)
 
-        with self.assertRaises(AbortedRetried):
+        with self.assertRaises(RetryAborted):
             _compare_checksums(original, retried)
 
     def test_mismatch(self):
         from google.cloud.spanner_dbapi.checksum import _compare_checksums
         from google.cloud.spanner_dbapi.checksum import ResultsChecksum
-        from google.cloud.spanner_dbapi.exceptions import AbortedRetried
+        from google.cloud.spanner_dbapi.exceptions import RetryAborted
 
         original = ResultsChecksum()
         original.consume_result(5)
@@ -59,5 +59,5 @@ class Test_compare_checksums(unittest.TestCase):
         retried = ResultsChecksum()
         retried.consume_result(2)
 
-        with self.assertRaises(AbortedRetried):
+        with self.assertRaises(RetryAborted):
             _compare_checksums(original, retried)

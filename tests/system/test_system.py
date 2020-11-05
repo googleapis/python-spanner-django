@@ -297,8 +297,8 @@ WHERE first_name = 'first-name'
         cursor.execute(
             """
 INSERT INTO contacts (contact_id, first_name, last_name, email)
-VALUES (1, 'first-name', 'last-name', 'test.email@domen.ru'),
-       (2, 'first-name2', 'last-name2', 'test.email2@domen.ru')
+VALUES (1, 'first-name', 'last-name', 'test.email@example.com'),
+       (2, 'first-name2', 'last-name2', 'test.email2@example.com')
         """
         )
         conn.commit()

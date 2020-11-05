@@ -235,13 +235,7 @@ class Connection:
                 self._release_session()
                 self._statements = []
             except Aborted:
-                while True:
-                    try:
-                        self.retry_transaction()
-                        break
-                    except Aborted:
-                        pass
-
+                self.retry_transaction()
                 self.commit()
 
     def rollback(self):

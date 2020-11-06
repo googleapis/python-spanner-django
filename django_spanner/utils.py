@@ -1,4 +1,5 @@
 import django
+import sqlparse
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.version import get_version_tuple
 
@@ -18,3 +19,17 @@ def check_django_compatability():
                 A=django.VERSION[0], B=django.VERSION[1], C=__version__
             )
         )
+
+
+def ensure_where_clause(sql):
+    """
+    Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
+    Add a dummy WHERE clause if necessary.
+    """
+    if any(
+        isinstance(token, sqlparse.sql.Where)
+        for token in sqlparse.parse(sql)[0]
+    ):
+        return sql
+
+    return sql + " WHERE 1=1"

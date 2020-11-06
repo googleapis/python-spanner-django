@@ -407,6 +407,9 @@ class TestParseUtils(unittest.TestCase):
         self.assertEqual(get_param_types(None), None)
 
     def test_ensure_where_clause(self):
+        from google.cloud.spanner_dbapi.exceptions import ProgrammingError
+        from google.cloud.spanner_dbapi.parse_utils import ensure_where_clause
+
         cases = (
             "UPDATE a SET a.b=10 FROM articles a JOIN d c ON a.ai = c.ai WHERE c.ci = 1",
             "UPDATE T SET A = 1 WHERE C1 = 1 AND C2 = 2",

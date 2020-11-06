@@ -4,32 +4,19 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import datetime
-import decimal
-from unittest import TestCase
+import unittest
 
 from google.cloud.spanner_v1 import param_types
-from google.cloud.spanner_dbapi.exceptions import Error, ProgrammingError
-from google.cloud.spanner_dbapi.parse_utils import (
-    STMT_DDL,
-    STMT_INSERT,
-    STMT_NON_UPDATING,
-    STMT_UPDATING,
-    DateStr,
-    TimestampStr,
-    classify_stmt,
-    ensure_where_clause,
-    escape_name,
-    get_param_types,
-    parse_insert,
-    rows_for_insert_or_update,
-    sql_pyformat_args_to_spanner,
-)
-from google.cloud.spanner_dbapi.utils import backtick_unicode
 
 
-class ParseUtilsTests(TestCase):
+class TestParseUtils(unittest.TestCase):
     def test_classify_stmt(self):
+        from google.cloud.spanner_dbapi.parse_utils import STMT_DDL
+        from google.cloud.spanner_dbapi.parse_utils import STMT_INSERT
+        from google.cloud.spanner_dbapi.parse_utils import STMT_NON_UPDATING
+        from google.cloud.spanner_dbapi.parse_utils import STMT_UPDATING
+        from google.cloud.spanner_dbapi.parse_utils import classify_stmt
+
         cases = (
             ("SELECT 1", STMT_NON_UPDATING),
             ("SELECT s.SongName FROM Songs AS s", STMT_NON_UPDATING),
@@ -60,6 +47,12 @@ class ParseUtilsTests(TestCase):
             self.assertEqual(classify_stmt(query), want_class)
 
     def test_parse_insert(self):
+        from google.cloud.spanner_dbapi.parse_utils import parse_insert
+        from google.cloud.spanner_dbapi.exceptions import ProgrammingError
+
+        with self.assertRaises(ProgrammingError):
+            parse_insert("bad-sql", None)
+
         cases = [
             (
                 "INSERT INTO django_migrations (app, name, applied) VALUES (%s, %s, %s)",
@@ -172,6 +165,10 @@ class ParseUtilsTests(TestCase):
             ),
         ]
 
+        sql = "INSERT INTO django_migrations (app, name, applied) VALUES (%s, %s, %s)"
+        with self.assertRaises(ProgrammingError):
+            parse_insert(sql, None)
+
         for sql, params, want in cases:
             with self.subTest(sql=sql):
                 got = parse_insert(sql, params)
@@ -180,6 +177,9 @@ class ParseUtilsTests(TestCase):
                 )
 
     def test_parse_insert_invalid(self):
+        from google.cloud.spanner_dbapi import exceptions
+        from google.cloud.spanner_dbapi.parse_utils import parse_insert
+
         cases = [
             (
                 "INSERT INTO django_migrations (app, name, applied) VALUES (%s, %s, %s), (%s, %s, %s)",
@@ -201,12 +201,23 @@ class ParseUtilsTests(TestCase):
         for sql, params, wantException in cases:
             with self.subTest(sql=sql):
                 self.assertRaisesRegex(
-                    ProgrammingError,
+                    exceptions.ProgrammingError,
                     wantException,
                     lambda: parse_insert(sql, params),
                 )
 
     def test_rows_for_insert_or_update(self):
+        from google.cloud.spanner_dbapi.parse_utils import (
+            rows_for_insert_or_update,
+        )
+        from google.cloud.spanner_dbapi.exceptions import Error
+
+        with self.assertRaises(Error):
+            rows_for_insert_or_update([0], [[]])
+
+        with self.assertRaises(Error):
+            rows_for_insert_or_update([0], None, ["0", "%s"])
+
         cases = [
             (
                 ["id", "app", "name"],
@@ -254,6 +265,12 @@ class ParseUtilsTests(TestCase):
                 self.assertEqual(got, want)
 
     def test_sql_pyformat_args_to_spanner(self):
+        import decimal
+
+        from google.cloud.spanner_dbapi.parse_utils import (
+            sql_pyformat_args_to_spanner,
+        )
+
         cases = [
             (
                 (
@@ -322,6 +339,11 @@ class ParseUtilsTests(TestCase):
                 )
 
     def test_sql_pyformat_args_to_spanner_invalid(self):
+        from google.cloud.spanner_dbapi import exceptions
+        from google.cloud.spanner_dbapi.parse_utils import (
+            sql_pyformat_args_to_spanner,
+        )
+
         cases = [
             (
                 "SELECT * from t WHERE f1=%s, f2 = %s, f3=%s, extra=%s",
@@ -331,118 +353,58 @@ class ParseUtilsTests(TestCase):
         for sql, params in cases:
             with self.subTest(sql=sql):
                 self.assertRaisesRegex(
-                    Error,
+                    exceptions.Error,
                     "pyformat_args mismatch",
                     lambda: sql_pyformat_args_to_spanner(sql, params),
                 )
 
-    def test_get_param_types(self):
-        cases = [
-            (
-                {
-                    "a1": 10,
-                    "b1": "2005-08-30T01:01:01.000001Z",
-                    "c1": "2019-12-05",
-                    "d1": 10.39,
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.STRING,
-                    "c1": param_types.STRING,
-                    "d1": param_types.FLOAT64,
-                },
-            ),
-            (
-                {
-                    "a1": 10,
-                    "b1": TimestampStr("2005-08-30T01:01:01.000001Z"),
-                    "c1": "2019-12-05",
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.TIMESTAMP,
-                    "c1": param_types.STRING,
-                },
-            ),
-            (
-                {
-                    "a1": 10,
-                    "b1": "2005-08-30T01:01:01.000001Z",
-                    "c1": DateStr("2019-12-05"),
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.STRING,
-                    "c1": param_types.DATE,
-                },
-            ),
-            (
-                {"a1": 10, "b1": "2005-08-30T01:01:01.000001Z"},
-                {"a1": param_types.INT64, "b1": param_types.STRING},
-            ),
-            (
-                {
-                    "a1": 10,
-                    "b1": TimestampStr("2005-08-30T01:01:01.000001Z"),
-                    "c1": DateStr("2005-08-30"),
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.TIMESTAMP,
-                    "c1": param_types.DATE,
-                },
-            ),
-            (
-                {"a1": 10, "b1": "aaaaa08-30T01:01:01.000001Z"},
-                {"a1": param_types.INT64, "b1": param_types.STRING},
-            ),
-            (
-                {
-                    "a1": 10,
-                    "b1": "2005-08-30T01:01:01.000001",
-                    "t1": True,
-                    "t2": False,
-                    "f1": 99e9,
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.STRING,
-                    "t1": param_types.BOOL,
-                    "t2": param_types.BOOL,
-                    "f1": param_types.FLOAT64,
-                },
-            ),
-            (
-                {"a1": 10, "b1": "2019-11-26T02:55:41.000000Z"},
-                {"a1": param_types.INT64, "b1": param_types.STRING},
-            ),
-            (
-                {
-                    "a1": 10,
-                    "b1": TimestampStr("2019-11-26T02:55:41.000000Z"),
-                    "dt1": datetime.datetime(2011, 9, 1, 13, 20, 30),
-                    "d1": datetime.date(2011, 9, 1),
-                },
-                {
-                    "a1": param_types.INT64,
-                    "b1": param_types.TIMESTAMP,
-                    "dt1": param_types.TIMESTAMP,
-                    "d1": param_types.DATE,
-                },
-            ),
-            (
-                {"a1": 10, "b1": TimestampStr("2019-11-26T02:55:41.000000Z")},
-                {"a1": param_types.INT64, "b1": param_types.TIMESTAMP},
-            ),
-            ({"a1": b"bytes"}, {"a1": param_types.BYTES}),
-            ({"a1": 10, "b1": None}, {"a1": param_types.INT64}),
-            (None, None),
-        ]
+    def test_cast_for_spanner(self):
+        import decimal
 
-        for i, (params, want_param_types) in enumerate(cases):
-            with self.subTest(i=i):
-                got_param_types = get_param_types(params)
-                self.assertEqual(got_param_types, want_param_types)
+        from google.cloud.spanner_dbapi.parse_utils import cast_for_spanner
+
+        value = decimal.Decimal(3)
+        self.assertEqual(cast_for_spanner(value), float(3.0))
+        self.assertEqual(cast_for_spanner(5), 5)
+        self.assertEqual(cast_for_spanner("string"), "string")
+
+    def test_get_param_types(self):
+        import datetime
+
+        from google.cloud.spanner_dbapi.parse_utils import DateStr
+        from google.cloud.spanner_dbapi.parse_utils import TimestampStr
+        from google.cloud.spanner_dbapi.parse_utils import get_param_types
+
+        params = {
+            "a1": 10,
+            "b1": "string",
+            "c1": 10.39,
+            "d1": TimestampStr("2005-08-30T01:01:01.000001Z"),
+            "e1": DateStr("2019-12-05"),
+            "f1": True,
+            "g1": datetime.datetime(2011, 9, 1, 13, 20, 30),
+            "h1": datetime.date(2011, 9, 1),
+            "i1": b"bytes",
+            "j1": None,
+        }
+        want_types = {
+            "a1": param_types.INT64,
+            "b1": param_types.STRING,
+            "c1": param_types.FLOAT64,
+            "d1": param_types.TIMESTAMP,
+            "e1": param_types.DATE,
+            "f1": param_types.BOOL,
+            "g1": param_types.TIMESTAMP,
+            "h1": param_types.DATE,
+            "i1": param_types.BYTES,
+        }
+        got_types = get_param_types(params)
+        self.assertEqual(got_types, want_types)
+
+    def test_get_param_types_none(self):
+        from google.cloud.spanner_dbapi.parse_utils import get_param_types
+
+        self.assertEqual(get_param_types(None), None)
 
     def test_ensure_where_clause(self):
         cases = (
@@ -464,28 +426,16 @@ class ParseUtilsTests(TestCase):
                     ensure_where_clause(sql)
 
     def test_escape_name(self):
-        cases = [
+        from google.cloud.spanner_dbapi.parse_utils import escape_name
+
+        cases = (
             ("SELECT", "`SELECT`"),
-            ("id", "id"),
-            ("", ""),
             ("dashed-value", "`dashed-value`"),
             ("with space", "`with space`"),
-        ]
-
+            ("name", "name"),
+            ("", ""),
+        )
         for name, want in cases:
             with self.subTest(name=name):
                 got = escape_name(name)
-                self.assertEqual(got, want)
-
-    def test_backtick_unicode(self):
-        cases = [
-            ("SELECT (1) as foo WHERE 1=1", "SELECT (1) as foo WHERE 1=1"),
-            ("SELECT (1) as föö", "SELECT (1) as `föö`"),
-            ("SELECT (1) as `föö`", "SELECT (1) as `föö`"),
-            ("SELECT (1) as `föö` `umläut", "SELECT (1) as `föö` `umläut"),
-            ("SELECT (1) as `föö", "SELECT (1) as `föö"),
-        ]
-        for sql, want in cases:
-            with self.subTest(sql=sql):
-                got = backtick_unicode(sql)
                 self.assertEqual(got, want)

@@ -30,11 +30,10 @@ from .exceptions import ProgrammingError
 ARGS = "ARGS"
 EXPR = "EXPR"
 FUNC = "FUNC"
-TERMINAL = "TERMINAL"
 VALUES = "VALUES"
 
 
-class func:
+class func(object):
     def __init__(self, func_name, args):
         self.name = func_name
         self.args = args
@@ -68,7 +67,7 @@ class terminal(str):
     pass
 
 
-class a_args:
+class a_args(object):
     def __init__(self, argv):
         self.argv = argv
 
@@ -90,13 +89,11 @@ class a_args:
         if type(self) != type(other):
             return False
 
-        s_len, o_len = len(self), len(other)
-        if s_len != o_len:
+        if len(self) != len(other):
             return False
 
-        for i, s_item in enumerate(self):
-            o_item = other[i]
-            if s_item != o_item:
+        for i, item in enumerate(self):
+            if item != other[i]:
                 return False
 
         return True
@@ -109,7 +106,7 @@ class a_args:
         Return True if all the arguments are pyformat
         args and have the same number of arguments.
         """
-        if not self.all_have_same_argc():
+        if not self._is_equal_length():
             return False
 
         for arg in self.argv:
@@ -122,7 +119,7 @@ class a_args:
                 return False
         return True
 
-    def all_have_same_argc(self):
+    def _is_equal_length(self):
         """
         Return False if all the arguments have the same length.
         """
@@ -150,37 +147,28 @@ pyfmt_str = terminal("%s")
 
 
 def expect(word, token):
-    word = word.strip(" ")
+    word = word.strip()
     if token == VALUES:
         if not word.startswith("VALUES"):
             raise ProgrammingError(
                 "VALUES: `%s` does not start with VALUES" % word
             )
-        word = word[len("VALUES") :].strip(" ")
+        word = word[len("VALUES") :].lstrip()
 
         all_args = []
         while word:
-            word = word.strip(" ")
+            word = word.strip()
 
             word, arg = expect(word, ARGS)
             all_args.append(arg)
+            word = word.strip()
 
-            word = word.strip(" ")
-            if word == "":
-                break
-            elif word[0] != ",":
+            if word and not word.startswith(","):
                 raise ProgrammingError(
                     "VALUES: expected `,` got %s in %s" % (word[0], word)
                 )
-            else:
-                word = word[1:]
+            word = word[1:]
         return "", values(all_args)
-
-    elif token == TERMINAL:
-        word = word.strip(" ")
-        if word != "%s":
-            raise ProgrammingError("TERMINAL: `%s` is not %%s" % word)
-        return "", pyfmt_str
 
     elif token == FUNC:
         begins_with_letter = word and (word[0].isalpha() or word[0] == "_")
@@ -197,7 +185,7 @@ def expect(word, token):
             else:
                 break
 
-        func_name, rest = word[: end + 1], word[end + 1 :].strip(" ")
+        func_name, rest = word[: end + 1], word[end + 1 :].strip()
 
         word, args = expect(rest, ARGS)
         return word, func(func_name, args)
@@ -208,36 +196,35 @@ def expect(word, token):
         #   (%s, %s...)
         #   (FUNC, %s...)
         #   (%s, %s...)
-        if not (word and word[0] == "("):
+        if not (word and word.startswith("(")):
             raise ProgrammingError(
-                "ARGS: supposed to begin with `(` in `%s`" % (word)
+                "ARGS: supposed to begin with `(` in `%s`" % word
             )
 
         word = word[1:]
 
         terms = []
         while True:
-            word = word.strip(" ")
-            if not word:
+            word = word.strip()
+            if not word or word.startswith(")"):
                 break
-            elif word == "%s":
+
+            if word == "%s":
                 terms.append(pyfmt_str)
                 word = ""
-            elif word.startswith(")"):
-                break
             elif not word.startswith("%s"):
                 word, parsed = expect(word, FUNC)
                 terms.append(parsed)
             else:
                 terms.append(pyfmt_str)
-                word = word[2:].strip(" ")
+                word = word[2:].strip()
 
-            if word and word[0] == ",":
+            if word.startswith(","):
                 word = word[1:]
 
-        if (not word) or word[0] != ")":
+        if not (word and word.startswith(")")):
             raise ProgrammingError(
-                "ARGS: supposed to end with `)` in `%s`" % (word)
+                "ARGS: supposed to end with `)` in `%s`" % word
             )
 
         word = word[1:]
@@ -246,15 +233,14 @@ def expect(word, token):
     elif token == EXPR:
         if word == "%s":
             # Terminal symbol.
-            return "", (pyfmt_str)
+            return "", pyfmt_str
 
         # Otherwise we expect a function.
         return expect(word, FUNC)
 
-    else:
-        raise ProgrammingError("Unknown token `%s`" % token)
+    raise ProgrammingError("Unknown token `%s`" % token)
 
 
 def as_values(values_stmt):
-    _, values = parse_values(values_stmt)
-    return values
+    _, _values = parse_values(values_stmt)
+    return _values

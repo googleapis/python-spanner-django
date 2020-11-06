@@ -627,9 +627,6 @@ def ensure_where_clause(sql):
     ):
         return sql
 
-    if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
-        return sql + " WHERE 1=1"
-
     raise ProgrammingError(
         "Cloud Spanner requires a WHERE clause when executing DELETE or UPDATE query"
     )

@@ -548,7 +548,7 @@ def ensure_where_clause(sql):
     Add a dummy WHERE clause if necessary.
 
     :type sql: str
-    :param sql: A SQL request.
+    :param sql: A SQL statement.
 
     :rtype: str
     :returns: A SQL request with dummy WHERE clause if necessary.

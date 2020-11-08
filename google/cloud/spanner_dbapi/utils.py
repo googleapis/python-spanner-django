@@ -92,7 +92,7 @@ def sanitize_literals_for_upload(s):
     * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
 
     :type s: str
-    :param s: A string with literals to be fitted for the consumption.
+    :param s: A string with literals to escaped for consumption by Cloud Spanner.
 
     :rtype: str
     :returns: A sanitized string for uploading.

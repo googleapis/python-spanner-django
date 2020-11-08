@@ -169,9 +169,9 @@ def expect(word, token):
     :type token: str
     :param token: An expression token.
 
-    :rtype: (str, Any)
-    :returns: A tuple containing the rest of the expression string and the tree
-              of the already parsed.
+    :rtype: `Tuple(str, Any)`
+    :returns: A tuple containing the rest of the expression string and the parse
+              tree for the part of the expression that has already been parsed.
     :raises :class:`ProgrammingError`: If there is a parsing error.
     """
     word = word.strip()

@@ -6,6 +6,7 @@
 
 import argparse
 
+from google.cloud import spanner_dbapi
 from google.cloud.spanner_dbapi import connect
 
 

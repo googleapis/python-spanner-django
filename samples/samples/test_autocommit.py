@@ -10,7 +10,7 @@ from google.api_core.exceptions import DeadlineExceeded
 from google.cloud import spanner
 import pytest
 
-import autocommit
+from . import autocommit
 
 
 def unique_instance_id():
@@ -30,7 +30,10 @@ DATABASE_ID = unique_database_id()
 @pytest.fixture(scope="module")
 def spanner_instance():
     spanner_client = spanner.Client()
-    instance = spanner_client.instance(INSTANCE_ID)
+    config_name = "{}/instanceConfigs/regional-us-central1".format(
+        spanner_client.project_name
+    )
+    instance = spanner_client.instance(INSTANCE_ID, config_name)
     op = instance.create()
     op.result(120)  # block until completion
     yield instance
@@ -46,7 +49,7 @@ def database(spanner_instance):
     db.drop()
 
 
-def test_enable_autocommit_mode(capsys):
+def test_enable_autocommit_mode(capsys, database):
     autocommit.enable_autocommit_mode(INSTANCE_ID, DATABASE_ID)
     out, _ = capsys.readouterr()
     assert "Autocommit mode is enabled." in out

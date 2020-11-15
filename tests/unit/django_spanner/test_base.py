@@ -4,6 +4,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import sys
 import unittest
 
 from mock_import import mock_import
@@ -11,6 +12,7 @@ from unittest import mock
 
 
 @mock_import()
+@unittest.skipIf(sys.version_info < (3, 6), reason="Skipping Python 3.5")
 class TestBase(unittest.TestCase):
     PROJECT = "project"
     INSTANCE_ID = "instance_id"

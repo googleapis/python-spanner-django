@@ -259,6 +259,24 @@ class TestCursor(unittest.TestCase):
                 """SELECT * FROM table1 WHERE "col1" = @a1""", ()
             )
 
+    def test_executemany_DLL(self):
+        from google.cloud.spanner_dbapi import connect, ProgrammingError
+
+        with mock.patch(
+            "google.cloud.spanner_v1.instance.Instance.exists",
+            return_value=True,
+        ):
+            with mock.patch(
+                "google.cloud.spanner_v1.database.Database.exists",
+                return_value=True,
+            ):
+                connection = connect("test-instance", "test-database")
+
+        cursor = connection.cursor()
+
+        with self.assertRaises(ProgrammingError):
+            cursor.executemany("""DROP DATABASE database_name""", ())
+
     def test_executemany(self):
         from google.cloud.spanner_dbapi import connect
 

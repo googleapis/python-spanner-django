@@ -199,6 +199,12 @@ class Cursor(object):
         """
         self._raise_if_closed()
 
+        classification = parse_utils.classify_stmt(operation)
+        if classification == parse_utils.STMT_DDL:
+            raise ProgrammingError(
+                "Executing DDL statements with executemany() method is now allowed."
+            )
+
         many_result_set = StreamedManyResultSets()
         for params in seq_of_params:
             self.execute(operation, params)

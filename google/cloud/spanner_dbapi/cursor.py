@@ -202,7 +202,7 @@ class Cursor(object):
         classification = parse_utils.classify_stmt(operation)
         if classification == parse_utils.STMT_DDL:
             raise ProgrammingError(
-                "Executing DDL statements with executemany() method is now allowed."
+                "Executing DDL statements with executemany() method is not allowed."
             )
 
         many_result_set = StreamedManyResultSets()

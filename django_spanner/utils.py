@@ -21,7 +21,7 @@ def check_django_compatability():
         )
 
 
-def ensure_where_clause(sql):
+def add_dummy_where(sql):
     """
     Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
     Add a dummy WHERE clause if necessary.

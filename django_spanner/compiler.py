@@ -12,7 +12,7 @@ from django.db.models.sql.compiler import (
     SQLInsertCompiler as BaseSQLInsertCompiler,
     SQLUpdateCompiler as BaseSQLUpdateCompiler,
 )
-from django.db.utils import DatabaseError, ensure_where_clause
+from django.db.utils import DatabaseError, add_dummy_where
 
 
 class SQLCompiler(BaseSQLCompiler):
@@ -91,7 +91,7 @@ class SQLCompiler(BaseSQLCompiler):
         for part in args_parts:
             params.extend(part)
 
-        result = ensure_where_clause(result)
+        result = add_dummy_where(result)
         return result, params
 
 

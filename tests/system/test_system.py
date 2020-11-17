@@ -4,8 +4,9 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import unittest
 import os
+import unittest
+import uuid
 
 from google.api_core import exceptions
 
@@ -104,7 +105,7 @@ def tearDownModule():
 class TestTransactionsManagement(unittest.TestCase):
     """Transactions management support tests."""
 
-    DATABASE_NAME = "db-api-transactions-management"
+    DATABASE_NAME = f"db-api-transactions-management-{uuid.uuid4().hex[:10]}"
 
     @classmethod
     def setUpClass(cls):

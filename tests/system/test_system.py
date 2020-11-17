@@ -105,7 +105,7 @@ def tearDownModule():
 class TestTransactionsManagement(unittest.TestCase):
     """Transactions management support tests."""
 
-    DATABASE_NAME = f"db-api-transactions-management-{uuid.uuid4().hex[:10]}"
+    DATABASE_NAME = f"db-api-transactions-mgmt-{uuid.uuid4().hex[:5]}"
 
     @classmethod
     def setUpClass(cls):

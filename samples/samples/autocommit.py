@@ -39,7 +39,7 @@ def enable_autocommit_mode(instance_id, database_id):
     cursor.execute("""SELECT * FROM Singers WHERE SingerId = 13""")
 
     print(
-        u"SingerId: {}, AlbumId: {}, AlbumTitle: {}".format(*cursor.fetchone())
+        "SingerId: {}, AlbumId: {}, AlbumTitle: {}".format(*cursor.fetchone())
     )
 
     connection.close()
@@ -65,6 +65,4 @@ if __name__ == "__main__":
     if args.command == "enable_autocommit_mode":
         enable_autocommit_mode(args.instance_id, args.database_id)
     else:
-        print(
-            "Command {} did not match expected commands.".format(args.command)
-        )
+        print(f"Command {args.command} did not match expected commands.")

@@ -15,12 +15,12 @@ from . import autocommit
 
 def unique_instance_id():
     """Creates a unique id for the database."""
-    return "test-instance-{}".format(uuid.uuid4().hex[:10])
+    return f"test-instance-{uuid.uuid4().hex[:10]}"
 
 
 def unique_database_id():
     """Creates a unique id for the database."""
-    return "test-db-{}".format(uuid.uuid4().hex[:10])
+    return f"test-db-{uuid.uuid4().hex[:10]}"
 
 
 INSTANCE_ID = unique_instance_id()
@@ -30,9 +30,10 @@ DATABASE_ID = unique_database_id()
 @pytest.fixture(scope="module")
 def spanner_instance():
     spanner_client = spanner.Client()
-    config_name = "{}/instanceConfigs/regional-us-central1".format(
-        spanner_client.project_name
+    config_name = (
+        f"{spanner_client.project_name}/instanceConfigs/regional-us-central1"
     )
+
     instance = spanner_client.instance(INSTANCE_ID, config_name)
     op = instance.create()
     op.result(120)  # block until completion

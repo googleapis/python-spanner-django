@@ -164,105 +164,6 @@ RE_VALUES_PYFORMAT = re.compile(
 
 RE_PYFORMAT = re.compile(r"(%s|%\([^\(\)]+\)s)+", re.DOTALL)
 
-SPANNER_RESERVED_KEYWORDS = {
-    "ALL",
-    "AND",
-    "ANY",
-    "ARRAY",
-    "AS",
-    "ASC",
-    "ASSERT_ROWS_MODIFIED",
-    "AT",
-    "BETWEEN",
-    "BY",
-    "CASE",
-    "CAST",
-    "COLLATE",
-    "CONTAINS",
-    "CREATE",
-    "CROSS",
-    "CUBE",
-    "CURRENT",
-    "DEFAULT",
-    "DEFINE",
-    "DESC",
-    "DISTINCT",
-    "DROP",
-    "ELSE",
-    "END",
-    "ENUM",
-    "ESCAPE",
-    "EXCEPT",
-    "EXCLUDE",
-    "EXISTS",
-    "EXTRACT",
-    "FALSE",
-    "FETCH",
-    "FOLLOWING",
-    "FOR",
-    "FROM",
-    "FULL",
-    "GROUP",
-    "GROUPING",
-    "GROUPS",
-    "HASH",
-    "HAVING",
-    "IF",
-    "IGNORE",
-    "IN",
-    "INNER",
-    "INTERSECT",
-    "INTERVAL",
-    "INTO",
-    "IS",
-    "JOIN",
-    "LATERAL",
-    "LEFT",
-    "LIKE",
-    "LIMIT",
-    "LOOKUP",
-    "MERGE",
-    "NATURAL",
-    "NEW",
-    "NO",
-    "NOT",
-    "NULL",
-    "NULLS",
-    "OF",
-    "ON",
-    "OR",
-    "ORDER",
-    "OUTER",
-    "OVER",
-    "PARTITION",
-    "PRECEDING",
-    "PROTO",
-    "RANGE",
-    "RECURSIVE",
-    "RESPECT",
-    "RIGHT",
-    "ROLLUP",
-    "ROWS",
-    "SELECT",
-    "SET",
-    "SOME",
-    "STRUCT",
-    "TABLESAMPLE",
-    "THEN",
-    "TO",
-    "TREAT",
-    "TRUE",
-    "UNBOUNDED",
-    "UNION",
-    "UNNEST",
-    "USING",
-    "WHEN",
-    "WHERE",
-    "WINDOW",
-    "WITH",
-    "WITHIN",
-}
-
 
 def classify_stmt(query):
     """Determine SQL query type.
@@ -614,21 +515,18 @@ def get_param_types(params):
 
 def ensure_where_clause(sql):
     """
-    Cloud Spanner requires a WHERE clause on UPDATE and DELETE statements.
-    Add a dummy WHERE clause if necessary.
+    Raise unless `sql` includes a WHERE clause.
 
-    :type sql: `str`
-    :param sql: SQL code to check.
+    :type sql: str
+    :param sql: SQL statement to check.
     """
-    if any(
+    if not any(
         isinstance(token, sqlparse.sql.Where)
         for token in sqlparse.parse(sql)[0]
     ):
-        return sql
-
-    raise ProgrammingError(
-        "Cloud Spanner requires a WHERE clause when executing DELETE or UPDATE query"
-    )
+        raise ProgrammingError(
+            "Cloud Spanner requires a WHERE clause in UPDATE and DELETE statements"
+        )
 
 
 def escape_name(name):

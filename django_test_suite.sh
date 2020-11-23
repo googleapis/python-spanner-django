@@ -15,7 +15,9 @@ TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a")
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
 TEST_APPS=${DJANGO_TEST_APPS:-basic}
 INSTANCE=${SPANNER_TEST_INSTANCE:-django-tests}
-PROJECT=${PROJECT_ID:-appdev-soda-spanner-staging}
+PROJECT=${PROJECT_ID}
+SPANNER_EMULATOR_HOST=${SPANNER_EMULATOR_HOST}
+GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
 SETTINGS_FILE="$TEST_DBNAME-settings"
 TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}
 
@@ -42,15 +44,6 @@ PASSWORD_HASHERS = [
 !
 }
 
-setup_emulator_if_needed() {
-    if [[ $SPANNER_EMULATOR_HOST != "" ]]
-    then
-        echo "Running the emulator at: $SPANNER_EMULATOR_HOST"
-        ./emulator_main --host_port "$SPANNER_EMULATOR_HOST" &
-        SPANNER_INSTANCE=$INSTANCE python3 .kokoro/ensure_instance_exists.py
-    fi
-}
-
 run_django_tests() {
     cd $TESTS_DIR/django/tests
     create_settings
@@ -58,5 +51,4 @@ run_django_tests() {
     python3 runtests.py $TEST_APPS --verbosity=2 --noinput --settings $SETTINGS_FILE
 }
 
-setup_emulator_if_needed
 run_django_tests

@@ -85,14 +85,16 @@ def sanitize_literals_for_upload(s):
     """Convert literals in s, to be fit for consumption by Cloud Spanner.
 
     * Convert %% (escaped percent literals) to %. Percent signs must be escaped
-      when values like %s are used as SQL parameter placeholders but Spanner's query
-      language uses placeholders like @a0 and doesn't expect percent signs to be
-      escaped.
+      when values like %s are used as SQL parameter placeholders but Spanner's
+      query language uses placeholders like @a0 and doesn't expect percent
+      signs to be escaped.
 
-    * Quote words containing non-ASCII, with backticks, for example föö to `föö`.
+    * Quote words containing non-ASCII, with backticks, for example föö to
+      `föö`.
 
     :type s: str
-    :param s: A string with literals to escaped for consumption by Cloud Spanner.
+    :param s: A string with literals to escaped for consumption by Cloud
+              Spanner.
 
     :rtype: str
     :returns: A sanitized string for uploading.

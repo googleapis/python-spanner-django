@@ -34,7 +34,7 @@ def lint(session):
     """
     session.install("flake8", BLACK_VERSION)
     session.run("black", "--check", *BLACK_PATHS)
-    session.run("flake8", "django_spanner", "google", "tests")
+    session.run("flake8", "django_spanner", "tests")
 
 
 @nox.session(python="3.8")

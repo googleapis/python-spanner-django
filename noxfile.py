@@ -65,36 +65,8 @@ def default(session):
 
     # Run py.test against the unit tests.
     session.run(
-        "py.test",
-        "--quiet",
-        # "--cov=django_spanner",
-        "--cov=google.cloud",
-        "--cov=tests.unit",
-        "--cov-append",
-        "--cov-config=.coveragerc",
-        "--cov-report=",
-        "--cov-fail-under=0",
-        os.path.join("tests", "unit"),
-        *session.posargs
+        "py.test", "--quiet", os.path.join("tests", "unit"), *session.posargs
     )
-
-
-# @nox.session(python=["3.6", "3.7", "3.8"])
-# def unit(session):
-#     """Run the unit test suite."""
-#     default(session)
-
-
-# @nox.session(python="3.8")
-# def cover(session):
-#     """Run the final coverage report.
-
-#     This outputs the coverage report aggregating coverage from the unit test
-#     runs and then erases coverage data.
-#     """
-#     session.install("coverage", "pytest-cov")
-#     session.run("coverage", "report", "--show-missing", "--fail-under=40")
-#     session.run("coverage", "erase")
 
 
 @nox.session(python="3.8")

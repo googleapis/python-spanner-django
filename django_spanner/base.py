@@ -103,6 +103,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @property
     def instance(self):
+        """Instance to which this connection relates.
+
+        :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
+        :returns: The related instance object.
+        """
         return spanner.Client().instance(self.settings_dict["INSTANCE"])
 
     @property
@@ -112,6 +117,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         )
 
     def get_connection_params(self):
+        """Dictionary of the connection parameters.
+
+        :rtype: dict
+        :returns: Connection parameters in Django Spanner format.
+        """
         return {
             "project": self.settings_dict["PROJECT"],
             "instance_id": self.settings_dict["INSTANCE"],
@@ -121,12 +131,30 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         }
 
     def get_new_connection(self, conn_params):
+        """Creates a new connection with corresponding connection parameters.
+
+        :type conn_params: list
+        :param conn_params: A List of the connection parameters for
+                            :class:`~google.cloud.spanner_dbapi.connection.Connection`
+
+        :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
+        :returns: Connection object associated with the given Google Cloud Spanner
+                  resource.
+
+        :raises: :class:`ValueError` in case of given instance/database
+                 doesn't exist.
+        """
         return Database.connect(**conn_params)
 
     def init_connection_state(self):
         pass
 
     def create_cursor(self, name=None):
+        """Factory to create a Cursor.
+
+        :rtype: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :returns: The Cursor for this connection.
+        """
         return self.connection.cursor()
 
     def _set_autocommit(self, autocommit):
@@ -134,6 +162,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             self.connection.autocommit = autocommit
 
     def is_usable(self):
+        """Checks database to be usable.
+
+        :rtype: bool
+        :returns: True if database is usable, False otherwise.
+        """
         if self.connection is None:
             return False
         try:

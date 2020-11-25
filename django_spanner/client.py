@@ -9,5 +9,11 @@ from google.cloud.spanner_dbapi.exceptions import NotSupportedError
 
 
 class DatabaseClient(BaseDatabaseClient):
+    """Wraps the Django base class via implementing the `runshell` method.
+
+    TODO: Missing actual implementation of `runshell`.
+
+    :raises: :class:`~google.cloud.spanner_dbapi.exceptions.NotSupportedError`
+    """
     def runshell(self, parameters):
         raise NotSupportedError("This method is not supported.")

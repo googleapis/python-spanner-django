@@ -51,7 +51,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             # just return and skip it all.
             if keepdb:
                 return test_database_name
-            self.log("Got an error creating the test database: %s" % e)
+            self.log("Got an error creating the test database: %s" % e.__traceback__)
             if not autoclobber:
                 confirm = input(
                     "Type 'yes' if you would like to try deleting the test "

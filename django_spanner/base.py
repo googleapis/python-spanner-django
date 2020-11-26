@@ -4,7 +4,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
+import os
 
 from django.db.backends.base.base import BaseDatabaseWrapper
 from google.cloud import spanner_dbapi as Database, spanner_v1 as spanner
@@ -106,7 +106,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     @property
     def instance(self):
         return spanner.Client(
-            project=sys.environ["GOOGLE_CLOUD_PROJECT"]
+            project=os.environ["GOOGLE_CLOUD_PROJECT"]
         ).instance(self.settings_dict["INSTANCE"])
 
     @property

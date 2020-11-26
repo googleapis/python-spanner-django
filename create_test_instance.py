@@ -20,10 +20,6 @@ from google.cloud.spanner_v1 import Client
 emulator_project = os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
 client = Client(project=emulator_project)
 
-configs = list(client.list_instance_configs())
-
-instance = client.instance(
-    "google-cloud-django-backend-tests", configs[0].name
-)
+instance = client.instance("google-cloud-django-backend-tests")
 created_op = instance.create()
 created_op.result(30)  # block until completion

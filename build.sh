@@ -47,5 +47,5 @@ sudo apt-get update
 apt-get install -y libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
 cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 
-python create_test_instance.py
+python3 create_test_instance.py
 bash django_test_suite.sh

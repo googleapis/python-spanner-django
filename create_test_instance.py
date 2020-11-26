@@ -18,31 +18,13 @@ from google.auth.credentials import AnonymousCredentials
 from google.cloud.spanner_v1 import Client
 
 
-INSTANCE_ID = "google-cloud-django-backend-tests"
+emulator_project = os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
+client = Client(project=emulator_project, credentials=AnonymousCredentials())
 
+configs = list(client.list_instance_configs())
 
-class Config(object):
-    """Run-time configuration to be modified at set-up.
-
-    This is a mutable stand-in to allow test set-up to modify
-    global state.
-    """
-
-    CLIENT = None
-    INSTANCE_CONFIG = None
-    INSTANCE = None
-
-
-emulator_project = os.getenv("GCLOUD_PROJECT", "emulator-test-project")
-Config.CLIENT = Client(
-    project=emulator_project, credentials=AnonymousCredentials()
+instance = client.instance(
+    "google-cloud-django-backend-tests", configs[0].name
 )
-
-configs = list(Config.CLIENT.list_instance_configs())
-
-Config.INSTANCE_CONFIG = configs[0]
-config_name = configs[0].name
-
-Config.INSTANCE = Config.CLIENT.instance(INSTANCE_ID, config_name)
-created_op = Config.INSTANCE.create()
+created_op = instance.create()
 created_op.result(30)  # block until completion

@@ -48,7 +48,7 @@ run_django_tests() {
     cd $TESTS_DIR/django/tests
     create_settings
     echo -e "\033[32mRunning Django tests: $TEST_APPS\033[00m"
-    python3 runtests.py $TEST_APPS --verbosity=2 --noinput --settings $SETTINGS_FILE
+    python3 runtests.py $TEST_APPS --verbosity=3 --noinput --settings $SETTINGS_FILE
 }
 
 run_django_tests

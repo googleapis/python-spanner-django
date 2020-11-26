@@ -14,6 +14,7 @@ from google.cloud.spanner_v1.proto import type_pb2
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
+    """This class describes database introspection."""
     data_types_reverse = {
         type_pb2.BOOL: "BooleanField",
         type_pb2.BYTES: "BinaryField",
@@ -25,12 +26,30 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def get_field_type(self, data_type, description):
+        """Define the type of the field.
+
+        :type data_type: str
+        :param data_type: The type name.
+
+        :type description: str
+        :param description: The description of the type.
+
+        :rtype: Any
+        :returns: Field type.
+        """
         if data_type == type_pb2.STRING and description.internal_size == "MAX":
             return "TextField"
         return super().get_field_type(data_type, description)
 
     def get_table_list(self, cursor):
-        """Return a list of table and view names in the current database."""
+        """Return a list of table and view names in the current database.
+
+        :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :param cursor: The cursor in the linked database.
+
+        :rtype: list
+        :returns: A list of table and view names.
+        """
         # The second TableInfo field is 't' for table or 'v' for view.
         return [TableInfo(row[0], "t") for row in cursor.list_tables()]
 
@@ -38,6 +57,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Return a description of the table with the DB-API cursor.description
         interface.
+
+        :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :param cursor: The cursor in the linked database.
+
+        :type table_name: str
+        :param table_name: The name of the table.
+
+        :rtype: list
+        :returns: A description of the table.
         """
         cursor.execute(
             "SELECT * FROM %s LIMIT 1"
@@ -78,6 +106,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         Return a dictionary of {field_name: (field_name_other_table, other_table)}
         representing all relationships in the table.
+
+        :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :param cursor: The cursor in the linked database.
+
+        :type table_name: str
+        :param table_name: The name of the table.
+
+        :rtype: dict
+        :returns: A dictionary of the field descriptions.
         """
         results = cursor.run_sql_in_snapshot(
             '''
@@ -103,6 +140,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         }
 
     def get_primary_key_column(self, cursor, table_name):
+        """Return Primary Key column.
+
+        :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :param cursor: The cursor in the linked database.
+
+        :type table_name: str
+        :param table_name: The name of the table.
+
+        :rtype: str
+        :returns: The name of the PK column.
+        """
         results = cursor.run_sql_in_snapshot(
             """
             SELECT
@@ -121,6 +169,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return results[0][0] if results else None
 
     def get_constraints(self, cursor, table_name):
+        """Return a dictionary the constraints in the current table.
+
+        :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :param cursor: The cursor in the linked database.
+
+        :type table_name: str
+        :param table_name: The name of the table.
+
+        :rtype: dict
+        :returns: A dictionary with constraints.
+        """
         constraints = {}
         quoted_table_name = self.connection.ops.quote_name(table_name)
 

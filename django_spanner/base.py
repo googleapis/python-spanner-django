@@ -117,7 +117,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def get_connection_params(self):
         return {
-            "project": self.settings_dict["PROJECT"],
+            "project": os.environ["GOOGLE_CLOUD_PROJECT"],
             "instance_id": self.settings_dict["INSTANCE"],
             "database_id": self.settings_dict["NAME"],
             "user_agent": "django_spanner/2.2.0a1",

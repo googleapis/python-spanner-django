@@ -30,6 +30,13 @@ class IfNull(Func):
 
 
 def cast(self, compiler, connection, **extra_context):
+    """Cast SQL query for given parameters.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     # Account for a field's max_length using SUBSTR.
     max_length = getattr(self.output_field, "max_length", None)
     if max_length is not None:
@@ -42,6 +49,13 @@ def cast(self, compiler, connection, **extra_context):
 
 
 def chr_(self, compiler, connection, **extra_context):
+    """Return a SQL query where the code points are displayed as a string.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler,
         connection,
@@ -51,6 +65,13 @@ def chr_(self, compiler, connection, **extra_context):
 
 
 def concatpair(self, compiler, connection, **extra_context):
+    """Concatenates a SQL query into the sequence of :class:`IfNull` objects.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     # Spanner's CONCAT function returns null if any of its arguments are null.
     # Prevent that by converting null arguments to an empty string.
     clone = self.copy()
@@ -61,6 +82,13 @@ def concatpair(self, compiler, connection, **extra_context):
 
 
 def cot(self, compiler, connection, **extra_context):
+    """Return a SQL query of calculated cotangent.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler,
         connection,
@@ -70,6 +98,13 @@ def cot(self, compiler, connection, **extra_context):
 
 
 def degrees(self, compiler, connection, **extra_context):
+    """Return a SQL query of the angle converted to degrees.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler,
         connection,
@@ -79,10 +114,24 @@ def degrees(self, compiler, connection, **extra_context):
 
 
 def left_and_right(self, compiler, connection, **extra_context):
+    """
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.get_substr().as_spanner(compiler, connection, **extra_context)
 
 
 def log(self, compiler, connection, **extra_context):
+    """Return a SQL query of calculated logarithm.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     # This function is usually Log(b, x) returning the logarithm of x to the
     # base b, but on Spanner it's Log(x, b).
     clone = self.copy()
@@ -91,6 +140,13 @@ def log(self, compiler, connection, **extra_context):
 
 
 def ord_(self, compiler, connection, **extra_context):
+    """Return a SQL query of the expression converted to ord.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler,
         connection,
@@ -100,12 +156,26 @@ def ord_(self, compiler, connection, **extra_context):
 
 
 def pi(self, compiler, connection, **extra_context):
+    """Return a SQL query of PI constant.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler, connection, template=str(math.pi), **extra_context
     )
 
 
 def radians(self, compiler, connection, **extra_context):
+    """Return a SQL query of the angle converted to radians.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler,
         connection,
@@ -115,18 +185,33 @@ def radians(self, compiler, connection, **extra_context):
 
 
 def strindex(self, compiler, connection, **extra_context):
+    """Return a SQL query of the string position.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler, connection, function="STRPOS", **extra_context
     )
 
 
 def substr(self, compiler, connection, **extra_context):
+    """Return a SQL query of substring.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: str
+    :returns: A SQL query.
+    """
     return self.as_sql(
         compiler, connection, function="SUBSTR", **extra_context
     )
 
 
 def register_functions():
+    """Register functions  in Spanner."""
     Cast.as_spanner = cast
     Chr.as_spanner = chr_
     ConcatPair.as_spanner = concatpair

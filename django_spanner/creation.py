@@ -51,6 +51,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             # just return and skip it all.
             if keepdb:
                 return test_database_name
+
             self.log("Got an error creating the test database: %s" % e)
             if not autoclobber:
                 confirm = input(
@@ -81,6 +82,9 @@ class DatabaseCreation(BaseDatabaseCreation):
         return test_database_name
 
     def _execute_create_test_db(self, cursor, parameters, keepdb=False):
+        self.log(
+            "emulator: " + str(self.connection.instance._client._emulator_host)
+        )
         self.connection.instance.database(parameters["dbname"]).create()
 
     def _destroy_test_db(self, test_database_name, verbosity):

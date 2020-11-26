@@ -31,18 +31,9 @@ import (
 )
 
 func main() {
-	workerIndex, err := strconv.ParseInt(os.Getenv("DJANGO_WORKER_INDEX"), 10, 64)
-	if err != nil {
-		log.Fatalf("Failed to parse DJANGO_WORKER_INDEX as an integer: %v", err)
-	}
 	workerCount, err := strconv.ParseInt(os.Getenv("DJANGO_WORKER_COUNT"), 10, 64)
 	if err != nil {
 		log.Fatalf("Failed to parse DJANGO_WORKER_COUNT as an integer: %v", err)
-	}
-	if workerIndex >= workerCount {
-		// Re-enable when we figure out how to deal with Cloud Spanner's very low quotas.
-		fmt.Printf("workerIndex (%d) >= workerCount (%d)", workerIndex, workerCount)
-		return
 	}
 
 	allAppsBlob, err := ioutil.ReadFile("django_test_apps.txt")
@@ -51,10 +42,7 @@ func main() {
 	}
 	allApps := strings.Split(string(allAppsBlob), "\n")
 	appsPerWorker := int(math.Ceil(float64(len(allApps)) / float64(workerCount)))
-	startIndex := int(workerIndex) * appsPerWorker
-	if startIndex >= len(allApps) {
-		startIndex = int(workerIndex)
-	}
+	startIndex := 0
 	endIndex := startIndex + appsPerWorker
 	if endIndex >= len(allApps) {
 		endIndex = len(allApps)

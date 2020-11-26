@@ -21,6 +21,12 @@ class SQLCompiler(BaseSQLCompiler):
         Copied from the base class except for:
             combinator_sql += ' ALL' if all else ' DISTINCT'
         Cloud Spanner requires ALL or DISTINCT.
+
+        :type combinator: str
+        :param combinator: A type of the combinator for the operation.
+
+        :type all: bool
+        :param all: Bool option for the SQL statement.
         """
         features = self.connection.features
         compilers = [

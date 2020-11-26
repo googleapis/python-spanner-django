@@ -24,7 +24,13 @@ from django.db.models.lookups import (
 
 
 def contains(self, compiler, connection):
-    """contains and icontains"""
+    """Contains and icontains.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: tuple[str, str]
+    :returns: A tuple of the SQL request and parameters.
+    """
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
     params.extend(rhs_params)
@@ -52,6 +58,15 @@ def contains(self, compiler, connection):
 
 
 def iexact(self, compiler, connection):
+    """
+    Case-insensitive exact match. If the value provided for comparison is
+    None, it will be interpreted as an SQL NULL.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: tuple[str, str]
+    :returns: A tuple of the SQL request and parameters.
+    """
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
     params.extend(rhs_params)
@@ -69,7 +84,13 @@ def iexact(self, compiler, connection):
 
 
 def regex(self, compiler, connection):
-    """regex and iregex"""
+    """Regex and iregex.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: tuple[str, str]
+    :returns: A tuple of the SQL request and parameters.
+    """
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
     params.extend(rhs_params)
@@ -91,7 +112,13 @@ def regex(self, compiler, connection):
 
 
 def startswith_endswith(self, compiler, connection):
-    """startswith, endswith, istartswith, and iendswith lookups."""
+    """Startswith, endswith, istartswith, and iendswith lookups.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: tuple[str, str]
+    :returns: A tuple of the SQL request and parameters.
+    """
     lhs_sql, params = self.process_lhs(compiler, connection)
     rhs_sql, rhs_params = self.process_rhs(compiler, connection)
     params.extend(rhs_params)
@@ -131,6 +158,13 @@ def startswith_endswith(self, compiler, connection):
 
 
 def cast_param_to_float(self, compiler, connection):
+    """Cast parameters of the expression into the float type.
+
+    TODO: describe all parameters when code will be ready.
+
+    :rtype: tuple[str, str]
+    :returns: A tuple of the SQL request and float parameters.
+    """
     sql, params = self.as_sql(compiler, connection)
     if params:
         # Cast to DecimaField lookup values to float because
@@ -151,6 +185,7 @@ def cast_param_to_float(self, compiler, connection):
 
 
 def register_lookups():
+    """Register a new lookup in the class."""
     Contains.as_spanner = contains
     IContains.as_spanner = contains
     IExact.as_spanner = iexact

@@ -24,5 +24,3 @@ client = Client(
 instance = client.instance("google-cloud-django-backend-tests")
 created_op = instance.create()
 created_op.result(30)  # block until completion
-
-print("existssss: ", instance.exists())

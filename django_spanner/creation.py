@@ -52,12 +52,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             if keepdb:
                 return test_database_name
 
-            import traceback
-
-            self.log(
-                "Got an error creating the test database: %s"
-                % traceback.print_tb(e.__traceback__)
-            )
+            self.log("Got an error creating the test database: %s" % e)
             if not autoclobber:
                 confirm = input(
                     "Type 'yes' if you would like to try deleting the test "

@@ -14,12 +14,11 @@
 
 import os
 
-from google.auth.credentials import AnonymousCredentials
 from google.cloud.spanner_v1 import Client
 
 
 emulator_project = os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
-client = Client(project=emulator_project, credentials=AnonymousCredentials())
+client = Client(project=emulator_project)
 
 configs = list(client.list_instance_configs())
 

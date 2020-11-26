@@ -11,6 +11,7 @@ from django.db.utils import InterfaceError
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
+    """This class describes Django database features."""
     can_introspect_big_integer_field = False
     can_introspect_duration_field = False
     can_introspect_foreign_keys = False

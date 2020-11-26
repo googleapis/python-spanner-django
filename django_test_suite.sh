@@ -5,7 +5,7 @@
 # license that can be found in the LICENSE file.
 
 # exit when any command fails
-set -e
+set -x pipefail
 
 # If no SPANNER_TEST_DB is set, generate a unique one
 # so that we can have multiple tests running without

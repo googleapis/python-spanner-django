@@ -120,8 +120,8 @@ Execute a query
     results = cur.fetchall()
 
 
-Limitations
------------
+Current limitations
+-------------------
 
 ``AutoField`` generates random IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -144,13 +144,11 @@ these IDs are not monotonically increasing. This means that sorting
 models by ID isn't guaranteed to return them in the order in which they
 were created.
 
-``ForeignKey`` constraints aren't created
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``ForeignKey`` constraints aren't created (`#313 <https://github.com/googleapis/python-spanner-django/issues/313>`__)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Spanner doesn't support ``ON DELETE CASCADE`` when creating foreign-key
-constraints so ``django-google-spanner`` `doesn't support foreign key
-constraints
-<https://github.com/googleapis/python-spanner-django/issues/313>`__.
+Spanner does not support ``ON DELETE CASCADE`` when creating foreign-key
+constraints, so these are not supported in ``django-google-spanner``.
 
 Check constraints aren't supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,8 +163,10 @@ can't be used.
 No native support for ``DecimalField``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Spanner does not support NUMERIC data types that allow storing high precision
-decimal values, so these values are stored as strings instead.
+Spanner's support for `Decimal <https://www.python.org/dev/peps/pep-0327/>`__
+types is limited to
+`NUMERIC <https://cloud.google.com/spanner/docs/data-types#numeric_types>`__
+precision. Higher-precision values can be stored as strings instead.
 
 ``Variance`` and ``StdDev`` database functions aren't supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

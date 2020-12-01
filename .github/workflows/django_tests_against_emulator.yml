@@ -3,7 +3,7 @@ on:
     branches:
       - master
   pull_request:
-name: Run Django backend tests against emulator
+name: django-tests
 jobs:
   system-tests:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Run system tests
+      - name: Run Django tests
         run: sh django_test_suite.sh
         env:
           SPANNER_EMULATOR_HOST: localhost:9010

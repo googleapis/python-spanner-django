@@ -24,16 +24,16 @@ Internals
 Installation
 ------------
 
-To use this library you'll need a Google Cloud Platform project with the Cloud
-Spanner API enabled. See the `Cloud Spanner Python client docs
+Using this library requires a Google Cloud Platform project with the Cloud
+Spanner API enabled. See the Spanner' Python Client `documentation
 <https://github.com/googleapis/python-spanner/#quick-start>`__ for details.
 
-Use the version of ``django-google-spanner`` that corresponds to your version
+The version of ``django-google-spanner`` must correspond to your version
 of Django.  For example, ``django-google-spanner`` 2.2.x works with Django
-2.2.y. (This is the only supported version at this time.)
+2.2.y (Note: this is the only supported version at this time).
 
-The minor release number of Django doesn't correspond to the minor release
-number of ``django-google-spanner``. Use the latest minor release of each.
+The minor release numbers of Django may not correspond to the minor release
+numbers of ``django-google-spanner``. Use the latest minor release of each.
 
 To install from PyPI:
 
@@ -42,7 +42,7 @@ To install from PyPI:
     pip3 install django-google-spanner
 
 
-To install from source:
+To install from the source:
 
 .. code:: shell
 
@@ -54,12 +54,14 @@ To install from source:
 Usage
 -----
 
-After `installation <#Installation>`__, you'll need to edit your Django
-``settings.py`` file:
+Configuring ``settings.py``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After `installation <#Installation>`__, you'll have to update your Django
+``settings.py`` file as follows.
 
 -  Add ``django_spanner`` as the very first entry in the ``INSTALLED_APPS``
-   setting
-
+   settings:
 
    .. code:: python
 
@@ -68,41 +70,37 @@ After `installation <#Installation>`__, you'll need to edit your Django
            ...
        ]
 
--  Edit the ``DATABASES`` setting to point to an EXISTING database, as shown in the following example.
+-  Edit the ``DATABASES`` settings to point to an EXISTING database, as shown in the following example:
 
-Database configurations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   .. code:: python
 
-.. code:: python
+       DATABASES = {
+           'default': {
+               'ENGINE': 'django_spanner',
+               'PROJECT': '<GCP_project_id>',
+               'INSTANCE': '<instance_id>',
+               'NAME': '<database_name>',
+           }
+       }
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django_spanner',
-            'PROJECT': '<GCP_project_id>',
-            'INSTANCE': '<instance_id>',
-            'NAME': '<database_name>',
-        }
-    }
+-   In order to retrieve the Cloud Spanner credentials from a JSON file, ``credentials_uri`` parameter can also be supplied in the ``OPTIONS`` field:
 
-In order to retrieve the Cloud Spanner credentials from a JSON file,
-``credentials_uri`` parameter can also be supplied in the ``OPTIONS`` field:
+    .. code:: python
 
-.. code:: python
+       DATABASES = {
+           'default': {
+               'ENGINE': 'django_spanner',
+               'PROJECT': '<GCP_project_id>',
+               'INSTANCE': '<instance_id>',
+               'NAME': '<database_name>',
+               'OPTIONS': {
+                   'credentials_uri': '<credentials_uri>',
+               },
+           },
+       }
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django_spanner',
-            'PROJECT': '<GCP_project_id>',
-            'INSTANCE': '<instance_id>',
-            'NAME': '<database_name>',
-            'OPTIONS': {
-                'credentials_uri': '<credentials_uri>',
-            },
-        },
-    }
-
-Execute a query
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Executing a query
+~~~~~~~~~~~~~~~~~
 
 .. code:: python
 

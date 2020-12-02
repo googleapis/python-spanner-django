@@ -6,7 +6,7 @@ Usage Documentation
   :maxdepth: 1
   :titlesonly:
 
-  connection-usage
+  django-spanner-usage
 
 API Documentation
 -----------------

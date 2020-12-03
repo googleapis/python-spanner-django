@@ -24,6 +24,7 @@ from google.cloud.spanner_dbapi.parse_utils import (
 
 
 class DatabaseOperations(BaseDatabaseOperations):
+    """This class describes database operations."""
     cast_data_types = {"CharField": "STRING", "TextField": "STRING"}
     cast_char_field_without_max_length = "STRING"
     compiler_module = "django_spanner.compiler"
@@ -37,10 +38,23 @@ class DatabaseOperations(BaseDatabaseOperations):
     }
 
     def max_name_length(self):
+        """The quota for the maximum table name length.
+
+        :rtype: int
+        :returns: Maximum length of the name of the table.
+        """
         # https://cloud.google.com/spanner/quotas#tables
         return 128
 
     def quote_name(self, name):
+        """Change quote name to the necessary format.
+
+        :type name: str
+        :param name: The Quota name.
+
+        :rtype: :class:`str`
+        :returns: Name escaped if it has to be escaped.
+        """
         # Spanner says "column name not valid" if spaces or hyphens are present
         # (although according the docs, any character should be allowed in
         # quoted identifiers). Replace problematic characters when running the
@@ -52,14 +66,47 @@ class DatabaseOperations(BaseDatabaseOperations):
         return escape_name(name)
 
     def bulk_batch_size(self, fields, objs):
+        """Return the maximum number of the query parameters.
+
+        TODO: describe the rest of the parameters or remove them.
+
+        :rtype: int
+        :returns: The maximum number of the query parameters (constant).
+        """
         return self.connection.features.max_query_params
 
     def bulk_insert_sql(self, fields, placeholder_rows):
+        """Bulk insert for SQLs.
+
+        TODO: describe the rest of the parameters or remove them.
+
+        :type placeholder_rows: list
+        :param placeholder_rows: A list of placeholder rows.
+
+        :rtype: str
+        :returns: A SQL statement.
+        """
         placeholder_rows_sql = (", ".join(row) for row in placeholder_rows)
         values_sql = ", ".join("(%s)" % sql for sql in placeholder_rows_sql)
         return "VALUES " + values_sql
 
     def sql_flush(self, style, tables, sequences, allow_cascade=False):
+        """
+        Return a list of SQL statements required to remove all data from the
+        given database tables (without actually removing the tables themselves).
+
+        :type style: :class:`~django.core.management.color.Style`
+        :param style: An object as returned by either color_style() or
+                      no_style().
+
+        :type tables: list
+        :param tables: A list of tables names.
+
+        TODO: describe the rest of the parameters or remove them.
+
+        :rtype: list
+        :returns: A list of SQL requests to tables.
+        """
         # Cloud Spanner doesn't support TRUNCATE so DELETE instead.
         # A dummy WHERE clause is required.
         if tables:
@@ -75,11 +122,27 @@ class DatabaseOperations(BaseDatabaseOperations):
             return []
 
     def adapt_datefield_value(self, value):
+        """Reformat date argument into Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A date argument.
+
+        :rtype: :class:`~google.cloud.spanner_dbapi.types.DateStr`
+        :returns: Formatted Date.
+        """
         if value is None:
             return None
         return DateStr(str(value))
 
     def adapt_datetimefield_value(self, value):
+        """Reformat time argument into Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A time argument.
+
+        :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
+        :returns: Formatted Time.
+        """
         if value is None:
             return None
         # Expression values are adapted by the database.
@@ -102,12 +165,35 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         Convert value from decimal.Decimal into float, for a direct mapping
         and correct serialization with RPCs to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A decimal field value.
+
+        :type max_digits: int
+        :param max_digits: (Optional) A maximum number of digits.
+
+        :type decimal_places: int
+        :param decimal_places: (Optional) The number of decimal places to store
+                               with the number.
+
+        :rtype: float
+        :returns: Formatted value.
         """
         if value is None:
             return None
         return float(value)
 
     def adapt_timefield_value(self, value):
+        """
+        Transforms a time value to an object compatible with what is expected
+        by the backend driver for time columns.
+
+        :type value: #TODO
+        :param value: A time field value.
+
+        :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
+        :returns: Formatted Time.
+        """
         if value is None:
             return None
         # Expression values are adapted by the database.
@@ -119,6 +205,14 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def get_db_converters(self, expression):
+        """Get a list of functions needed to convert field data.
+
+        :type expression: #TODO finish class in functions.py
+        :param expression: An expression to convert.
+
+        :rtype: list
+        :returns: A list of functions.
+        """
         converters = super().get_db_converters(expression)
         internal_type = expression.output_field.get_internal_type()
         if internal_type == "DateTimeField":
@@ -134,12 +228,32 @@ class DatabaseOperations(BaseDatabaseOperations):
         return converters
 
     def convert_binaryfield_value(self, value, expression, connection):
+        """Convert a binary field to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A binary field value.
+
+        #TODO remove unused expression and connection parameters or include them to the code.
+
+        :rtype: b64decode
+        :returns: A base64 encoded bytes.
+        """
         if value is None:
             return value
         # Cloud Spanner stores bytes base64 encoded.
         return b64decode(value)
 
     def convert_datetimefield_value(self, value, expression, connection):
+        """Convert a date and time field to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A binary field value.
+
+        #TODO remove unused expression and connection parameters or include them to the code.
+
+        :rtype: datetime
+        :returns: A DateTime in the format for Cloud Spanner.
+        """
         if value is None:
             return value
         # Cloud Spanner returns the
@@ -163,27 +277,83 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def convert_decimalfield_value(self, value, expression, connection):
+        """Convert a decimal field to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A decimal field.
+
+        #TODO remove unused expression and connection parameters or include them to the code.
+
+        :rtype: :class:`Decimal`
+        :returns: A decimal field in the Cloud Spanner format.
+        """
         if value is None:
             return value
         # Cloud Spanner returns a float.
         return Decimal(str(value))
 
     def convert_timefield_value(self, value, expression, connection):
+        """Convert a time field to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A time field.
+
+        #TODO remove unused expression and connection parameters or include them to the code.
+
+        :rtype: :class:`time`
+        :returns: A time field in the Cloud Spanner format.
+        """
         if value is None:
             return value
         # Convert DatetimeWithNanoseconds to time.
         return time(value.hour, value.minute, value.second, value.microsecond)
 
     def convert_uuidfield_value(self, value, expression, connection):
+        """Convert a UUID field to Cloud Spanner.
+
+        :type value: #TODO
+        :param value: A UUID field.
+
+        #TODO remove unused expression and connection parameters or include them to the code.
+
+        :rtype: :class:`UUID`
+        :returns: A UUID field in the Cloud Spanner format.
+        """
         if value is not None:
             value = UUID(value)
         return value
 
     def date_extract_sql(self, lookup_type, field_name):
+        """Extract date from the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :rtype: str
+        :returns: A SQL statement for extracting.
+        """
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
         return "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
 
     def datetime_extract_sql(self, lookup_type, field_name, tzname):
+        """Extract datetime from the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :type tzname: str
+        :param tzname: The time zone name. If using of time zone is not
+                       allowed in settings default will be UTC.
+
+        :rtype: str
+        :returns: A SQL statement for extracting.
+        """
         tzname = tzname if settings.USE_TZ else "UTC"
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
         return 'EXTRACT(%s FROM %s AT TIME ZONE "%s")' % (
@@ -193,6 +363,17 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def time_extract_sql(self, lookup_type, field_name):
+        """Extract time from the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :rtype: str
+        :returns: A SQL statement for extracting.
+        """
         # Time is stored as TIMESTAMP with UTC time zone.
         return 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (
             lookup_type,
@@ -200,6 +381,17 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def date_trunc_sql(self, lookup_type, field_name):
+        """Truncate date in the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :rtype: str
+        :returns: A SQL statement for truncating.
+        """
         # https://cloud.google.com/spanner/docs/functions-and-operators#date_trunc
         if lookup_type == "week":
             # Spanner truncates to Sunday but Django expects Monday. First,
@@ -215,6 +407,17 @@ class DatabaseOperations(BaseDatabaseOperations):
         return sql
 
     def datetime_trunc_sql(self, lookup_type, field_name, tzname):
+        """Truncate datetime in the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :rtype: str
+        :returns: A SQL statement for truncating.
+        """
         # https://cloud.google.com/spanner/docs/functions-and-operators#timestamp_trunc
         tzname = tzname if settings.USE_TZ else "UTC"
         if lookup_type == "week":
@@ -233,15 +436,50 @@ class DatabaseOperations(BaseDatabaseOperations):
         return sql
 
     def time_trunc_sql(self, lookup_type, field_name):
+        """Truncate time in the lookup.
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :rtype: str
+        :returns: A SQL statement for truncating.
+        """
         # https://cloud.google.com/spanner/docs/functions-and-operators#timestamp_trunc
         return 'TIMESTAMP_TRUNC(%s, %s, "UTC")' % (field_name, lookup_type)
 
     def datetime_cast_date_sql(self, field_name, tzname):
+        """Cast date in the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :type tzname: str
+        :param tzname: The time zone name. If using of time zone is not
+                       allowed in settings default will be UTC.
+
+        :rtype: str
+        :returns: A SQL statement for casting.
+        """
         # https://cloud.google.com/spanner/docs/functions-and-operators#date
         tzname = tzname if settings.USE_TZ else "UTC"
         return 'DATE(%s, "%s")' % (field_name, tzname)
 
     def datetime_cast_time_sql(self, field_name, tzname):
+        """Cast time in the lookup.
+
+        :type field_name: str
+        :param field_name: The name of the field.
+
+        :type tzname: str
+        :param tzname: The time zone name. If using of time zone is not
+                       allowed in settings default will be UTC.
+
+        :rtype: str
+        :returns: A SQL statement for casting.
+        """
         tzname = tzname if settings.USE_TZ else "UTC"
         # Cloud Spanner doesn't have a function for converting
         # TIMESTAMP to another time zone.
@@ -251,12 +489,39 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def date_interval_sql(self, timedelta):
+        """Get a date interval in microseconds.
+
+        :type timedelta: datetime
+        :param timedelta: A time delta for the interval.
+
+        :rtype: str
+        :returns: A SQL statement.
+        """
         return "INTERVAL %s MICROSECOND" % duration_microseconds(timedelta)
 
     def format_for_duration_arithmetic(self, sql):
+        """Do nothing since formatting is handled in the custom function.
+
+        :type sql: str
+        :param sql: A SQL statement.
+
+        :rtype: str
+        :return: A SQL statement.
+        """
         return "INTERVAL %s MICROSECOND" % sql
 
     def combine_expression(self, connector, sub_expressions):
+        """Recurrently combine expressions into single one using connector.
+
+        :type connector: str
+        :param connector: A type of connector operation.
+
+        :type sub_expressions: list
+        :param sub_expressions: A list of expressions to combine.
+
+        :rtype: str
+        :return: A SQL statement for combining.
+        """
         if connector == "%%":
             return "MOD(%s)" % ", ".join(sub_expressions)
         elif connector == "^":
@@ -276,6 +541,19 @@ class DatabaseOperations(BaseDatabaseOperations):
         return super().combine_expression(connector, sub_expressions)
 
     def combine_duration_expression(self, connector, sub_expressions):
+        """Combine duration expressions into single one using connector.
+
+        :type connector: str
+        :param connector: A type of connector operation.
+
+        :type sub_expressions: list
+        :param sub_expressions: A list of expressions to combine.
+
+        :raises: :class:`~django.db.utils.DatabaseError`
+
+        :rtype: str
+        :return: A SQL statement for combining.
+        """
         if connector == "+":
             return "TIMESTAMP_ADD(" + ", ".join(sub_expressions) + ")"
         elif connector == "-":
@@ -286,6 +564,18 @@ class DatabaseOperations(BaseDatabaseOperations):
             )
 
     def lookup_cast(self, lookup_type, internal_type=None):
+        """
+        Cast text lookups to string to allow things like  filter(x__contains=4).
+
+        :type lookup_type: str
+        :param lookup_type: A type of the lookup.
+
+        :type internal_type: str
+        :param internal_type: (Optional)
+
+        :rtype: str
+        :return: A SQL statement.
+        """
         # Cast text lookups to string to allow things like
         # filter(x__contains=4)
         if lookup_type in (
@@ -303,13 +593,24 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "%s"
 
     def prep_for_like_query(self, x):
-        """Lookups that use this method use REGEXP_CONTAINS instead of LIKE."""
+        """Lookups that use this method use REGEXP_CONTAINS instead of LIKE.
+
+        :type x: str
+        :param x: A query to prepare.
+
+        :rtype: str
+        :returns: A prepared query.
+        """
         return re.escape(str(x))
 
     prep_for_iexact_query = prep_for_like_query
 
     def no_limit_value(self):
-        """The largest INT64: (2**63) - 1"""
+        """The largest INT64: (2**63) - 1
+
+        :rtype: int
+        :returns: The largest INT64.
+        """
         return 9223372036854775807
 
     def _get_limit_offset_params(self, low_mark, high_mark):

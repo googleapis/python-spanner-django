@@ -24,10 +24,11 @@ from google.cloud.spanner_dbapi.parse_utils import (
 
 
 class DatabaseOperations(BaseDatabaseOperations):
-    """This class describes database operations."""
+    """A Spanner-specific version of Django database operations."""
     cast_data_types = {"CharField": "STRING", "TextField": "STRING"}
     cast_char_field_without_max_length = "STRING"
     compiler_module = "django_spanner.compiler"
+
     # Django's lookup names that require a different name in Spanner's
     # EXTRACT() function.
     # https://cloud.google.com/spanner/docs/functions-and-operators#extract
@@ -38,16 +39,30 @@ class DatabaseOperations(BaseDatabaseOperations):
     }
 
     def max_name_length(self):
-        """The quota for the maximum table name length.
+        """Get the maximum length of Spanner table and column names.
+
+        See also: https://cloud.google.com/spanner/quotas#tables
+
+        TODO: Consider changing the hardcoded output to a linked value.
 
         :rtype: int
         :returns: Maximum length of the name of the table.
         """
-        # https://cloud.google.com/spanner/quotas#tables
         return 128
 
     def quote_name(self, name):
-        """Change quote name to the necessary format.
+        """Returns a quoted version of the given table or column name. Also,
+        applies backticks to the name that either contain '-' or ' ', or is a
+        Cloud Spanner's reserved keyword.
+
+        Spanner says "column name not valid" if spaces or hyphens are present
+        (although according to the documantation, any character should be
+        allowed in quoted identifiers). Replace problematic characters when
+        running the Django tests to prevent crashes. (Don't modify names in
+        normal operation to prevent the possibility of colliding with another
+        column.)
+
+        See: https://github.com/googleapis/python-spanner-django/issues/204
 
         :type name: str
         :param name: The Quota name.
@@ -55,57 +70,63 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: :class:`str`
         :returns: Name escaped if it has to be escaped.
         """
-        # Spanner says "column name not valid" if spaces or hyphens are present
-        # (although according the docs, any character should be allowed in
-        # quoted identifiers). Replace problematic characters when running the
-        # Django tests to prevent crashes. (Don't modify names in normal
-        # operation to prevent the possibility of colliding with another
-        # column.) https://github.com/orijtech/spanner-orm/issues/204
         if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
             name = name.replace(" ", "_").replace("-", "_")
         return escape_name(name)
 
     def bulk_batch_size(self, fields, objs):
-        """Return the maximum number of the query parameters.
+        """Overrides the base class method. Returns the maximum number of the
+        query parameters.
 
-        TODO: describe the rest of the parameters or remove them.
+        :type fields: list
+        :param fields: Currently not used.
+
+        :type objs: list
+        :param objs: Currently not used.
 
         :rtype: int
-        :returns: The maximum number of the query parameters (constant).
+        :returns: The maximum number of query parameters (constant).
         """
         return self.connection.features.max_query_params
 
     def bulk_insert_sql(self, fields, placeholder_rows):
-        """Bulk insert for SQLs.
+        """A helper method that stitches multiple values into a single SQL
+        record.
 
-        TODO: describe the rest of the parameters or remove them.
+        :type fields: list
+        :param fields: Currently not used.
 
         :type placeholder_rows: list
-        :param placeholder_rows: A list of placeholder rows.
+        :param placeholder_rows: Data "rows" containing values to combine.
 
         :rtype: str
-        :returns: A SQL statement.
+        :returns: A SQL statement (a `VALUES` command).
         """
         placeholder_rows_sql = (", ".join(row) for row in placeholder_rows)
         values_sql = ", ".join("(%s)" % sql for sql in placeholder_rows_sql)
         return "VALUES " + values_sql
 
-    def sql_flush(self, style, tables, sequences, allow_cascade=False):
-        """
-        Return a list of SQL statements required to remove all data from the
-        given database tables (without actually removing the tables themselves).
+    def sql_flush(self, style, tables, reset_sequences=False, allow_cascade=False):
+        """Overrides the base class method. Returns a list of SQL statements
+        required to remove all data from the given database tables (without
+        actually removing the tables themselves).
 
         :type style: :class:`~django.core.management.color.Style`
-        :param style: An object as returned by either color_style() or
-                      no_style().
+        :param style: (Currently not used) An object as returned by either
+                      color_style() or no_style().
 
         :type tables: list
-        :param tables: A list of tables names.
+        :param tables: A collection of Cloud Spanner Tables
 
-        TODO: describe the rest of the parameters or remove them.
+        :type reset_sequences: bool
+        :param reset_sequences: (Optional) Currently not used.
+
+        :type allow_cascade: bool
+        :param allow_cascade: (Optional) Currently not used.
 
         :rtype: list
-        :returns: A list of SQL requests to tables.
+        :returns: A list of SQL statements required to remove all data from
+        the given database tables.
         """
         # Cloud Spanner doesn't support TRUNCATE so DELETE instead.
         # A dummy WHERE clause is required.
@@ -162,8 +183,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def adapt_decimalfield_value(
         self, value, max_digits=None, decimal_places=None
     ):
-        """
-        Convert value from decimal.Decimal into float, for a direct mapping
+        """Convert value from decimal.Decimal into float, for a direct mapping
         and correct serialization with RPCs to Cloud Spanner.
 
         :type value: #TODO

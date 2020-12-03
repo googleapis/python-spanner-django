@@ -103,10 +103,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @property
     def instance(self):
-        """Instance to which this connection relates.
+        """Reference to a Cloud Spanner Instance containing the Database.
 
         :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
-        :returns: The related instance object.
+        :returns: A new instance owned by the existing Spanner Client.
         """
         return spanner.Client().instance(self.settings_dict["INSTANCE"])
 
@@ -117,10 +117,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         )
 
     def get_connection_params(self):
-        """Dictionary of the connection parameters.
+        """Retrieve the connection parameters.
 
         :rtype: dict
-        :returns: Connection parameters in Django Spanner format.
+        :returns: A dictionary containing the Spanner connection parametersб
+                  in Django Spanner format.
         """
         return {
             "project": self.settings_dict["PROJECT"],
@@ -130,7 +131,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             **self.settings_dict["OPTIONS"],
         }
 
-    def get_new_connection(self, conn_params):
+    def get_new_connection(self, **conn_params):
         """Creates a new connection with corresponding connection parameters.
 
         :type conn_params: list
@@ -138,19 +139,23 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                             :class:`~google.cloud.spanner_dbapi.connection.Connection`
 
         :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
-        :returns: Connection object associated with the given Google Cloud Spanner
-                  resource.
+        :returns: A new Spanner DB API Connection object associated with the
+                  given Google Cloud Spanner resource.
 
-        :raises: :class:`ValueError` in case of given instance/database
+        :raises: :class:`ValueError` in case the given instance/database
                  doesn't exist.
         """
         return Database.connect(**conn_params)
 
     def init_connection_state(self):
+        """Initialize the state of the existing connection."""
         pass
 
     def create_cursor(self, name=None):
-        """Factory to create a Cursor.
+        """Create a new Database cursor.
+
+        :type name: str
+        :param name: Currently not used.
 
         :rtype: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
         :returns: The Cursor for this connection.
@@ -158,14 +163,19 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return self.connection.cursor()
 
     def _set_autocommit(self, autocommit):
+        """Set the Spanner transaction autocommit flag.
+
+        :type autocommit: bool
+        :param autocommit: The new value of the autocommit flag.
+        """
         with self.wrap_database_errors:
             self.connection.autocommit = autocommit
 
     def is_usable(self):
-        """Checks database to be usable.
+        """Check whether the connection is valid.
 
         :rtype: bool
-        :returns: True if database is usable, False otherwise.
+        :returns: True if the connection is open, otherwise False.
         """
         if self.connection is None:
             return False

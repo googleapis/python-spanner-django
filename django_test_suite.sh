@@ -7,11 +7,11 @@
 # exit when any command fails
 set -x pipefail
 
-# Disable buffering, so that the logs stream through.
-export PYTHONUNBUFFERED=1
-
 # Export essential environment variables for Django tests.
 export RUNNING_SPANNER_BACKEND_TESTS=1
+
+# Disable buffering, so that the logs stream through.
+export PYTHONUNBUFFERED=1
 
 pip3 install .
 pip3 uninstall -y google-cloud-spanner

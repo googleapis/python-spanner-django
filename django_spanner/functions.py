@@ -4,6 +4,8 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+"""Various math helper functions."""
+
 import math
 
 from django.db.models.expressions import Func, Value
@@ -25,17 +27,31 @@ from django.db.models.functions import (
 
 
 class IfNull(Func):
+    """Represents SQL `IFNULL` function."""
     function = "IFNULL"
     arity = 2
 
 
 def cast(self, compiler, connection, **extra_context):
-    """Cast SQL query for given parameters.
+    """A method to extend Django Cast class. Cast SQL query for given
+    parameters.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.comparison.Cast`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     # Account for a field's max_length using SUBSTR.
     max_length = getattr(self.output_field, "max_length", None)
@@ -49,12 +65,25 @@ def cast(self, compiler, connection, **extra_context):
 
 
 def chr_(self, compiler, connection, **extra_context):
-    """Return a SQL query where the code points are displayed as a string.
+    """A method to extend Django Chr class. Returns a SQL query where the code
+    points are displayed as a string.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.Chr`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler,
@@ -65,12 +94,25 @@ def chr_(self, compiler, connection, **extra_context):
 
 
 def concatpair(self, compiler, connection, **extra_context):
-    """Concatenates a SQL query into the sequence of :class:`IfNull` objects.
+    """A method to extend Django ConcatPair class. Concatenates a SQL query
+    into the sequence of :class:`IfNull` objects.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.ConcatPair`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     # Spanner's CONCAT function returns null if any of its arguments are null.
     # Prevent that by converting null arguments to an empty string.
@@ -82,12 +124,25 @@ def concatpair(self, compiler, connection, **extra_context):
 
 
 def cot(self, compiler, connection, **extra_context):
-    """Return a SQL query of calculated cotangent.
+    """A method to extend Django Cot class. Returns a SQL query of calculated
+    trigonometric cotangent function.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.math.Cot`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler,
@@ -98,12 +153,25 @@ def cot(self, compiler, connection, **extra_context):
 
 
 def degrees(self, compiler, connection, **extra_context):
-    """Return a SQL query of the angle converted to degrees.
+    """A method to extend Django Degress class. Returns a SQL query of the
+    angle converted to degrees.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.math.Degrees`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler,
@@ -114,23 +182,49 @@ def degrees(self, compiler, connection, **extra_context):
 
 
 def left_and_right(self, compiler, connection, **extra_context):
-    """
+    """A method to extend Django Left and Right classes.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.Left` or
+                :class:`~django.db.models.functions.text.Right`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.get_substr().as_spanner(compiler, connection, **extra_context)
 
 
 def log(self, compiler, connection, **extra_context):
-    """Return a SQL query of calculated logarithm.
+    """A method to extend Django Log class. Returns a SQL query of calculated
+    logarithm.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.math.Log`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     # This function is usually Log(b, x) returning the logarithm of x to the
     # base b, but on Spanner it's Log(x, b).
@@ -140,12 +234,25 @@ def log(self, compiler, connection, **extra_context):
 
 
 def ord_(self, compiler, connection, **extra_context):
-    """Return a SQL query of the expression converted to ord.
+    """A method to extend Django Ord class. Returns a SQL query of the
+    expression converted to ord.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.Ord`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler,
@@ -156,12 +263,25 @@ def ord_(self, compiler, connection, **extra_context):
 
 
 def pi(self, compiler, connection, **extra_context):
-    """Return a SQL query of PI constant.
+    """A method to extend Django Pi class. Returns a SQL query of the Pi
+    constant.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.math.Pi`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler, connection, template=str(math.pi), **extra_context
@@ -169,12 +289,25 @@ def pi(self, compiler, connection, **extra_context):
 
 
 def radians(self, compiler, connection, **extra_context):
-    """Return a SQL query of the angle converted to radians.
+    """A method to extend Django Radians class. Returns a SQL query of the
+    angle converted to radians.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.math.Radians`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler,
@@ -185,12 +318,25 @@ def radians(self, compiler, connection, **extra_context):
 
 
 def strindex(self, compiler, connection, **extra_context):
-    """Return a SQL query of the string position.
+    """A method to extend Django StrIndex class. Returns a SQL query of the
+    string position.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.StrIndex`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler, connection, function="STRPOS", **extra_context
@@ -198,12 +344,25 @@ def strindex(self, compiler, connection, **extra_context):
 
 
 def substr(self, compiler, connection, **extra_context):
-    """Return a SQL query of substring.
+    """A method to extend Django Substr class. Returns a SQL query of a
+    substring.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.functions.text.Substr`
+    :param self: the instance of the class that owns this method.
 
-    :rtype: str
-    :returns: A SQL query.
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
+
+    :rtype: tuple(str, list)
+    :returns: A tuple where `str` is a string containing ordered SQL parameters
+              to be replaced with the elements of the `list`.
     """
     return self.as_sql(
         compiler, connection, function="SUBSTR", **extra_context
@@ -211,7 +370,7 @@ def substr(self, compiler, connection, **extra_context):
 
 
 def register_functions():
-    """Register functions  in Spanner."""
+    """Registers the above methods with the corersponding Django classes."""
     Cast.as_spanner = cast
     Chr.as_spanner = chr_
     ConcatPair.as_spanner = concatpair

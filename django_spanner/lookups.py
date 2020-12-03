@@ -24,9 +24,21 @@ from django.db.models.lookups import (
 
 
 def contains(self, compiler, connection):
-    """Contains and icontains.
+    """A method to extend Django Contains and IContains classes.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.lookups.Contains` or
+                :class:`~django.db.models.lookups.IContains`
+    :param self: the instance of the class that owns this method.
+
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
 
     :rtype: tuple[str, str]
     :returns: A tuple of the SQL request and parameters.
@@ -58,11 +70,22 @@ def contains(self, compiler, connection):
 
 
 def iexact(self, compiler, connection):
-    """
-    Case-insensitive exact match. If the value provided for comparison is
-    None, it will be interpreted as an SQL NULL.
+    """A method to extend Django IExact class. Case-insensitive exact match.
+    If the value provided for comparison is None, it will be interpreted as
+    an SQL NULL.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.lookups.IExact`
+    :param self: the instance of the class that owns this method.
+
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
 
     :rtype: tuple[str, str]
     :returns: A tuple of the SQL request and parameters.
@@ -84,9 +107,21 @@ def iexact(self, compiler, connection):
 
 
 def regex(self, compiler, connection):
-    """Regex and iregex.
+    """A method to extend Django Regex and IRegex classes.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.lookups.Regex` or
+                :class:`~django.db.models.lookups.IRegex`
+    :param self: the instance of the class that owns this method.
+
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
 
     :rtype: tuple[str, str]
     :returns: A tuple of the SQL request and parameters.
@@ -112,9 +147,24 @@ def regex(self, compiler, connection):
 
 
 def startswith_endswith(self, compiler, connection):
-    """Startswith, endswith, istartswith, and iendswith lookups.
+    """A method to extend Django StartsWith, IStartsWith, EndsWith, and
+    IEndsWith classes.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.lookups.StartsWith` or
+                :class:`~django.db.models.lookups.IStartsWith` or
+                :class:`~django.db.models.lookups.EndsWith` or
+                :class:`~django.db.models.lookups.IEndsWith`
+    :param self: the instance of the class that owns this method.
+
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
 
     :rtype: tuple[str, str]
     :returns: A tuple of the SQL request and parameters.
@@ -158,9 +208,25 @@ def startswith_endswith(self, compiler, connection):
 
 
 def cast_param_to_float(self, compiler, connection):
-    """Cast parameters of the expression into the float type.
+    """A method to extend Django Exact, GreaterThan, GreaterThanOrEqual,
+    LessThan, and LessThanOrEqual classes.
 
-    TODO: describe all parameters when code will be ready.
+    :type self: :class:`~django.db.models.lookups.Exact` or
+                :class:`~django.db.models.lookups.GreaterThan` or
+                :class:`~django.db.models.lookups.GreaterThanOrEqual` or
+                :class:`~django.db.models.lookups.LessThan` or
+                :class:`~django.db.models.lookups.LessThanOrEqual`
+    :param self: the instance of the class that owns this method.
+
+    :type compiler: :class:`~django_spanner.compiler.SQLCompilerst`
+    :param compiler: The query compiler responsible for generating the query.
+                     Must have a compile method, returning a (sql, [params])
+                     tuple. Calling compiler(value) will return a quoted
+                     `value`.
+
+    :type connection: :class:`~google.cloud.spanner_dbapi.connection.Connection`
+    :param connection: The Spanner database connection used for the current
+                       query.
 
     :rtype: tuple[str, str]
     :returns: A tuple of the SQL request and float parameters.
@@ -185,7 +251,7 @@ def cast_param_to_float(self, compiler, connection):
 
 
 def register_lookups():
-    """Register a new lookup in the class."""
+    """Registers the above methods with the corersponding Django classes."""
     Contains.as_spanner = contains
     IContains.as_spanner = contains
     IExact.as_spanner = iexact

@@ -8,15 +8,16 @@ from django.db.models.expressions import OrderBy
 
 
 def order_by(self, compiler, connection, **extra_context):
-    """Order expressions in the SQL query.
+    """Order expressions in the SQL query and generate a new query using
+    Spanner-specific templates.
 
-    TODO: Make this function a part of the class.
+    TODO: In Django 3.1, this can be replaced with
+     DatabaseFeatures.supports_order_by_nulls_modifier = False.
+     Also, consider making this function a part of a class.
 
     :rtype: str
     :returns: A SQL query.
     """
-    # In Django 3.1, this can be replaced with
-    # DatabaseFeatures.supports_order_by_nulls_modifier = False.
     template = None
     if self.nulls_last:
         template = "%(expression)s IS NULL, %(expression)s %(ordering)s"
@@ -28,5 +29,5 @@ def order_by(self, compiler, connection, **extra_context):
 
 
 def register_expressions():
-    """Register ordered expressions in Spanner."""
+    """Add Spanner-specific attribute to the Django OrderBy class."""
     OrderBy.as_spanner = order_by

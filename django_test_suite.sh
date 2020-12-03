@@ -14,6 +14,9 @@ export PYTHONUNBUFFERED=1
 export RUNNING_SPANNER_BACKEND_TESTS=1
 
 pip3 install .
+pip3 uninstall -y google-cloud-spanner
+pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@autocommit_change#egg=google-cloud-spanner'
+
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"

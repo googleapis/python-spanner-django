@@ -14,7 +14,7 @@ from google.cloud.spanner_v1 import TypeCode
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
-    """This class describes database introspection."""
+    """A Spanner-specific version of Django introspection utilities."""
     data_types_reverse = {
         TypeCode.BOOL: "BooleanField",
         TypeCode.BYTES: "BinaryField",
@@ -26,16 +26,17 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
     }
 
     def get_field_type(self, data_type, description):
-        """Define the type of the field.
+        """A hook for a Spanner database to use the cursor description to
+        match a Django field type to the database column.
 
-        :type data_type: str
-        :param data_type: The type name.
+        :type data_type: int
+        :param data_type: One of Spanner's standard data types.
 
-        :type description: str
-        :param description: The description of the type.
+        :type description: :class:`~google.cloud.spanner_dbapi._helpers.ColumnInfo`
+        :param description: A description of Spanner column data type.
 
-        :rtype: Any
-        :returns: Field type.
+        :rtype: str
+        :returns: The corresponding type of Django field.
         """
         if data_type == TypeCode.STRING and description.internal_size == "MAX":
             return "TextField"
@@ -45,27 +46,27 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """Return a list of table and view names in the current database.
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
-        :param cursor: The cursor in the linked database.
+        :param cursor: A reference to a Spanner Database cursor.
 
         :rtype: list
-        :returns: A list of table and view names.
+        :returns: A list of table and view names in the current database.
         """
         # The second TableInfo field is 't' for table or 'v' for view.
         return [TableInfo(row[0], "t") for row in cursor.list_tables()]
 
     def get_table_description(self, cursor, table_name):
-        """
-        Return a description of the table with the DB-API cursor.description
+        """Return a description of the table with the DB-API cursor.description
         interface.
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
-        :param cursor: The cursor in the linked database.
+        :param cursor: A reference to a Spanner Database cursor.
 
         :type table_name: str
         :param table_name: The name of the table.
 
         :rtype: list
-        :returns: A description of the table.
+        :returns: A description of the table with the DB-API
+                  cursor.description interface.
         """
         cursor.execute(
             "SELECT * FROM %s LIMIT 1"
@@ -99,22 +100,22 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return descriptions
 
     def get_relations(self, cursor, table_name):
-        # TODO: PLEASE DO NOT USE THIS METHOD UNTIL
-        #   https://github.com/orijtech/django-spanner/issues/313
-        # is resolved so that foreign keys can be supported, as documented in:
-        #   https://github.com/orijtech/django-spanner/issues/311
-        """
-        Return a dictionary of {field_name: (field_name_other_table, other_table)}
-        representing all relationships in the table.
+        """Return a dictionary of {field_name: (field_name_other_table, other_table)}
+        representing all the relationships in the table.
+
+        TODO: DO NOT USE THIS METHOD UNTIL
+            https://github.com/orijtech/django-spanner/issues/313
+         is resolved so that foreign keys can be supported, as documented in:
+            https://github.com/orijtech/django-spanner/issues/311
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
-        :param cursor: The cursor in the linked database.
+        :param cursor: A reference to a Spanner Database cursor.
 
         :type table_name: str
-        :param table_name: The name of the table.
+        :param table_name: The name of the Cloud Spanner Database.
 
         :rtype: dict
-        :returns: A dictionary of the field descriptions.
+        :returns: A dictionary representing column relationships to other tables.
         """
         results = cursor.run_sql_in_snapshot(
             '''
@@ -143,7 +144,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """Return Primary Key column.
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
-        :param cursor: The cursor in the linked database.
+        :param cursor: A reference to a Spanner Database cursor.
 
         :type table_name: str
         :param table_name: The name of the table.
@@ -169,7 +170,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return results[0][0] if results else None
 
     def get_constraints(self, cursor, table_name):
-        """Return a dictionary the constraints in the current table.
+        """Retrieve the Spanner Table column constraints.
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
         :param cursor: The cursor in the linked database.

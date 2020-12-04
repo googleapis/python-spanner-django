@@ -12,8 +12,8 @@ export PYTHONUNBUFFERED=1
 
 # Export essential environment variables for Django tests.
 export RUNNING_SPANNER_BACKEND_TESTS=1
-pip3 install .
 
+pip3 install .
 pip3 uninstall -y google-cloud-spanner
 pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@autocommit_change#egg=google-cloud-spanner'
 

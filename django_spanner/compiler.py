@@ -101,7 +101,16 @@ class SQLInsertCompiler(BaseSQLInsertCompiler, SQLCompiler):
 
 
 class SQLDeleteCompiler(BaseSQLDeleteCompiler, SQLCompiler):
-    pass
+    def _as_sql(self, query):
+        result = [
+            "DELETE FROM %s" % self.quote_name_unless_alias(query.base_table)
+        ]
+        where, params = self.compile(query.where)
+        if where:
+            result.append("WHERE %s" % where)
+        else:
+            result.append("WHERE 1=1")
+        return " ".join(result), tuple(params)
 
 
 class SQLUpdateCompiler(BaseSQLUpdateCompiler, SQLCompiler):

@@ -101,11 +101,7 @@ class SQLInsertCompiler(BaseSQLInsertCompiler, SQLCompiler):
 
 
 class SQLDeleteCompiler(BaseSQLDeleteCompiler, SQLCompiler):
-    def as_sql(self):
-        query = super().as_sql()
-        if not self.where:
-            query += "WHERE 1=1"
-        return query
+    pass
 
 
 class SQLUpdateCompiler(BaseSQLUpdateCompiler, SQLCompiler):

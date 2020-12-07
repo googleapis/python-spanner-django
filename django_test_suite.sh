@@ -6,11 +6,11 @@
 
 set -x pipefail
 
-# Disable buffering, so that the logs stream through.
-export PYTHONUNBUFFERED=1
-
 sudo apt-get update -y
 sudo apt-get install -y libmemcached-dev
+
+# Disable buffering, so that the logs stream through.
+export PYTHONUNBUFFERED=1
 
 pip3 install .
 pip3 uninstall -y google-cloud-spanner

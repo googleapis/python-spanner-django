@@ -143,9 +143,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             return []
 
     def adapt_datefield_value(self, value):
-        """Reformat date argument into Cloud Spanner.
+        """Cast date argument into Spanner DB API DateStr format.
 
-        :type value: #TODO
+        :type value: object
         :param value: A date argument.
 
         :rtype: :class:`~google.cloud.spanner_dbapi.types.DateStr`
@@ -158,7 +158,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def adapt_datetimefield_value(self, value):
         """Reformat time argument into Cloud Spanner.
 
-        :type value: #TODO
+        :type value: object
         :param value: A time argument.
 
         :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
@@ -186,7 +186,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         """Convert value from decimal.Decimal into float, for a direct mapping
         and correct serialization with RPCs to Cloud Spanner.
 
-        :type value: #TODO
+        :type value: :class:`~google.cloud.spanner_v1.types.Numeric`
         :param value: A decimal field value.
 
         :type max_digits: int

@@ -326,17 +326,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
         "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",
         "model_formsets_regress.tests.FormsetTests.test_extraneous_query_is_not_run",
+        # os.chmod() doesn't work on Kokoro?
+        "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
+        # Tests that sometimes fail on Kokoro for unknown reasons.
+        "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
+        "migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence",
+        "servers.test_liveserverthread.LiveServerThreadTest.test_closes_connections",
     )
-    # Kokoro-specific skips.
-    if os.environ.get("KOKORO_JOB_NAME"):
-        skip_tests += (
-            # os.chmod() doesn't work on Kokoro?
-            "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
-            # Tests that sometimes fail on Kokoro for unknown reasons.
-            "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
-            "migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence",
-            "servers.test_liveserverthread.LiveServerThreadTest.test_closes_connections",
-        )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.

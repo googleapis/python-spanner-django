@@ -1,13 +1,5 @@
 .. include:: README.rst
 
-Usage Documentation
--------------------
-.. toctree::
-  :maxdepth: 1
-  :titlesonly:
-
-  django-spanner-usage
-
 API Documentation
 -----------------
 .. toctree::

@@ -21,7 +21,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # Spanner uses REGEXP_CONTAINS which is case-sensitive.
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
-    max_query_params = 950
+    max_query_params = 900
     supports_foreign_keys = False
     supports_ignore_conflicts = False
     supports_partial_indexes = False

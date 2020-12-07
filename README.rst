@@ -25,7 +25,7 @@ Installation
 ------------
 
 Using this library requires a Google Cloud Platform project with the Cloud
-Spanner API enabled. See the Spanner' Python Client `documentation
+Spanner API enabled. See the Spanner Python client `documentation
 <https://github.com/googleapis/python-spanner/#quick-start>`__ for details.
 
 The version of ``django-google-spanner`` must correspond to your version
@@ -42,7 +42,7 @@ To install from PyPI:
     pip3 install django-google-spanner
 
 
-To install from the source:
+To install from source:
 
 .. code:: shell
 
@@ -50,9 +50,6 @@ To install from the source:
     cd python-spanner-django
     pip3 install -e .
 
-
-Usage
------
 
 Configuring ``settings.py``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,7 +80,7 @@ After `installation <#Installation>`__, you'll have to update your Django
            }
        }
 
--   In order to retrieve the Cloud Spanner credentials from a JSON file, ``credentials_uri`` parameter can also be supplied in the ``OPTIONS`` field:
+-   In order to retrieve the Cloud Spanner credentials from a JSON file, the ``credentials_uri`` parameter can also be supplied in the ``OPTIONS`` field:
 
     .. code:: python
 
@@ -146,12 +143,12 @@ were created.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Spanner does not support ``ON DELETE CASCADE`` when creating foreign-key
-constraints, so these are not supported in ``django-google-spanner``.
+constraints, so this is not supported in ``django-google-spanner``.
 
 Check constraints aren't supported
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Spanner does not support ``CHECK`` constraints, so one isn't created for
+Spanner does not support ``CHECK`` constraints so one isn't created for
 `PositiveIntegerField
 <https://docs.djangoproject.com/en/stable/ref/models/fields/#positiveintegerfield>`__
 and `CheckConstraint

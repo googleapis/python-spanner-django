@@ -66,11 +66,9 @@ PASSWORD_HASHERS = [
 !
 }
 
-run_django_tests() {
-    cd $TESTS_DIR/django/tests
-    create_settings
-    echo -e "\033[32mRunning Django tests: $TEST_APPS\033[00m"
-    python3 runtests.py $TEST_APPS --verbosity=2 --noinput --settings $SETTINGS_FILE
-}
-
-run_django_tests
+cd $TESTS_DIR/django/tests
+create_settings
+SPANNER_EMULATOR_HOST=localhost:9010 python3 runtests.py admin_changelist --verbosity=2 --noinput --settings $SETTINGS_FILE &
+SPANNER_EMULATOR_HOST=localhost:9011 python3 runtests.py admin_docs --verbosity=2 --noinput --settings $SETTINGS_FILE &
+SPANNER_EMULATOR_HOST=localhost:9012 python3 runtests.py admin_filters --verbosity=2 --noinput --settings $SETTINGS_FILE &
+SPANNER_EMULATOR_HOST=localhost:9013 python3 runtests.py admin_inlines --verbosity=2 --noinput --settings $SETTINGS_FILE

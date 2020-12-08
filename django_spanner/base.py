@@ -120,7 +120,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """Retrieve the connection parameters.
 
         :rtype: dict
-        :returns: A dictionary containing the Spanner connection parametersб
+        :returns: A dictionary containing the Spanner connection parameters
                   in Django Spanner format.
         """
         return {

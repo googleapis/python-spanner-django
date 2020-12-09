@@ -131,7 +131,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def delete_model(self, model):
         """
-        Drop the model’s table in the database along with any unique constraints
+        Drop the model's table in the database along with any unique constraints
         or indexes it has.
 
         :type model: :class:`~django.db.migrations.operations.models.ModelOperation`
@@ -148,7 +148,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def add_field(self, model, field):
         """
-        Add a column (or sometimes multiple) to the model’s table to
+        Add a column (or sometimes multiple) to the model's table to
         represent the field. This will also add indexes or a unique constraint
         if the field has db_index=True or unique=True. If the field is a
         ManyToManyField without a value for through, instead of creating a
@@ -233,7 +233,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def remove_field(self, model, field):
         """
-        Remove the column(s) representing the field from the model’s table,
+        Remove the column(s) representing the field from the model's table,
         along with any unique constraints, foreign key constraints, or indexes
         caused by that field. If the field is a ManyToManyField without a
         value for through, it will remove the table created to track the
@@ -304,7 +304,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return sql, params
 
     def add_index(self, model, index):
-        """Add index to model’s table.
+        """Add index to model's table.
 
         :type model: :class:`~django.db.migrations.operations.models.ModelOperation`
         :param model: A model for creating a table.

@@ -9,11 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      emulator:
+      emulator-0:
         image: gcr.io/cloud-spanner-emulator/emulator:latest
         ports:
           - 9010:9010
-          - 9020:9020
+      emulator-1:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9011:9010
+      emulator-2:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9012:9010
+      emulator-3:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9013:9010
 
     steps:
       - name: Checkout code

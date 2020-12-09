@@ -25,6 +25,22 @@ jobs:
         image: gcr.io/cloud-spanner-emulator/emulator:latest
         ports:
           - 9013:9010
+      emulator-4:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9014:9010
+      emulator-5:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9015:9010
+      emulator-6:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9016:9010
+      emulator-7:
+        image: gcr.io/cloud-spanner-emulator/emulator:latest
+        ports:
+          - 9017:9010
 
     steps:
       - name: Checkout code

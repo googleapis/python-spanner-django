@@ -132,7 +132,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         }
 
     def get_new_connection(self, **conn_params):
-        """Creates a new connection with corresponding connection parameters.
+        """Create a new connection with corresponding connection parameters.
 
         :type conn_params: list
         :param conn_params: A List of the connection parameters for

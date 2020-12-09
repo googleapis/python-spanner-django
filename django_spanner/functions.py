@@ -27,13 +27,14 @@ from django.db.models.functions import (
 
 
 class IfNull(Func):
-    """Represents SQL `IFNULL` function."""
+    """Represent SQL `IFNULL` function."""
     function = "IFNULL"
     arity = 2
 
 
 def cast(self, compiler, connection, **extra_context):
-    """A method to extend Django Cast class. Cast SQL query for given
+    """
+    A method to extend Django Cast class. Cast SQL query for given
     parameters.
 
     :type self: :class:`~django.db.models.functions.comparison.Cast`
@@ -65,7 +66,8 @@ def cast(self, compiler, connection, **extra_context):
 
 
 def chr_(self, compiler, connection, **extra_context):
-    """A method to extend Django Chr class. Returns a SQL query where the code
+    """
+    A method to extend Django Chr class. Returns a SQL query where the code
     points are displayed as a string.
 
     :type self: :class:`~django.db.models.functions.text.Chr`
@@ -94,7 +96,8 @@ def chr_(self, compiler, connection, **extra_context):
 
 
 def concatpair(self, compiler, connection, **extra_context):
-    """A method to extend Django ConcatPair class. Concatenates a SQL query
+    """
+    A method to extend Django ConcatPair class. Concatenates a SQL query
     into the sequence of :class:`IfNull` objects.
 
     :type self: :class:`~django.db.models.functions.text.ConcatPair`
@@ -124,7 +127,8 @@ def concatpair(self, compiler, connection, **extra_context):
 
 
 def cot(self, compiler, connection, **extra_context):
-    """A method to extend Django Cot class. Returns a SQL query of calculated
+    """
+    A method to extend Django Cot class. Returns a SQL query of calculated
     trigonometric cotangent function.
 
     :type self: :class:`~django.db.models.functions.math.Cot`
@@ -153,7 +157,8 @@ def cot(self, compiler, connection, **extra_context):
 
 
 def degrees(self, compiler, connection, **extra_context):
-    """A method to extend Django Degress class. Returns a SQL query of the
+    """
+    A method to extend Django Degress class. Returns a SQL query of the
     angle converted to degrees.
 
     :type self: :class:`~django.db.models.functions.math.Degrees`
@@ -206,7 +211,8 @@ def left_and_right(self, compiler, connection, **extra_context):
 
 
 def log(self, compiler, connection, **extra_context):
-    """A method to extend Django Log class. Returns a SQL query of calculated
+    """
+    A method to extend Django Log class. Returns a SQL query of calculated
     logarithm.
 
     :type self: :class:`~django.db.models.functions.math.Log`
@@ -234,7 +240,8 @@ def log(self, compiler, connection, **extra_context):
 
 
 def ord_(self, compiler, connection, **extra_context):
-    """A method to extend Django Ord class. Returns a SQL query of the
+    """
+    A method to extend Django Ord class. Returns a SQL query of the
     expression converted to ord.
 
     :type self: :class:`~django.db.models.functions.text.Ord`
@@ -263,7 +270,8 @@ def ord_(self, compiler, connection, **extra_context):
 
 
 def pi(self, compiler, connection, **extra_context):
-    """A method to extend Django Pi class. Returns a SQL query of the Pi
+    """
+    A method to extend Django Pi class. Returns a SQL query of the Pi
     constant.
 
     :type self: :class:`~django.db.models.functions.math.Pi`
@@ -289,7 +297,8 @@ def pi(self, compiler, connection, **extra_context):
 
 
 def radians(self, compiler, connection, **extra_context):
-    """A method to extend Django Radians class. Returns a SQL query of the
+    """
+    A method to extend Django Radians class. Returns a SQL query of the
     angle converted to radians.
 
     :type self: :class:`~django.db.models.functions.math.Radians`
@@ -318,7 +327,8 @@ def radians(self, compiler, connection, **extra_context):
 
 
 def strindex(self, compiler, connection, **extra_context):
-    """A method to extend Django StrIndex class. Returns a SQL query of the
+    """
+    A method to extend Django StrIndex class. Returns a SQL query of the
     string position.
 
     :type self: :class:`~django.db.models.functions.text.StrIndex`
@@ -344,7 +354,8 @@ def strindex(self, compiler, connection, **extra_context):
 
 
 def substr(self, compiler, connection, **extra_context):
-    """A method to extend Django Substr class. Returns a SQL query of a
+    """
+    A method to extend Django Substr class. Returns a SQL query of a
     substring.
 
     :type self: :class:`~django.db.models.functions.text.Substr`
@@ -370,7 +381,7 @@ def substr(self, compiler, connection, **extra_context):
 
 
 def register_functions():
-    """Registers the above methods with the corersponding Django classes."""
+    """Register the above methods with the corersponding Django classes."""
     Cast.as_spanner = cast
     Chr.as_spanner = chr_
     ConcatPair.as_spanner = concatpair

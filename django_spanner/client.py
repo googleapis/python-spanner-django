@@ -9,10 +9,10 @@ from google.cloud.spanner_dbapi.exceptions import NotSupportedError
 
 
 class DatabaseClient(BaseDatabaseClient):
-    """Wraps the Django base class."""
+    """Wrap the Django base class."""
 
     def runshell(self, parameters):
-        """Overrides the base class method.
+        """Override the base class method.
 
         TODO: Consider actual implementation of this method.
 

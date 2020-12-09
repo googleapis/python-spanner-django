@@ -14,7 +14,8 @@ from django.utils.module_loading import import_string
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-    """Spanner-specific wrapper for Django class encapsulating methods for
+    """
+    Spanner-specific wrapper for Django class encapsulating methods for
     creation and destruction of the underlying test database.
     """
 
@@ -34,7 +35,7 @@ class DatabaseCreation(BaseDatabaseCreation):
                 )
 
     def create_test_db(self, *args, **kwargs):
-        """Creates a test database.
+        """Create a test database.
 
         :rtype: str
         :returns: The name of the newly created test Database.
@@ -46,8 +47,9 @@ class DatabaseCreation(BaseDatabaseCreation):
         super().create_test_db(*args, **kwargs)
 
     def _create_test_db(self, verbosity, autoclobber, keepdb=False):
-        """Creates dummy test tables. This method is mostly copied from the
-        base class but removes usage of _nodb_connection since Spanner doesn't
+        """
+        Create dummy test tables. This method is mostly copied from the
+        base class but removes usage of `_nodb_connection` since Spanner doesn't
         have or need one.
         """
         # Mostly copied from the base class but removes usage of

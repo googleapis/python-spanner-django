@@ -51,7 +51,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return 128
 
     def quote_name(self, name):
-        """Returns a quoted version of the given table or column name. Also,
+        """
+        Return a quoted version of the given table or column name. Also,
         applies backticks to the name that either contain '-' or ' ', or is a
         Cloud Spanner's reserved keyword.
 
@@ -75,7 +76,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return escape_name(name)
 
     def bulk_batch_size(self, fields, objs):
-        """Overrides the base class method. Returns the maximum number of the
+        """
+        Override the base class method. Returns the maximum number of the
         query parameters.
 
         :type fields: list
@@ -90,7 +92,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return self.connection.features.max_query_params
 
     def bulk_insert_sql(self, fields, placeholder_rows):
-        """A helper method that stitches multiple values into a single SQL
+        """
+        A helper method that stitches multiple values into a single SQL
         record.
 
         :type fields: list
@@ -107,7 +110,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "VALUES " + values_sql
 
     def sql_flush(self, style, tables, reset_sequences=False, allow_cascade=False):
-        """Overrides the base class method. Returns a list of SQL statements
+        """
+        Override the base class method. Returns a list of SQL statements
         required to remove all data from the given database tables (without
         actually removing the tables themselves).
 
@@ -183,7 +187,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     def adapt_decimalfield_value(
         self, value, max_digits=None, decimal_places=None
     ):
-        """Convert value from decimal.Decimal into float, for a direct mapping
+        """
+        Convert value from decimal.Decimal into float, for a direct mapping
         and correct serialization with RPCs to Cloud Spanner.
 
         :type value: :class:`~google.cloud.spanner_v1.types.Numeric`
@@ -205,7 +210,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def adapt_timefield_value(self, value):
         """
-        Transforms a time value to an object compatible with what is expected
+        Transform a time value to an object compatible with what is expected
         by the backend driver for time columns.
 
         :type value: #TODO

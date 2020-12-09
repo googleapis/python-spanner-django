@@ -8,7 +8,8 @@ from django.db.models.expressions import OrderBy
 
 
 def order_by(self, compiler, connection, **extra_context):
-    """Order expressions in the SQL query and generate a new query using
+    """
+    Order expressions in the SQL query and generate a new query using
     Spanner-specific templates.
 
     :rtype: str

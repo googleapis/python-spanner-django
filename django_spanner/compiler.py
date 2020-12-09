@@ -17,12 +17,13 @@ from django_spanner.utils import add_dummy_where
 
 
 class SQLCompiler(BaseSQLCompiler):
-    """A variation of the Django SQL compiler, adjusted for Spanner-specific
+    """
+    A variation of the Django SQL compiler, adjusted for Spanner-specific
     functionality.
     """
 
     def get_combinator_sql(self, combinator, all):
-        """Overrides the native Django method.
+        """Override the native Django method.
 
         Copied from the base class except for:
             combinator_sql += ' ALL' if all else ' DISTINCT'

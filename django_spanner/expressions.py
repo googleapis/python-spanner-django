@@ -11,13 +11,12 @@ def order_by(self, compiler, connection, **extra_context):
     """Order expressions in the SQL query and generate a new query using
     Spanner-specific templates.
 
-    TODO: In Django 3.1, this can be replaced with
-     DatabaseFeatures.supports_order_by_nulls_modifier = False.
-     Also, consider making this function a part of a class.
-
     :rtype: str
     :returns: A SQL query.
     """
+    # TODO: In Django 3.1, this can be replaced with
+    #  DatabaseFeatures.supports_order_by_nulls_modifier = False.
+    #  Also, consider making this a class method.
     template = None
     if self.nulls_last:
         template = "%(expression)s IS NULL, %(expression)s %(ordering)s"

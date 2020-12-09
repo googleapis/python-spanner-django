@@ -27,7 +27,10 @@ sudo apt-get install -y libffi-dev libjpeg-dev zlib1g-devel
 
 cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 
-python3 create_test_instance.py
+SPANNER_EMULATOR_HOST=localhost:9010 python3 create_test_instance.py
+SPANNER_EMULATOR_HOST=localhost:9011 python3 create_test_instance.py
+SPANNER_EMULATOR_HOST=localhost:9012 python3 create_test_instance.py
+SPANNER_EMULATOR_HOST=localhost:9013 python3 create_test_instance.py
 
 # If no SPANNER_TEST_DB is set, generate a unique one
 # so that we can have multiple tests running without
@@ -68,6 +71,7 @@ PASSWORD_HASHERS = [
 
 cd $TESTS_DIR/django/tests
 create_settings
+
 SPANNER_EMULATOR_HOST=localhost:9010 python3 runtests.py modeladmin model_fields model_forms model_formsets model_formsets_regress model_indexes model_inheritance model_inheritance_regress model_options model_package model_regress multiple_database mutually_referential nested_foreign_keys null_fk null_fk_ordering null_queries one_to_one ordering order_with_respect_to or_lookups prefetch_related proxy_model_inheritance proxy_models queries queryset_pickle raw_query redirects_tests reserved_names reverse_lookup save_delete_hooks schema --verbosity=3 --noinput --settings $SETTINGS_FILE &
 SPANNER_EMULATOR_HOST=localhost:9011 python3 runtests.py migration_test_data_persistence max_lengths migrate_signals migrations select_for_update select_related select_related_onetoone select_related_regress serializers servers sessions_tests signals sitemaps_tests sites_framework sites_tests string_lookup syndication_tests test_client test_client_regress test_runner test_utils timezones transaction_hooks transactions unmanaged_models update update_only_fields validation admin_changelist admin_docs view_tests many_to_many many_to_one many_to_one_null --verbosity=3 --noinput --settings $SETTINGS_FILE &
 SPANNER_EMULATOR_HOST=localhost:9012 python3 runtests.py admin_filters admin_inlines admin_ordering admin_utils admin_views aggregation aggregation_regress annotations auth_tests backends basic bulk_create cache choices constraints contenttypes_tests custom_columns custom_lookups custom_managers custom_methods custom_pk datatypes dates datetimes db_functions defer defer_regress delete delete_regress distinct_on_fields empty expressions expressions_case expressions_window extra_regress field_defaults file_storage file_uploads filtered_relation --verbosity=3 --noinput --settings $SETTINGS_FILE &

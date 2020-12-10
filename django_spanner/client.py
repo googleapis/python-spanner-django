@@ -12,13 +12,4 @@ class DatabaseClient(BaseDatabaseClient):
     """Wrap the Django base class."""
 
     def runshell(self, parameters):
-        """Override the base class method.
-
-        TODO: Consider actual implementation of this method.
-
-        :type parameters: list
-        :param parameters: Currently not used.
-
-        :raises: :class:`~google.cloud.spanner_dbapi.exceptions.NotSupportedError`
-        """
         raise NotSupportedError("This method is not supported.")

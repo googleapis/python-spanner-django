@@ -38,12 +38,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         "week_day": "dayofweek",
     }
 
+    # TODO: Consider changing the hardcoded output to a linked value.
     def max_name_length(self):
         """Get the maximum length of Spanner table and column names.
 
         See also: https://cloud.google.com/spanner/quotas#tables
-
-        TODO: Consider changing the hardcoded output to a linked value.
 
         :rtype: int
         :returns: Maximum length of the name of the table.
@@ -252,13 +251,14 @@ class DatabaseOperations(BaseDatabaseOperations):
             converters.append(self.convert_uuidfield_value)
         return converters
 
+    # TODO: here and below, remove unused expression and connection parameters
+    # or include them to the code.
     def convert_binaryfield_value(self, value, expression, connection):
         """Convert a binary field to Cloud Spanner.
 
         :type value: #TODO
         :param value: A binary field value.
 
-        #TODO remove unused expression and connection parameters or include them to the code.
 
         :rtype: b64decode
         :returns: A base64 encoded bytes.
@@ -273,8 +273,6 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type value: #TODO
         :param value: A binary field value.
-
-        #TODO remove unused expression and connection parameters or include them to the code.
 
         :rtype: datetime
         :returns: A DateTime in the format for Cloud Spanner.
@@ -307,8 +305,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type value: #TODO
         :param value: A decimal field.
 
-        #TODO remove unused expression and connection parameters or include them to the code.
-
         :rtype: :class:`Decimal`
         :returns: A decimal field in the Cloud Spanner format.
         """
@@ -323,8 +319,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type value: #TODO
         :param value: A time field.
 
-        #TODO remove unused expression and connection parameters or include them to the code.
-
         :rtype: :class:`time`
         :returns: A time field in the Cloud Spanner format.
         """
@@ -338,8 +332,6 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type value: #TODO
         :param value: A UUID field.
-
-        #TODO remove unused expression and connection parameters or include them to the code.
 
         :rtype: :class:`UUID`
         :returns: A UUID field in the Cloud Spanner format.

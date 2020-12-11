@@ -1102,8 +1102,27 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "expressions.tests.ValueTests.test_update_TimeField_using_Value",  # noqa
             "expressions.tests.ValueTests.test_update_UUIDField_using_Value",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_loaddata_error_message",  # noqa
+            "fixtures.tests.FixtureTransactionTests.test_format_discovery",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",  # noqa
+            "flatpages_tests.test_csrf.FlatpageCSRFTests.test_view_authenticated_flatpage",  # noqa
+            "flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_fallback_authenticated_flatpage",  # noqa
+            "flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_view_authenticated_flatpage",  # noqa
+            "flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_tag_for_user",  # noqa
+            "flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_with_prefix_for_user",  # noqa
+            "flatpages_tests.test_views.FlatpageViewTests.test_view_authenticated_flatpage",  # noqa
+            "generic_inline_admin.tests.GenericAdminViewTest.test_basic_add_GET",  # noqa
+            "generic_inline_admin.tests.GenericAdminViewTest.test_basic_add_POST",  # noqa
+            "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_GET",  # noqa
+            "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_POST",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.testMaxNumParam ",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_extra_param",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_max_num",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_min_num",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_min_num_param",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_no_param",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminWithUniqueTogetherTest.test_add",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminWithUniqueTogetherTest.test_delete",  # noqa
             "get_or_create.tests.GetOrCreateTests.test_get_or_create_invalid_params",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_get_or_create_raises_IntegrityError_plus_traceback",  # noqa

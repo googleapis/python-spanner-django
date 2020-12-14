@@ -21,6 +21,9 @@ client = Client(
     project=os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
 )
 
-instance = client.instance("google-cloud-django-backend-tests")
+instance = client.instance(
+    "google-cloud-django-backend-tests-"
+    + os.environ["SPANNER_EMULATOR_HOST"][-1]
+)
 created_op = instance.create()
 created_op.result(30)  # block until completion

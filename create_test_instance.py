@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import uuid
 
 from google.cloud.spanner_v1 import Client
 
@@ -21,6 +22,6 @@ client = Client(
     project=os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
 )
 
-instance = client.instance("google-cloud-django-backend-tests")
+instance = client.instance("django-backend-tests-" + uuid.uuid4().hex[:10])
 created_op = instance.create()
 created_op.result(30)  # block until completion

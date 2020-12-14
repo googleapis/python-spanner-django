@@ -1116,6 +1116,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_GET",  # noqa
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_POST",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.testMaxNumParam",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_extra",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_extra_param",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_max_num",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_min_num",  # noqa

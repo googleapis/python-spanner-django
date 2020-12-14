@@ -43,7 +43,7 @@ SPANNER_EMULATOR_HOST=localhost:9017 python3 create_test_instance.py
 TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a") + time.time_ns() % 26)+os.urandom(10).hex())')}
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
 TEST_APPS=${DJANGO_TEST_APPS:-basic}
-INSTANCE=${SPANNER_TEST_INSTANCE:-django-tests}
+INSTANCE=${SPANNER_TEST_INSTANCE}
 PROJECT=${PROJECT_ID}
 SPANNER_EMULATOR_HOST=${SPANNER_EMULATOR_HOST}
 GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
@@ -62,7 +62,7 @@ DATABASES = {
    'other': {
        'ENGINE': 'django_spanner',
        'PROJECT': "$PROJECT",
-       'INSTANCE': "$INSTANCE",
+       'INSTANCE': "$SPANNER_TEST_INSTANCE",
        'NAME': "$TEST_DBNAME_OTHER",
    },
 }

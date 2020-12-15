@@ -212,7 +212,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         Transform a time value to an object compatible with what is expected
         by the backend driver for time columns.
 
-        :type value: #TODO
+        :type value: `datetime.datetime`
         :param value: A time field value.
 
         :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
@@ -231,11 +231,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def get_db_converters(self, expression):
         """Get a list of functions needed to convert field data.
 
-        :type expression: #TODO finish class in functions.py
+        :type expression: `django.db.models.expressions.Expression`
         :param expression: An expression to convert.
 
         :rtype: list
-        :returns: A list of functions.
+        :returns: Converter functions to apply to Spanner field values.
         """
         converters = super().get_db_converters(expression)
         internal_type = expression.output_field.get_internal_type()
@@ -251,16 +251,13 @@ class DatabaseOperations(BaseDatabaseOperations):
             converters.append(self.convert_uuidfield_value)
         return converters
 
-    # TODO: here and below, remove unused expression and connection parameters
-    # or include them to the code.
     def convert_binaryfield_value(self, value, expression, connection):
-        """Convert a binary field to Cloud Spanner.
+        """Convert Spanner BinaryField value for Django.
 
-        :type value: #TODO
-        :param value: A binary field value.
+        :type value: bytes
+        :param value: A base64-encoded binary field value.
 
-
-        :rtype: b64decode
+        :rtype: bytes
         :returns: A base64 encoded bytes.
         """
         if value is None:
@@ -269,13 +266,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         return b64decode(value)
 
     def convert_datetimefield_value(self, value, expression, connection):
-        """Convert a date and time field to Cloud Spanner.
+        """Convert Spanner DateTimeField value for Django.
 
-        :type value: #TODO
-        :param value: A binary field value.
+        :type value: `DatetimeWithNanoseconds`
+        :param value: A datetime field value.
 
         :rtype: datetime
-        :returns: A DateTime in the format for Cloud Spanner.
+        :returns: A TZ-aware datetime.
         """
         if value is None:
             return value
@@ -300,13 +297,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         )
 
     def convert_decimalfield_value(self, value, expression, connection):
-        """Convert a decimal field to Cloud Spanner.
+        """Convert Spanner DecimalField value for Django.
 
-        :type value: #TODO
+        :type value: float
         :param value: A decimal field.
 
         :rtype: :class:`Decimal`
-        :returns: A decimal field in the Cloud Spanner format.
+        :returns: A converted decimal field.
         """
         if value is None:
             return value
@@ -314,13 +311,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         return Decimal(str(value))
 
     def convert_timefield_value(self, value, expression, connection):
-        """Convert a time field to Cloud Spanner.
+        """Convert Spanner TimeField value for Django.
 
-        :type value: #TODO
-        :param value: A time field.
+        :type value: `DatetimeWithNanoseconds`
+        :param value: A datetime/time field.
 
-        :rtype: :class:`time`
-        :returns: A time field in the Cloud Spanner format.
+        :rtype: :class:`datetime.time`
+        :returns: A converted datetime.
         """
         if value is None:
             return value
@@ -330,11 +327,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def convert_uuidfield_value(self, value, expression, connection):
         """Convert a UUID field to Cloud Spanner.
 
-        :type value: #TODO
-        :param value: A UUID field.
+        :type value: str
+        :param value: A UUID-valued str.
 
-        :rtype: :class:`UUID`
-        :returns: A UUID field in the Cloud Spanner format.
+        :rtype: :class:`uuid.UUID`
+        :returns: A converted UUID.
         """
         if value is not None:
             value = UUID(value)

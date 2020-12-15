@@ -23,7 +23,7 @@ BLACK_PATHS = [
 ]
 
 
-@nox.session(python="3.8")
+@nox.session(python="3.9")
 def lint(session):
     """Run linters.
 
@@ -35,7 +35,7 @@ def lint(session):
     session.run("flake8", "django_spanner", "tests")
 
 
-@nox.session(python="3.8")
+@nox.session(python="3.9")
 def blacken(session):
     """Run black.
 
@@ -49,7 +49,7 @@ def blacken(session):
     session.run("black", *BLACK_PATHS)
 
 
-@nox.session(python="3.8")
+@nox.session(python="3.9")
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
     session.install("docutils", "pygments")
@@ -69,7 +69,7 @@ def default(session):
     )
 
 
-@nox.session(python="3.8")
+@nox.session(python="3.9")
 def docs(session):
     """Build the docs for this library."""
 

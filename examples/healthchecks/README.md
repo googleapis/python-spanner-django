@@ -61,7 +61,20 @@ After we have a Cloud Spanner database created, we'll need a few variables:
 * Instance name
 * Database name aka DisplayName
 
-Once in, please edit the file `hc/local_settings.py` to:
+_NOTE:_ Actually, healthchecks' `local_settings.py` overrides `settings.py
+` and needs to be imported explicitly. To do that add such code at the very
+ end of your `settings.py`:
+ 
+```python
+try:
+    from local_settings import *
+except ImportError:
+    pass
+```
+
+After that, please edit the file `hc/local_settings.py` in healthckecks
+ folder to: 
+
 a) Add `django_spanner` as the first entry to `INSTALLED_APPS`
 ```python
 INSTALLED_APPS = [

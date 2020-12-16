@@ -35,7 +35,6 @@ python3 create_test_instance.py
 # cleanup the created database.
 TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a") + time.time_ns() % 26)+os.urandom(10).hex())')}
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
-TEST_APPS=${DJANGO_TEST_APPS:-basic}
 INSTANCE=${SPANNER_TEST_INSTANCE:-django-tests}
 PROJECT=${PROJECT_ID}
 SPANNER_EMULATOR_HOST=${SPANNER_EMULATOR_HOST}

@@ -231,8 +231,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     def get_db_converters(self, expression):
         """Get a list of functions needed to convert field data.
 
-        :type expression: `django.db.models.expressions.Expression`
-        :param expression: An expression to convert.
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression to convert.
 
         :rtype: list
         :returns: Converter functions to apply to Spanner field values.
@@ -257,6 +257,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type value: bytes
         :param value: A base64-encoded binary field value.
 
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
+
         :rtype: bytes
         :returns: A base64 encoded bytes.
         """
@@ -270,6 +276,12 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type value: `DatetimeWithNanoseconds`
         :param value: A datetime field value.
+
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
 
         :rtype: datetime
         :returns: A TZ-aware datetime.
@@ -302,6 +314,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type value: float
         :param value: A decimal field.
 
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
+
         :rtype: :class:`Decimal`
         :returns: A converted decimal field.
         """
@@ -313,8 +331,14 @@ class DatabaseOperations(BaseDatabaseOperations):
     def convert_timefield_value(self, value, expression, connection):
         """Convert Spanner TimeField value for Django.
 
-        :type value: `DatetimeWithNanoseconds`
+        :type value: :class:`~google.api_core.datetime_helpers.DatetimeWithNanoseconds`
         :param value: A datetime/time field.
+
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
 
         :rtype: :class:`datetime.time`
         :returns: A converted datetime.
@@ -329,6 +353,12 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type value: str
         :param value: A UUID-valued str.
+
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
 
         :rtype: :class:`uuid.UUID`
         :returns: A converted UUID.

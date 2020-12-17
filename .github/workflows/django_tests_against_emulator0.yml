@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: modeladmin model_fields model_forms model_formsets model_formsets_regress model_indexes model_inheritance model_inheritance_regress model_options model_package model_regress multiple_database
+          TEST_APPS: modeladmin model_fields model_forms model_formsets model_formsets_regress model_indexes

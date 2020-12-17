@@ -3,7 +3,7 @@ on:
     branches:
       - master
   pull_request:
-name: django-tests4
+name: django-tests10
 jobs:
   system-tests:
     runs-on: ubuntu-latest
@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: admin_filters admin_inlines admin_ordering admin_utils admin_views aggregation
+          TEST_APPS: select_related select_related_onetoone select_related_regress serializers servers sessions_tests signals

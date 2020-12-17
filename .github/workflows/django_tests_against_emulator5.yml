@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: custom_columns custom_lookups custom_managers custom_methods custom_pk datatypes dates datetimes db_functions defer defer_regress delete delete_regress distinct_on_fields empty expressions expressions_case expressions_window extra_regress field_defaults file_storage file_uploads filtered_relation
+          TEST_APPS: custom_columns custom_lookups custom_managers custom_methods custom_pk datatypes dates datetimes db_functions defer defer_regress

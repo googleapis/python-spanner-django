@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: sitemaps_tests sites_framework sites_tests string_lookup syndication_tests test_client test_client_regress test_runner test_utils timezones transaction_hooks transactions unmanaged_models update update_only_fields validation admin_changelist admin_docs view_tests many_to_many many_to_one many_to_one_null
+          TEST_APPS: sitemaps_tests sites_framework sites_tests string_lookup syndication_tests test_client test_client_regress test_runner test_utils timezones

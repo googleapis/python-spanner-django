@@ -6,8 +6,10 @@
 
 import os
 
+from google.cloud import spanner
+
 from django.db.backends.base.base import BaseDatabaseWrapper
-from google.cloud import spanner_dbapi as Database, spanner_v1 as spanner
+from google.cloud import spanner_dbapi
 
 from .client import DatabaseClient
 from .creation import DatabaseCreation
@@ -83,6 +85,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # special characters for REGEXP_CONTAINS operators (e.g. \, *, _) must be
     # escaped on database side.
     pattern_esc = r'REPLACE(REPLACE(REPLACE({}, "\\", "\\\\"), "%%", r"\%%"), "_", r"\_")'
+
     # These are all no-ops in favor of using REGEXP_CONTAINS in the customized
     # lookups.
     pattern_ops = {
@@ -94,7 +97,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "iendswith": "",
     }
 
-    Database = Database
+    Database = spanner_dbapi
     SchemaEditorClass = DatabaseSchemaEditor
     creation_class = DatabaseCreation
     features_class = DatabaseFeatures
@@ -105,6 +108,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @property
     def instance(self):
+        """Reference to a Cloud Spanner Instance containing the Database.
+
+        :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
+        :returns: A new instance owned by the existing Spanner Client.
+        """
         return spanner.Client(
             project=os.environ["GOOGLE_CLOUD_PROJECT"]
         ).instance(self.settings_dict["INSTANCE"])
@@ -116,6 +124,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         )
 
     def get_connection_params(self):
+        """Retrieve the connection parameters.
+
+        :rtype: dict
+        :returns: A dictionary containing the Spanner connection parameters
+                  in Django Spanner format.
+        """
         return {
             "project": os.environ["GOOGLE_CLOUD_PROJECT"],
             "instance_id": self.settings_dict["INSTANCE"],
@@ -125,25 +139,60 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         }
 
     def get_new_connection(self, conn_params):
-        return Database.connect(**conn_params)
+        """Create a new connection with corresponding connection parameters.
+
+        :type conn_params: list
+        :param conn_params: A List of the connection parameters for
+                            :class:`~google.cloud.spanner_dbapi.connection.Connection`
+
+        :rtype: :class:`google.cloud.spanner_dbapi.connection.Connection`
+        :returns: A new Spanner DB API Connection object associated with the
+                  given Google Cloud Spanner resource.
+
+        :raises: :class:`ValueError` in case the given instance/database
+                 doesn't exist.
+        """
+        return self.Database.connect(**conn_params)
 
     def init_connection_state(self):
-        pass
+        """Initialize the state of the existing connection."""
+        self.connection.close()
+        database = self.connection.database
+        self.connection.__init__(self.instance, database)
 
     def create_cursor(self, name=None):
+        """Create a new Database cursor.
+
+        :type name: str
+        :param name: Currently not used.
+
+        :rtype: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
+        :returns: The Cursor for this connection.
+        """
         return self.connection.cursor()
 
     def _set_autocommit(self, autocommit):
+        """Set the Spanner transaction autocommit flag.
+
+        :type autocommit: bool
+        :param autocommit: The new value of the autocommit flag.
+        """
         with self.wrap_database_errors:
             self.connection.autocommit = autocommit
 
     def is_usable(self):
-        if self.connection is None:
+        """Check whether the connection is valid.
+
+        :rtype: bool
+        :returns: True if the connection is open, otherwise False.
+        """
+        if self.connection is None or self.connection.is_closed:
             return False
+
         try:
             # Use a cursor directly, bypassing Django's utilities.
             self.connection.cursor().execute("SELECT 1")
-        except Database.Error:
+        except self.Database.Error:
             return False
-        else:
-            return True
+
+        return True

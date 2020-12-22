@@ -77,10 +77,10 @@ After that, please edit the file `hc/local_settings.py` in healthckecks
 
 a) Add `django_spanner` as the first entry to `INSTALLED_APPS`
 ```python
-INSTALLED_APPS = [
-    'django_spanner',  # Must be listed first.
+INSTALLED_APPS = (
+    "django_spanner",  # Must be listed first.
     ...
-]
+)
 ```
 **The rest of the apps MUST be copied from hc/settings.py**
 
@@ -88,33 +88,30 @@ INSTALLED_APPS = [
 b) Edit `DATABASES` into the following:
 ```python
 DATABASES = {
-    'default': {
-        'ENGINE': 'django_spanner',
-        'PROJECT': PROJECT_ID,
-        'INSTANCE': SPANNER_INSTANCE,
-        'NAME': SPANNER_DATABASE_NAME,
+    "default": {
+        "ENGINE": "django_spanner",
+        "PROJECT": PROJECT_ID,
+        "INSTANCE": SPANNER_INSTANCE,
+        "NAME": SPANNER_DATABASE_NAME,
     }
 }
 ```
 
-and for example here is a filled in database where:
-
-* `PROJECT_ID`: spanner-appdev
-* INSTANCE: instance
-* NAME: `healthchecks_db`
-
-which when filled out, will look like this
+For example here is a filled in database where:
 
 ```python
 DATABASES = {
-    'default': {
-        'ENGINE': 'django_spanner',
-        'PROJECT': 'spanner-appdev',
-        'INSTANCE': 'instance',
-        'NAME': 'healthchecks_db',
+    "default": {
+        "ENGINE": "django_spanner",
+        "PROJECT": "project_name",
+        "INSTANCE": "instance_name",
+        "NAME": "healthchecks_db",
     }
 }
 ```
+
+where: `PROJECT` is a project ID, `INSTANCE` is an instance ID and `NAME` is
+ a database name in this instance.
 
 ### Run the server
 With those steps out of the way, and having successfully setup both healthchecks and properly installed django-spanner, we are now ready to get started

@@ -15,8 +15,8 @@ export PYTHONUNBUFFERED=1
 pip3 install .
 pip3 uninstall -y google-cloud-spanner
 pip3 uninstall -y django-google-spanner
-pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@autocommit_change#egg=google-cloud-spanner'
 pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@eight_workflows#egg=django-google-spanner'
+pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@autocommit_change#egg=google-cloud-spanner'
 
 export DJANGO_TESTS_DIR="django_tests_dir"
 mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django

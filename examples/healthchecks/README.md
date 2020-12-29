@@ -2,6 +2,8 @@
 
 This example shows how to use django-spanner for Cloud Spanner as a backend database for [https://healthchecks.io](https://healthchecks.io)
 
+*NOTE:* This README is suitable for Django version=2.2.
+
 ### Table of contents
 - [Install healthchecks](#install-healthchecks)
 - [Clone django-spanner](#clone-django-spanner)

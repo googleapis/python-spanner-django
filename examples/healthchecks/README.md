@@ -2,7 +2,7 @@
 
 This example shows how to use django-spanner for Cloud Spanner as a backend database for [https://healthchecks.io](https://healthchecks.io)
 
-*NOTE:* This README is suitable for Django version=2.2.
+*NOTE:* This README is suitable for Django version=2.2.python3 manage.py runserver
 
 ### Table of contents
 - [Install healthchecks](#install-healthchecks)
@@ -117,6 +117,9 @@ where: `PROJECT` is a project ID, `INSTANCE` is an instance ID and `NAME` is
 
 ### Run the server
 With those steps out of the way, and having successfully setup both healthchecks and properly installed django-spanner, we are now ready to get started
+
+*NOTE:* Before running server specify necessary credentials
+ (`GOOGLE_CLOUD_PROJECT`, `GOOGLE_APPLICATION_CREDENTIALS`). 
 
 ```shell
 (hc-venv) $ python3 manage.py runserver

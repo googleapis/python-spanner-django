@@ -58,8 +58,8 @@ DATABASES = {
 and for example here is a filled in database where:
 
 * `PROJECT_ID`: spanner-appdev
-* INSTANCE: instance
-* NAME: `healthchecks_db`
+* `INSTANCE`: instance
+* `NAME`: healthchecks_db
 
 which when filled out, will look like this
 
@@ -73,9 +73,11 @@ DATABASES = {
     }
 }
 ```
-### Configure your environment variables
+
+### Set Google Application Default Credentials to the environment
+You'll need to download a service account JSON keyfile and point to it using an environment variable: 
 ```shell
-Please ensure that GOOGLE_APPLICATION_CREDENTIALS is configured in your environment
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
 ```
 
 ### Apply the migrations

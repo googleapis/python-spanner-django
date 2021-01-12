@@ -12,6 +12,7 @@ from django.db.utils import InterfaceError
 
 class DatabaseFeatures(BaseDatabaseFeatures):
     """An extension to Django database feature descriptor."""
+
     can_introspect_big_integer_field = False
     can_introspect_duration_field = False
     can_introspect_foreign_keys = False
@@ -558,6 +559,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "aggregation_regress.tests.SelfReferentialFKTests.test_ticket_24748",  # noqa
             "annotations.tests.NonAggregateAnnotationTestCase.test_custom_functions",  # noqa
             "annotations.tests.NonAggregateAnnotationTestCase.test_custom_functions_can_ref_other_functions",  # noqa
+            "annotations.tests.NonAggregateAnnotationTestCase.test_filter_decimal_annotation",  # noqa
             "auth_tests.test_auth_backends.AllowAllUsersModelBackendTest.test_authenticate",  # noqa
             "auth_tests.test_auth_backends.AllowAllUsersModelBackendTest.test_get_user",  # noqa
             "auth_tests.test_auth_backends.AuthenticateTests.test_skips_backends_without_arguments",  # noqa

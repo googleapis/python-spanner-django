@@ -75,7 +75,7 @@ DATABASES = {
 ```
 
 ### Set Google Application Default Credentials to the environment
-You'll need to download a service account JSON keyfile and point to it using an environment variable: 
+You'll need to download a service account JSON key file and point to it using an environment variable: 
 ```shell
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
 ```
@@ -120,9 +120,30 @@ After this you should can see the tables and indices created in your Cloud Spann
 ### Now run your server
 After those migrations are completed, that will be all. Please continue on with the guides.
 
+### Create an Django admin user
+First you’ll need to create a user who can login to the admin site. Run the following command:
+
+```shell
+$ python3 manage.py createsuperuser
+```
+which will then produce a prompt which will allow you to create your super user
+```shell
+Username: admin
+Email address: admin@example.com
+Password: **********
+Password (again): **********
+Superuser created successfully.
+```
+
+### Login as admin
+Let’s run the server
+```shell script
+python3 manage.py runserver
+```
+Then visit http://127.0.0.1:8000/admin/
+
 ### Comprehensive hands-on guide
 For a more comprehensive, step by step hands-on guide, please visit [using django-spanner from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
-
 
 ### References
 

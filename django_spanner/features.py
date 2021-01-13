@@ -1055,6 +1055,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.text.test_upper.UpperTests.test_transform",  # noqa
             "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related",  # noqa
             "delete_regress.tests.DeleteCascadeTransactionTests.test_inheritance",  # noqa
+            "delete_regress.tests.DeleteLockingTest.test_concurrent_delete",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_chained_values_with_expression",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_values_expression",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_values_expression_group_by",  # noqa

@@ -45,6 +45,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         # django_spanner monkey patches AutoField to have a default value.
         "basic.tests.ModelTest.test_hash",
+        "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
+        "custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_fk_related_manager",
         "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
         "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
         "generic_relations_regress.tests.GenericRelationTests.test_target_model_is_unsaved",
@@ -58,6 +60,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_inheritance.tests.ModelInheritanceTests.test_create_child_no_update",
         "model_regress.tests.ModelTests.test_get_next_prev_by_field_unsaved",
         "one_to_one.tests.OneToOneTests.test_get_reverse_on_unsaved_object",
+        "one_to_one.tests.OneToOneTests.test_o2o_primary_key_delete",
         "one_to_one.tests.OneToOneTests.test_set_reverse_on_unsaved_object",
         "one_to_one.tests.OneToOneTests.test_unsaved_object",
         "queries.test_bulk_update.BulkUpdateNoteTests.test_unsaved_models",
@@ -107,6 +110,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "aggregation_regress.tests.AggregationTests.test_more_more",
         "aggregation_regress.tests.AggregationTests.test_more_more_more",
         "aggregation_regress.tests.AggregationTests.test_ticket_11293",
+        "defer_regress.tests.DeferRegressionTest.test_ticket_12163",
         "defer_regress.tests.DeferRegressionTest.test_ticket_23270",
         "distinct_on_fields.tests.DistinctOnTests.test_basic_distinct_on",
         "extra_regress.tests.ExtraRegressTests.test_regression_7314_7372",
@@ -232,6 +236,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "cache.tests.CreateCacheTableForDBCacheTests",
         "cache.tests.DBCacheTests",
         "cache.tests.DBCacheWithTimeZoneTests",
+        "delete.tests.DeletionTests.test_queryset_delete_returns_num_rows",
+        "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
         # Tests that require transactions.
         "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
         "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
@@ -331,6 +337,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_inheritance_regress.tests.ModelInheritanceTest.test_issue_6755",
         # Probably due to django-spanner setting a default on AutoField:
         # https://github.com/googleapis/python-spanner-django/issues/424
+        "model_forms.tests.ModelFormBasicTests.test_runtime_choicefield_populated",
+        "model_forms.tests.ModelFormBasicTests.test_multi_fields",
+        "model_forms.tests.ModelFormBasicTests.test_m2m_initial_callable",
+        "model_forms.tests.ModelFormBasicTests.test_initial_values",
+        "model_forms.tests.OtherModelFormTests.test_prefetch_related_queryset",
         "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
         "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",
         "model_formsets_regress.tests.FormsetTests.test_extraneous_query_is_not_run",
@@ -340,6 +351,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
         "migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence",
         "servers.test_liveserverthread.LiveServerThreadTest.test_closes_connections",
+        "servers.tests.LiveServerDatabase.test_fixtures_loaded",
+        "view_tests.tests.test_csrf.CsrfViewTests.test_no_cookies",
+        "view_tests.tests.test_csrf.CsrfViewTests.test_no_referer",
+        "view_tests.tests.test_i18n.SetLanguageTests.test_lang_from_translated_i18n_pattern",
     )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
@@ -1112,6 +1127,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "expressions.tests.ValueTests.test_update_TimeField_using_Value",  # noqa
             "expressions.tests.ValueTests.test_update_UUIDField_using_Value",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_loaddata_error_message",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_ambiguous_compressed_fixture",  # noqa
             "fixtures.tests.FixtureTransactionTests.test_format_discovery",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",  # noqa
@@ -1137,6 +1153,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "get_or_create.tests.GetOrCreateTests.test_get_or_create_invalid_params",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_get_or_create_raises_IntegrityError_plus_traceback",  # noqa
+            "i18n.tests.WatchForTranslationChangesTests.test_i18n_app_dirs",  # noqa
             "introspection.tests.IntrospectionTests.test_get_constraints",  # noqa
             "introspection.tests.IntrospectionTests.test_get_constraints_index_types",  # noqa
             "introspection.tests.IntrospectionTests.test_get_constraints_indexes_orders",  # noqa
@@ -1620,6 +1637,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "select_related_onetoone.tests.ReverseSelectRelatedTestCase.test_nullable_relation",  # noqa
             "select_related_onetoone.tests.ReverseSelectRelatedTestCase.test_self_relation",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_actual_expiry",  # noqa
+            "sessions_tests.tests.CustomDatabaseSessionTests.test_extra_session_field",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_clearsessions_command",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_cycle",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_cycle_with_no_session_cache",  # noqa
@@ -1632,6 +1650,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sessions_tests.tests.CustomDatabaseSessionTests.test_session_save_does_not_resurrect_session_logged_out_in_other_context",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_session_str",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_sessionmanager_save",  # noqa
+            "sessions_tests.tests.SessionMiddlewareTests.test_empty_session_saved",  # noqa
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap",  # noqa
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap_attributes",  # noqa
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap_lastmod",  # noqa

@@ -59,7 +59,7 @@ and for example here is a filled in database where:
 
 * `PROJECT_ID`: spanner-appdev
 * `INSTANCE`: instance
-* `NAME`: healthchecks_db
+* `NAME`: db1
 
 which when filled out, will look like this
 
@@ -69,7 +69,7 @@ DATABASES = {
         'ENGINE': 'django_spanner',
         'PROJECT': 'spanner-appdev',
         'INSTANCE': 'instance',
-        'NAME': 'healthchecks_db',
+        'NAME': 'db1',
     }
 }
 ```

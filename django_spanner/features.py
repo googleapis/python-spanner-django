@@ -752,6 +752,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_migrations.ProxyModelWithDifferentAppLabelTests.test_user_keeps_same_permissions_after_migrating_backward",  # noqa
             "auth_tests.test_migrations.ProxyModelWithSameAppLabelTests.test_user_keeps_same_permissions_after_migrating_backward",  # noqa
             "auth_tests.test_migrations.ProxyModelWithSameAppLabelTests.test_user_still_has_proxy_model_permissions",  # noqa
+            "proxy_models.tests.ProxyModelAdminTests.test_delete_str_in_model_admin",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_access_mixin_permission_denied_response",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_stacked_mixins_missing_permission",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_stacked_mixins_not_logged_in",  # noqa

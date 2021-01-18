@@ -48,6 +48,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
         "custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_fk_related_manager",
         "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
+        "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
+        "generic_relations.tests.GenericRelationsTests.test_generic_update_or_create_when_updated",
+        "generic_relations.tests.GenericRelationsTests.test_update_or_create_defaults",
         "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
         "generic_relations_regress.tests.GenericRelationTests.test_target_model_is_unsaved",
         "m2m_through_regress.tests.ToFieldThroughTests.test_m2m_relations_unusable_on_null_pk_obj",
@@ -237,6 +240,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "cache.tests.DBCacheTests",
         "cache.tests.DBCacheWithTimeZoneTests",
         "delete.tests.DeletionTests.test_queryset_delete_returns_num_rows",
+        "delete.tests.DeletionTests.test_model_delete_returns_num_rows",
+        "delete.tests.DeletionTests.test_deletion_order",
         "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
         # Tests that require transactions.
         "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
@@ -1551,6 +1556,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.WeirdQuerysetSlicingTests.test_empty_sliced_subquery_exclude",  # noqa
             "queries.tests.WeirdQuerysetSlicingTests.test_tickets_7698_10202",  # noqa
             "queries.tests.WeirdQuerysetSlicingTests.test_zero_length_values_slicing",  # noqa
+            "foreign_object.tests.MultiColumnFKTests.test_translations",  # noqa
             "schema.tests.SchemaTests.test_add_datefield_and_datetimefield_use_effective_default",  # noqa
             "schema.tests.SchemaTests.test_add_field",  # noqa
             "schema.tests.SchemaTests.test_add_field_binary",  # noqa
@@ -1698,6 +1704,29 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_not_detected",  # noqa
             "sitemaps_tests.test_utils.PingGoogleTests.test_something",  # noqa
             "string_lookup.tests.StringLookupTests.test_queries_on_textfields",  # noqa
+            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
+            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_output",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_pks",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loaddata_verbosity_three",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loading_and_dumping",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loading_stdin",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_output_formats",  # noqa
+            "fixtures.tests.TestCaseFixtureLoadingTests.testClassFixtures",  # noqa
+            "fixtures_model_package.tests.FixtureTestCase.test_loaddata",  # noqa
+            "fixtures_model_package.tests.SampleTestCase.testClassFixtures",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_create_twice",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_defaults_exact",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_callable_default",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_with_related_manager",  # noqa
+            "model_inheritance_regress.tests.ModelInheritanceTest.test_model_inheritance",  # noqa
+            "model_inheritance_regress.tests.ModelInheritanceTest.test_id_field_update_on_ancestor_change",  # noqa
+            "model_inheritance.tests.ModelInheritanceTests.test_update_parent_filtering",  # noqa
+            "model_inheritance.tests.ModelInheritanceDataTests.test_update_query_counts",  # noqa
+            "model_inheritance.tests.ModelInheritanceDataTests.test_update_inherited_model",  # noqa
             "test_client.tests.ClientTest.test_empty_post",  # noqa
             "test_client.tests.ClientTest.test_exception_following_nested_client_request",  # noqa
             "test_client.tests.ClientTest.test_external_redirect",  # noqa

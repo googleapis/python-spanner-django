@@ -16,14 +16,14 @@ import os
 
 from google.cloud.spanner_v1 import Client
 
-
-client = Client(
-    project=os.getenv(
-        "GOOGLE_CLOUD_PROJECT",
-        os.getenv("PROJECT_ID", "emulator-test-project"),
-    )
+project = os.getenv(
+    "GOOGLE_CLOUD_PROJECT", os.getenv("PROJECT_ID", "emulator-test-project"),
 )
 
-instance = client.instance("google-cloud-django-backend-tests")
+client = Client(project=project)
+
+config = f"{project}/instanceConfigs/regional-us-central1"
+
+instance = client.instance("google-cloud-django-backend-tests", config)
 created_op = instance.create()
 created_op.result(30)  # block until completion

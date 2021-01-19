@@ -18,7 +18,10 @@ from google.cloud.spanner_v1 import Client
 
 
 client = Client(
-    project=os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
+    project=os.getenv(
+        "GOOGLE_CLOUD_PROJECT",
+        os.getenv("PROJECT_ID", "emulator-test-project"),
+    )
 )
 
 instance = client.instance("google-cloud-django-backend-tests")

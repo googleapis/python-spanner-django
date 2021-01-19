@@ -20,6 +20,7 @@ project = os.getenv(
     "GOOGLE_CLOUD_PROJECT", os.getenv("PROJECT_ID", "emulator-test-project"),
 )
 
+raise ValueError(project)
 client = Client(project=project)
 
 config = f"{project}/instanceConfigs/regional-us-central1"

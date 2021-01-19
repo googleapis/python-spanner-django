@@ -20,11 +20,10 @@ project = os.getenv(
     "GOOGLE_CLOUD_PROJECT", os.getenv("PROJECT_ID", "emulator-test-project"),
 )
 
-raise ValueError(project)
 client = Client(project=project)
 
-config = f"{project}/instanceConfigs/regional-us-central1"
+config = f"{client.project_name}/instanceConfigs/regional-us-central1"
 
-instance = client.instance("google-cloud-django-backend-tests", config)
+instance = client.instance("django-backend-tests", config)
 created_op = instance.create()
 created_op.result(30)  # block until completion

@@ -1,5 +1,4 @@
 admin_filters
-admin_views
 admin_utils
 custom_lookups
 expressions_case

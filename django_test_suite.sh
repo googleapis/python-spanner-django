@@ -69,4 +69,4 @@ PASSWORD_HASHERS = [
 cd $TESTS_DIR/django/tests
 create_settings
 
-python3 runtests.py $TEST_APPS --verbosity=3 --noinput --settings $SETTINGS_FILE
+python3 runtests.py $TEST_APPS --verbosity=2 --noinput --settings $SETTINGS_FILE

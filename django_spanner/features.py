@@ -1720,6 +1720,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "string_lookup.tests.StringLookupTests.test_queries_on_textfields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_manytomany",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_underscorelookup_foreignkey",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_none_returning_lookups",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_queryset_based_lookups",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_without_parameter",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_two_characters_long_field",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_output",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_pks",  # noqa

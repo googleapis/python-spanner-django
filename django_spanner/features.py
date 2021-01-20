@@ -963,15 +963,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "custom_pk.tests.CustomPKTests.test_required_pk",  # noqa
             "custom_pk.tests.CustomPKTests.test_unique_pk",  # noqa
             "custom_lookups.tests.SubqueryTransformTests.test_subquery_usage",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_bilateral_fexpr",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_bilateral_multi_value",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_bilateral_order",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_bilateral_upper",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_div3_bilateral_extract",  # noqa
-            "custom_lookups.tests.BilateralTransformTests.test_transform_order_by",  # noqa
-            "custom_lookups.tests.LookupTests.test_basic_lookup",  # noqa
-            "custom_lookups.tests.LookupTests.test_custom_exact_lookup_none_rhs",  # noqa
-            "custom_lookups.tests.LookupTests.test_div3_extract",  # noqa
             "datatypes.tests.DataTypesTestCase.test_boolean_type",  # noqa
             "datatypes.tests.DataTypesTestCase.test_date_type",  # noqa
             "datatypes.tests.DataTypesTestCase.test_textfields_str",  # noqa

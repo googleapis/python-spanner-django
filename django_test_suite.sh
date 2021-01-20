@@ -13,8 +13,6 @@ sudo apt-get install -y libmemcached-dev
 export PYTHONUNBUFFERED=1
 
 pip3 install .
-pip3 uninstall -y google-cloud-spanner
-pip3 uninstall -y django-google-spanner
 pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@django_test_fixes#egg=google-cloud-spanner'
 pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@dj_tests_against_emulator#egg=django-google-spanner'
 

@@ -78,7 +78,7 @@ then
         # 'spanner.googleapis.com').
         export DJANGO_WORKER_COUNT=0
     else
-        export DJANGO_WORKER_COUNT=2
+        export DJANGO_WORKER_COUNT=3
     fi
 else
     export DJANGO_WORKER_COUNT=$(ls .kokoro/presubmit/worker* | wc -l)

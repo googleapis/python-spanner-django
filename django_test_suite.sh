@@ -16,7 +16,7 @@ pip3 install .
 pip3 uninstall -y google-cloud-spanner
 pip3 uninstall -y django-google-spanner
 pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@django_test_fixes#egg=google-cloud-spanner'
-pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@19_workflows#egg=django-google-spanner'
+pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@dj_tests_against_emulator#egg=django-google-spanner'
 
 export DJANGO_TESTS_DIR="django_tests_dir"
 mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django
@@ -41,7 +41,7 @@ SPANNER_EMULATOR_HOST=${SPANNER_EMULATOR_HOST}
 GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
 SETTINGS_FILE="$TEST_DBNAME-settings"
 TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}
-TEST_APPS=${TEST_APPS}
+TEST_APPS=${DJANGO_TEST_APPS}
 
 create_settings() {
     cat << ! > "$SETTINGS_FILE.py"

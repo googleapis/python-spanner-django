@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: mutually_referential nested_foreign_keys null_fk null_fk_ordering null_queries one_to_one ordering order_with_respect_to or_lookups
+          DJANGO_TEST_APPS: mutually_referential nested_foreign_keys null_fk null_fk_ordering null_queries one_to_one ordering order_with_respect_to or_lookups

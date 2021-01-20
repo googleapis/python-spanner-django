@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: delete delete_regress distinct_on_fields empty expressions expressions_window field_defaults file_storage file_uploads filtered_relation
+          DJANGO_TEST_APPS: delete delete_regress distinct_on_fields empty expressions expressions_window field_defaults file_storage file_uploads filtered_relation

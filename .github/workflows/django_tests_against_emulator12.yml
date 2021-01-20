@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          TEST_APPS: aggregation_regress annotations auth_tests backends basic bulk_create cache choices constraints
+          DJANGO_TEST_APPS: aggregation_regress annotations auth_tests backends basic bulk_create cache choices constraints

@@ -1,6 +1,5 @@
 admin_filters
 admin_utils
-custom_lookups
 expressions_case
 extra_regress
 model_regress

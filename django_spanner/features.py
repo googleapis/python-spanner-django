@@ -11,8 +11,6 @@ from django.db.utils import InterfaceError
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
-    """An extension to Django database feature descriptor."""
-
     can_introspect_big_integer_field = False
     can_introspect_duration_field = False
     can_introspect_foreign_keys = False
@@ -67,12 +65,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "one_to_one.tests.OneToOneTests.test_set_reverse_on_unsaved_object",
         "one_to_one.tests.OneToOneTests.test_unsaved_object",
         "queries.test_bulk_update.BulkUpdateNoteTests.test_unsaved_models",
+        "expressions_case.tests.CaseExpressionTests.test_update_decimal",
         "serializers.test_json.JsonSerializerTestCase.test_pkless_serialized_strings",
         "serializers.test_json.JsonSerializerTestCase.test_serialize_with_null_pk",
         "serializers.test_xml.XmlSerializerTestCase.test_pkless_serialized_strings",
         "serializers.test_xml.XmlSerializerTestCase.test_serialize_with_null_pk",
         "serializers.test_yaml.YamlSerializerTestCase.test_pkless_serialized_strings",
         "serializers.test_yaml.YamlSerializerTestCase.test_serialize_with_null_pk",
+        "serializers.test_data.SerializerDataTests.test_yaml_serializer",
+        "serializers.test_data.SerializerDataTests.test_xml_serializer",
+        "serializers.test_data.SerializerDataTests.test_python_serializer",
+        "serializers.test_data.SerializerDataTests.test_json_serializer",
         "timezones.tests.LegacyDatabaseTests.test_cursor_execute_accepts_naive_datetime",
         "timezones.tests.NewDatabaseTests.test_cursor_execute_accepts_naive_datetime",
         "timezones.tests.AdminTests.test_change_editable",

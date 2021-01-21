@@ -55,6 +55,8 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 export USE_SPANNER_EMULATOR=0
 
 pip3 install .
+pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@django_test_fixes#egg=google-cloud-spanner'
+pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@dj_tests_against_emulator#egg=django-google-spanner'
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.
 export DJANGO_TESTS_DIR="django_tests_$DJANGO_WORKER_INDEX"

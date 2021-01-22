@@ -152,9 +152,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def init_connection_state(self):
         """Initialize the state of the existing connection."""
-        self.connection.close()
-        database = self.connection.database
-        self.connection.__init__(self.instance, database)
+        if not self.connection:
+            self.connection.__init__(self.instance, self.instance.database(self.settings_dict["NAME"]))
 
     def create_cursor(self, name=None):
         """Create a new Database cursor.
@@ -167,7 +166,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """
         return self.connection.cursor()
 
-    def _set_autocommit(self, autocommit):
+    def set_autocommit(self, autocommit):
         """Set the Spanner transaction autocommit flag.
 
         :type autocommit: bool

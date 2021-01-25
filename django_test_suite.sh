@@ -17,6 +17,7 @@ mkdir -p $DJANGO_TESTS_DIR
 
 if [ $SPANNER_EMULATOR_HOST != 0 ]
 then
+    pip3 install -e .
     git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django
 fi
 
@@ -24,7 +25,7 @@ fi
 sudo apt-get update
 sudo apt-get install -y libffi-dev libjpeg-dev zlib1g-devel
 
-cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+cd $DJANGO_TESTS_DIR/django && pip3 install -r tests/requirements/py3.txt; cd ../../
 
 python3 create_test_instance.py
 

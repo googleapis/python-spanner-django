@@ -12,14 +12,15 @@ sudo apt-get install -y libmemcached-dev
 # Disable buffering, so that the logs stream through.
 export PYTHONUNBUFFERED=1
 
+export DJANGO_TESTS_DIR="django_tests_dir"
+mkdir -p $DJANGO_TESTS_DIR
+
 if [ $SPANNER_EMULATOR_HOST != 0 ]
 then
     pip3 install .
     pip3 install -e 'git+https://github.com/q-logic/python-spanner-django.git@dj_tests_against_emulator#egg=django-google-spanner'
-    mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django
+    git clone --depth 1 --single-branch --branch spanner-2.2.x https://github.com/timgraham/django.git $DJANGO_TESTS_DIR/django
 fi
-
-export DJANGO_TESTS_DIR="django_tests_dir"
 
 # Install dependencies for Django tests.
 sudo apt-get update

@@ -155,6 +155,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.connection.close()
         database = self.connection.database
         self.connection.__init__(self.instance, database)
+        self.connection.autocommit = True
 
     def create_cursor(self, name=None):
         """Create a new Database cursor.

@@ -152,9 +152,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         :raises: :class:`ValueError` in case the given instance/database
                  doesn't exist.
         """
-        conn = self.Database.connect(**conn_params)
-        conn.autocommit = True
-        return conn
+        return self.Database.connect(**conn_params)
 
     def init_connection_state(self):
         """Initialize the state of the existing connection."""

@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Run Django tests
-        run: bash django_test_suite.sh
+        run: sh django_test_suite.sh
         env:
           SPANNER_EMULATOR_HOST: localhost:9010
           GOOGLE_CLOUD_PROJECT: emulator-test-project

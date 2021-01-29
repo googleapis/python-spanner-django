@@ -2,12 +2,30 @@
 
 This example shows how to use django-spanner for Cloud Spanner as a backend database for [Django's tutorials](https://docs.djangoproject.com/en/2.2/intro/tutorial01/)
 
-### Walkthrough the introduction to Django
+*NOTE:* Use the version of python-spanner-django that corresponds to your version of Django. For example, python-spanner-django 2.2.x works with Django 2.2.y. (This is the only supported version at this time.)
+
+### Table of contents
+- [Install django-spanner](#install-django-spanner)
+- [Ensure you have a Cloud Spanner database already created](#ensure-you-have-a-cloud-spanner-database-already-created)
+- [Follow the tutorial](#follow-the-tutorial)
+- [Update your settings.py file to use django-spanner](#update-your-settings.py-file-to-use-django-spanner)
+- [Set credentials and project environment variables](#Set-credentials-and-project-environment-variables)
+- [Apply the migrations](#apply-the-migrations)
+- [Now run your server](#now-run-your-server)
+- [Create an Django admin user](#create-an-django-admin-user)
+- [Login as admin](#login-as-admin)
+- [Comprehensive hands-on guide](#comprehensive-hands-on-guide)
+- [References](#references)
 
 ### Install django-spanner
-We'll need to install `django-spanner`, by cloning this repository and then running `pip3 install`
+To install from PyPI:
 ```shell
-git clone https://github.com/googleapis/django-spanner
+pip3 install django-google-spanner
+```
+To install from source:
+```shell
+git clone https://github.com/googleapis/python-spanner-django
+cd python-spanner-django/
 pip3 install .
 ```
 
@@ -26,7 +44,7 @@ After we have a Cloud Spanner database created, we'll need a few variables:
 * Instance name
 * Database name aka DisplayName
 
-Once in, please edit the file `hc/local_settings.py`, and:
+Once in, edit the DATABASES section of your mysite/settings.py file to the following:
 
 a) add `django_spanner` as the very first entry to your `INSTALLED_APPS`
 ```python
@@ -51,8 +69,8 @@ DATABASES = {
 and for example here is a filled in database where:
 
 * `PROJECT_ID`: spanner-appdev
-* INSTANCE: instance
-* NAME: `healthchecks_db`
+* `INSTANCE`: instance
+* `NAME`: db1
 
 which when filled out, will look like this
 
@@ -62,9 +80,16 @@ DATABASES = {
         'ENGINE': 'django_spanner',
         'PROJECT': 'spanner-appdev',
         'INSTANCE': 'instance',
-        'NAME': 'healthchecks_db',
+        'NAME': 'db1',
     }
 }
+```
+
+### Set credentials and project environment variables
+You'll need to download a service account JSON key file and point to it using an environment variable:
+```shell
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
+export GOOGLE_CLOUD_PROJECT=gcloud_project
 ```
 
 ### Apply the migrations
@@ -102,12 +127,35 @@ Running migrations:
 ```
 </details>
 
+After this you should can see the tables and indices created in your Cloud Spanner console
+
 ### Now run your server
 After those migrations are completed, that will be all. Please continue on with the guides.
 
+### Create an Django admin user
+First you’ll need to create a user who can login to the admin site. Run the following command:
+
+```shell
+$ python3 manage.py createsuperuser
+```
+which will then produce a prompt which will allow you to create your super user
+```shell
+Username: admin
+Email address: admin@example.com
+Password: **********
+Password (again): **********
+Superuser created successfully.
+```
+
+### Login as admin
+Let’s run the server
+```shell script
+python3 manage.py runserver
+```
+Then visit http://127.0.0.1:8000/admin/
+
 ### Comprehensive hands-on guide
 For a more comprehensive, step by step hands-on guide, please visit [using django-spanner from scratch](https://orijtech-161805.firebaseapp.com/quickstart/new_app/)
-
 
 ### References
 

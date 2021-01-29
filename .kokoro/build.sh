@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -x
 set -eo pipefail
 
 cd github/python-spanner-django
@@ -54,6 +55,9 @@ export RUNNING_SPANNER_BACKEND_TESTS=1
 #    Python and other dynamic languages.
 export USE_SPANNER_EMULATOR=0
 
+echo "does this install fail?"
+echo `pwd`
+echo `ls -lah`
 pip3 install .
 # Create a unique DJANGO_TESTS_DIR per worker to avoid
 # any clashes with configured tests by other workers.

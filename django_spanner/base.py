@@ -4,7 +4,9 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import google.cloud.spanner_v1 as spanner
+import os
+
+from google.cloud import spanner
 
 from django.db.backends.base.base import BaseDatabaseWrapper
 from google.cloud import spanner_dbapi
@@ -111,7 +113,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
         :returns: A new instance owned by the existing Spanner Client.
         """
-        return spanner.Client().instance(self.settings_dict["INSTANCE"])
+        return spanner.Client(
+            project=os.environ["GOOGLE_CLOUD_PROJECT"]
+        ).instance(self.settings_dict["INSTANCE"])
 
     @property
     def _nodb_connection(self):
@@ -127,7 +131,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                   in Django Spanner format.
         """
         return {
-            "project": self.settings_dict["PROJECT"],
+            "project": os.environ["GOOGLE_CLOUD_PROJECT"],
             "instance_id": self.settings_dict["INSTANCE"],
             "database_id": self.settings_dict["NAME"],
             "user_agent": "django_spanner/2.2.0a1",
@@ -152,9 +156,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def init_connection_state(self):
         """Initialize the state of the existing connection."""
+        autocommit = self.connection.autocommit
         self.connection.close()
         database = self.connection.database
         self.connection.__init__(self.instance, database)
+        self.connection.autocommit = autocommit
 
     def create_cursor(self, name=None):
         """Create a new Database cursor.
@@ -192,3 +198,16 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return False
 
         return True
+
+    # The usual way to start a transaction is to turn autocommit off.
+    # Spanner DB API does not properly start a transaction when disabling
+    # autocommit. To avoid this buggy behavior and to actually enter a new
+    # transaction, an explicit SELECT 1 is required.
+    def _start_transaction_under_autocommit(self):
+        """
+        Start a transaction explicitly in autocommit mode.
+
+        Staying in autocommit mode works around a bug that breaks
+        save points when autocommit is disabled by django.
+        """
+        self.connection.cursor().execute("SELECT 1")

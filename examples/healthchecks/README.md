@@ -56,11 +56,12 @@ now install django-spanner using the path you obtained in [Clone django-spanner]
 If you haven't already, please follow the steps to install [Cloud Spanner](https://cloud.google.com/spanner/docs/getting-started/set-up),
 or visit this [codelab](https://opencensus.io/codelabs/spanner/#0)
 
-### Set Google Application Default Credentials to the environment
+### Set Google Application Default Credentials and Google Cloud Project to the environment
 You'll need to download a service account JSON keyfile and point to it using an environment variable: 
 
 ```shell
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
+export GOOGLE_CLOUD_PROJECT=gcloud_project
 ```
 
 ### Update local_settings.py

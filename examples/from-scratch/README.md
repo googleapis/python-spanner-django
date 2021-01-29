@@ -74,10 +74,11 @@ DATABASES = {
 }
 ```
 
-### Set Google Application Default Credentials to the environment
+### Set Google Application Default Credentials and Google Cloud Project to the environment
 You'll need to download a service account JSON key file and point to it using an environment variable: 
 ```shell
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
+export GOOGLE_CLOUD_PROJECT=gcloud_project
 ```
 
 ### Apply the migrations

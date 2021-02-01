@@ -64,4 +64,4 @@ else
     export DJANGO_WORKER_COUNT=4
 fi
 
-./run_testing_worker.py
+python3 ./run_testing_worker.py

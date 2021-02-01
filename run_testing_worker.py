@@ -30,8 +30,8 @@ def create_test_instance():
     return name, instance
 
 
-worker_index = os.getenv("DJANGO_WORKER_INDEX", 0)
-worker_count = os.getenv("DJANGO_WORKER_COUNT", 1)
+worker_index = int(os.getenv("DJANGO_WORKER_INDEX", 0))
+worker_count = int(os.getenv("DJANGO_WORKER_COUNT", 1))
 
 if worker_index > worker_count:
     print(

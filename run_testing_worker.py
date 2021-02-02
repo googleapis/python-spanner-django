@@ -26,7 +26,7 @@ def create_test_instance():
 
     instance = client.instance(name, config)
     created_op = instance.create()
-    created_op.result(30)  # block until completion
+    created_op.result(120)  # block until completion
     return name, instance
 
 

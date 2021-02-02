@@ -69,7 +69,7 @@ print(
 
 os.system(
     "DJANGO_TEST_APPS={apps} SPANNER_TEST_INSTANCE={instance} bash django_test_suite.sh".format(
-        apps=",".join(test_apps), instance=instance_name
+        apps=" ".join(test_apps), instance=instance_name
     )
 )
 

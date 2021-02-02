@@ -62,13 +62,13 @@ time.sleep(delay)
 instance_name, instance = create_test_instance()
 
 print(
-    """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash django_test_suite.sh""".format(
+    "DJANGO_TEST_APPS={apps} SPANNER_TEST_INSTANCE={instance} bash django_test_suite.sh".format(
         apps=",".join(test_apps), instance=instance_name
     )
 )
 
 os.system(
-    """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash django_test_suite.sh""".format(
+    "DJANGO_TEST_APPS={apps} SPANNER_TEST_INSTANCE={instance} bash django_test_suite.sh".format(
         apps=",".join(test_apps), instance=instance_name
     )
 )

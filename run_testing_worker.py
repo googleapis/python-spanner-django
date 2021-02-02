@@ -32,24 +32,6 @@ def create_test_instance():
 
     time.sleep(3)
 
-    instance = client.instance("spanner-django-test-1612252863")
-    instance.delete()
-
-    time.sleep(3)
-
-    instance = client.instance("spanner-django-test-1612253380")
-    instance.delete()
-
-    time.sleep(3)
-
-    instance = client.instance("spanner-django-test-1612255253")
-    instance.delete()
-
-    time.sleep(3)
-
-    instance = client.instance("spanner-django-test-1612255260")
-    instance.delete()
-
     exit()
 
     instance = client.instance(name, config)

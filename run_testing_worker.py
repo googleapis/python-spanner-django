@@ -25,6 +25,9 @@ def create_test_instance():
     name = "spanner-django-test-{}".format(str(int(time.time())))
 
     instance = client.instance(name, config)
+    for ins in client.list_instances():
+        print(ins.name)
+
     created_op = instance.create()
     created_op.result(30)  # block until completion
     return name, instance

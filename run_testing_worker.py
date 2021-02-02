@@ -24,6 +24,9 @@ def create_test_instance():
 
     name = "spanner-django-test-{}".format(str(int(time.time())))
 
+    for ins in client.list_instances():
+        print(ins.name)
+
     instance = client.instance("django-backend-tests")
     instance.delete()
 
@@ -32,6 +35,8 @@ def create_test_instance():
 
     instance = client.instance("libc-django-test")
     instance.delete()
+
+    exit()
 
     instance = client.instance(name, config)
     created_op = instance.create()

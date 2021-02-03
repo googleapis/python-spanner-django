@@ -27,10 +27,23 @@ def create_test_instance():
     for ins in client.list_instances():
         print(ins.name)
 
-    instance = client.instance("spanner-django-test-1612252844")
+    instance = client.instance("spanner-django-test-1612260180")
     instance.delete()
 
     time.sleep(3)
+
+    instance = client.instance("spanner-django-test-1612338184")
+    instance.delete()
+
+    time.sleep(3)
+
+    instance = client.instance("spanner-django-test-1612338377")
+    instance.delete()
+
+    time.sleep(3)
+
+    instance = client.instance("spanner-django-test-1612338379")
+    instance.delete()
 
     exit()
 

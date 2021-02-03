@@ -47,7 +47,7 @@ if worker_index >= worker_count:
             wi=worker_index, wc=worker_count,
         )
     )
-    exit(1)
+    exit()
 
 with open("django_test_apps.txt", "r") as file:
     all_apps = file.read().split("\n")

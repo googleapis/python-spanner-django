@@ -11,29 +11,35 @@ import time
 
 from google.cloud.spanner_v1 import Client
 
+REGION = "regional-us-central1"
 
-def create_test_instance():
-    project = os.getenv(
-        "GOOGLE_CLOUD_PROJECT",
-        os.getenv("PROJECT_ID", "emulator-test-project"),
-    )
 
-    client = Client(project=project)
+class TestInstance:
+    def __enter__(self):
+        project = os.getenv(
+            "GOOGLE_CLOUD_PROJECT",
+            os.getenv("PROJECT_ID", "emulator-test-project"),
+        )
 
-    config = f"{client.project_name}/instanceConfigs/regional-us-central1"
+        client = Client(project=project)
 
-    name = "spanner-django-test-{}".format(str(int(time.time())))
+        config = f"{client.project_name}/instanceConfigs/{REGION}"
 
-    instance = client.instance(name, config)
-    created_op = instance.create()
-    created_op.result(120)  # block until completion
-    return name, instance
+        name = "spanner-django-test-{}".format(str(int(time.time())))
+
+        self._instance = client.instance(name, config)
+        created_op = self._instance.create()
+        created_op.result(120)  # block until completion
+        return name
+
+    def __exit__(self, exc, exc_value, traceback):
+        self._instance.delete()
 
 
 worker_index = int(os.getenv("DJANGO_WORKER_INDEX", 0))
 worker_count = int(os.getenv("DJANGO_WORKER_COUNT", 1))
 
-if worker_index > worker_count:
+if worker_index >= worker_count:
     print(
         "worker_index (wi) > worker_count (wc)".format(
             wi=worker_index, wc=worker_count,
@@ -59,18 +65,9 @@ delay = random.randint(10, 60)
 print("creating instance with delay: {} seconds".format(delay))
 time.sleep(delay)
 
-instance_name, instance = create_test_instance()
-
-print(
-    """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash ./django_test_suite.sh""".format(
-        apps=" ".join(test_apps), instance=instance_name
+with TestInstance() as instance_name:
+    os.system(
+        """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash ./django_test_suite.sh""".format(
+            apps=" ".join(test_apps), instance=instance_name
+        )
     )
-)
-
-os.system(
-    """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash ./django_test_suite.sh""".format(
-        apps=" ".join(test_apps), instance=instance_name
-    )
-)
-
-instance.delete()

@@ -43,7 +43,7 @@ worker_count = int(os.getenv("DJANGO_WORKER_COUNT", 1))
 
 if worker_index >= worker_count:
     print(
-        "worker_index (wi) > worker_count (wc)".format(
+        "worker_index ({wi}) > worker_count ({wc})".format(
             wi=worker_index, wc=worker_count,
         )
     )

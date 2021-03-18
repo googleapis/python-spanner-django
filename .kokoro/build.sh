@@ -28,7 +28,6 @@ export GOOGLE_CLOUD_PROJECT=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 # Remove old nox
 python3.6 -m pip uninstall --yes --quiet nox-automation
 
-# Install nox
 python3.6 -m pip install --upgrade --quiet nox
 python3.6 -m nox --version
 

@@ -42,6 +42,7 @@ fi
 export RUNNING_SPANNER_BACKEND_TESTS=1
 
 pip3 install .
+pip3 install -e 'git+https://github.com/q-logic/python-spanner.git@revert_233#egg=django-google-spanner'
 export DJANGO_TESTS_DIR="django_tests_dir"
 mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch "spanner/stable/2.2.x" https://github.com/c24t/django.git $DJANGO_TESTS_DIR/django
 

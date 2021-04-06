@@ -79,7 +79,11 @@ def default(session):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
+<<<<<<< HEAD
         "--cov-fail-under=25",
+=======
+        "--cov-fail-under=20",
+>>>>>>> ad001a8 (feat: updated nox file for docs and docfx and added unit tests for client)
         os.path.join("tests", "unit"),
         *session.posargs
     )

@@ -85,6 +85,25 @@ def default(session):
     )
 
 
+@nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
+def unit(session):
+    """Run the unit test suite."""
+    default(session)
+
+
+@nox.session(python=DEFAULT_PYTHON_VERSION)
+def cover(session):
+    """Run the final coverage report.
+
+    This outputs the coverage report aggregating coverage from the unit
+    test runs (not system test runs), and then erases coverage data.
+    """
+    session.install("coverage", "pytest-cov")
+    session.run("coverage", "report", "--show-missing", "--fail-under=20")
+
+    session.run("coverage", "erase")
+
+
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def docs(session):
     """Build the docs for this library."""
@@ -98,6 +117,43 @@ def docs(session):
         "-W",  # warnings as errors
         "-T",  # show full traceback on exception
         "-N",  # no colors
+        "-b",
+        "html",
+        "-d",
+        os.path.join("docs", "_build", "doctrees", ""),
+        os.path.join("docs", ""),
+        os.path.join("docs", "_build", "html", ""),
+    )
+
+
+@nox.session(python=DEFAULT_PYTHON_VERSION)
+def docfx(session):
+    """Build the docfx yaml files for this library."""
+
+    session.install("-e", ".[tracing]")
+    # sphinx-docfx-yaml supports up to sphinx version 1.5.5.
+    # https://github.com/docascode/sphinx-docfx-yaml/issues/97
+    session.install(
+        "sphinx==1.5.5", "alabaster", "recommonmark", "sphinx-docfx-yaml"
+    )
+
+    shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
+    session.run(
+        "sphinx-build",
+        "-T",  # show full traceback on exception
+        "-N",  # no colors
+        "-D",
+        (
+            "extensions=sphinx.ext.autodoc,"
+            "sphinx.ext.autosummary,"
+            "docfx_yaml.extension,"
+            "sphinx.ext.intersphinx,"
+            "sphinx.ext.coverage,"
+            "sphinx.ext.napoleon,"
+            "sphinx.ext.todo,"
+            "sphinx.ext.viewcode,"
+            "recommonmark"
+        ),
         "-b",
         "html",
         "-d",

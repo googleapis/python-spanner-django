@@ -131,12 +131,12 @@ def docs(session):
 def docfx(session):
     """Build the docfx yaml files for this library."""
 
-    session.install("-e", ".")
+    session.install("-e", ".[tracing]")
     session.install(
         "sphinx",
         "alabaster",
         "recommonmark",
-        "sphinx-docfx-yaml",
+        "gcp-sphinx-docfx-yaml",
         "django==2.2",
     )
 

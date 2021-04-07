@@ -131,7 +131,7 @@ def docs(session):
 def docfx(session):
     """Build the docfx yaml files for this library."""
 
-    session.install("-e", ".")
+    session.install("-e", ".[tracing]")
     session.install(
         "sphinx",
         "alabaster",

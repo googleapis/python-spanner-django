@@ -79,7 +79,7 @@ def default(session):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=20",
+        "--cov-fail-under=25",
         os.path.join("tests", "unit"),
         *session.posargs
     )
@@ -109,12 +109,13 @@ def docs(session):
     """Build the docs for this library."""
 
     session.install("-e", ".[tracing]")
-    session.install("sphinx", "alabaster", "recommonmark")
+    session.install("sphinx", "alabaster", "recommonmark", "django==2.2")
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
+    # Warnings as errors is disabled for `sphinx-build` because django module
+    # has warnings.
     session.run(
         "sphinx-build",
-        "-W",  # warnings as errors
         "-T",  # show full traceback on exception
         "-N",  # no colors
         "-b",
@@ -130,11 +131,13 @@ def docs(session):
 def docfx(session):
     """Build the docfx yaml files for this library."""
 
-    session.install("-e", ".[tracing]")
-    # sphinx-docfx-yaml supports up to sphinx version 1.5.5.
-    # https://github.com/docascode/sphinx-docfx-yaml/issues/97
+    session.install("-e", ".")
     session.install(
-        "sphinx==1.5.5", "alabaster", "recommonmark", "sphinx-docfx-yaml"
+        "sphinx",
+        "alabaster",
+        "recommonmark",
+        "sphinx-docfx-yaml",
+        "django==2.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

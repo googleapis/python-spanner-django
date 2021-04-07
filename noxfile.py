@@ -79,7 +79,7 @@ def default(session):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=20",
+        "--cov-fail-under=25",
         os.path.join("tests", "unit"),
         *session.posargs
     )
@@ -131,11 +131,13 @@ def docs(session):
 def docfx(session):
     """Build the docfx yaml files for this library."""
 
-    session.install("-e", ".[tracing]")
-    # sphinx-docfx-yaml supports up to sphinx version 1.5.5.
-    # https://github.com/docascode/sphinx-docfx-yaml/issues/97
+    session.install("-e", ".")
     session.install(
-        "sphinx==1.5.5", "alabaster", "recommonmark", "sphinx-docfx-yaml"
+        "sphinx",
+        "alabaster",
+        "recommonmark",
+        "sphinx-docfx-yaml",
+        "django==2.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

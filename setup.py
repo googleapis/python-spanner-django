@@ -7,7 +7,22 @@
 import io
 import os
 
-from setuptools import find_packages, setup
+import setuptools
+
+# Disable version normalization performed by setuptools.setup()
+try:
+    # Try the approach of using sic(), added in setuptools 46.1.0
+    from setuptools import sic
+except ImportError:
+    # Try the approach of replacing packaging.version.Version
+    sic = lambda v: v
+    try:
+        # setuptools >=39.0.0 uses packaging from setuptools.extern
+        from setuptools.extern import packaging
+    except ImportError:
+        # setuptools <39.0.0 uses packaging from pkg_resources.extern
+        from pkg_resources.extern import packaging
+    packaging.version.Version = packaging.version.LegacyVersion
 
 # Package metadata.
 name = "django-google-spanner"
@@ -35,15 +50,15 @@ readme_filename = os.path.join(package_root, "README.rst")
 with io.open(readme_filename, encoding="utf-8") as readme_file:
     readme = readme_file.read()
 
-setup(
+setuptools.setup(
     name=name,
-    version=setuptools.sic(version),
+    version=sic(version),
     description=description,
     long_description=readme,
     author="Google LLC",
     author_email="googleapis-packages@google.com",
     license="BSD",
-    packages=find_packages(exclude=["tests"]),
+    packages=setuptools.find_packages(exclude=["tests"]),
     install_requires=dependencies,
     url="https://github.com/googleapis/python-spanner-django",
     classifiers=[

@@ -66,7 +66,12 @@ def lint_setup_py(session):
 def default(session):
     # Install all test dependencies, then install this package in-place.
     session.install(
-        "django~=2.2", "mock", "mock-import", "pytest", "pytest-cov"
+        "django~=2.2",
+        "mock",
+        "mock-import",
+        "pytest",
+        "pytest-cov",
+        "coverage",
     )
     session.install("-e", ".")
 
@@ -79,11 +84,7 @@ def default(session):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-<<<<<<< HEAD
-        "--cov-fail-under=25",
-=======
-        "--cov-fail-under=20",
->>>>>>> ad001a8 (feat: updated nox file for docs and docfx and added unit tests for client)
+        "--cov-fail-under=80",
         os.path.join("tests", "unit"),
         *session.posargs
     )

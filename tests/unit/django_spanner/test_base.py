@@ -49,7 +49,7 @@ class TestBase(unittest.TestCase):
             _ = db_wrapper.instance
             mock_instance.assert_called_once_with(settings_dict["INSTANCE"])
 
-    def test_property__nodb_connection(self):
+    def test_property_nodb_connection(self):
         db_wrapper = self._make_one(None)
         with self.assertRaises(NotImplementedError):
             db_wrapper._nodb_connection()
@@ -86,7 +86,7 @@ class TestBase(unittest.TestCase):
         db_wrapper.create_cursor()
         mock_cursor.assert_called_once_with()
 
-    def test__set_autocommit(self):
+    def test_set_autocommit(self):
         db_wrapper = self._make_one(self.settings_dict)
         db_wrapper.connection = mock_connection = mock.MagicMock()
         mock_connection.autocommit = False
@@ -110,7 +110,7 @@ class TestBase(unittest.TestCase):
         mock_connection.cursor = mock.MagicMock(side_effect=Error)
         self.assertFalse(db_wrapper.is_usable())
 
-    def test__start_transaction_under_autocommit(self):
+    def test_start_transaction_under_autocommit(self):
         db_wrapper = self._make_one(self.settings_dict)
         db_wrapper.connection = mock_connection = mock.MagicMock()
         mock_connection.cursor = mock_cursor = mock.MagicMock()

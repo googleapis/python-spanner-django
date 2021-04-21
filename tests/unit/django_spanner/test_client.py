@@ -7,6 +7,7 @@
 import sys
 import unittest
 import os
+from google.cloud.spanner_dbapi.exceptions import NotSupportedError
 
 
 @unittest.skipIf(
@@ -36,8 +37,6 @@ class TestClient(unittest.TestCase):
         return self._get_target_class()(*args, **kwargs)
 
     def test_runshell(self):
-        from google.cloud.spanner_dbapi.exceptions import NotSupportedError
-
         db_wrapper = self._make_one(self.settings_dict)
 
         with self.assertRaises(NotSupportedError):

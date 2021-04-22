@@ -4,14 +4,11 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
 import unittest
 import os
+from google.cloud.spanner_dbapi.exceptions import NotSupportedError
 
 
-@unittest.skipIf(
-    sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
-)
 class TestClient(unittest.TestCase):
     PROJECT = os.environ["GOOGLE_CLOUD_PROJECT"]
     INSTANCE_ID = "instance_id"
@@ -36,8 +33,6 @@ class TestClient(unittest.TestCase):
         return self._get_target_class()(*args, **kwargs)
 
     def test_runshell(self):
-        from google.cloud.spanner_dbapi.exceptions import NotSupportedError
-
         db_wrapper = self._make_one(self.settings_dict)
 
         with self.assertRaises(NotSupportedError):

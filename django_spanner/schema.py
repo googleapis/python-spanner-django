@@ -6,6 +6,7 @@
 
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django_spanner._opentelemetry_tracing import trace_call
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -119,7 +120,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 sql += " " + tablespace_sql
         # Prevent using [] as params, in the case a literal '%' is used in the
         # definition
-        self.execute(sql, params or None)
+        trace_attributes = {
+            "model_name": self.quote_name(model._meta.db_table)
+        }
+        with trace_call(
+            "CloudSpannerDjango.create_model",
+            self.connection,
+            trace_attributes,
+        ):
+            self.execute(sql, params or None)
 
         # Add any field index and index_together's (deferred as SQLite
         # _remake_table needs it)

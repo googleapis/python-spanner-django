@@ -24,8 +24,8 @@ except ImportError:
 
 
 @contextmanager
-def trace_call(name, session, extra_attributes=None):
-    if not HAS_OPENTELEMETRY_INSTALLED or not session:
+def trace_call(name, connection, extra_attributes=None):
+    if not HAS_OPENTELEMETRY_INSTALLED or not connection:
         # Empty context manager. Users will have to check if the generated value is None or a span
         yield None
         return
@@ -36,7 +36,7 @@ def trace_call(name, session, extra_attributes=None):
     attributes = {
         "db.type": "spanner",
         "db.url": SpannerClient.DEFAULT_ENDPOINT,
-        "db.instance": session._database.name,
+        "db.instance": connection.get_connection_params()["db"],
         "net.host.name": SpannerClient.DEFAULT_ENDPOINT,
     }
 

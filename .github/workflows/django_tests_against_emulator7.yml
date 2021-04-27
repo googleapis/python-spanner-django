@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          DJANGO_TEST_APPS: generic_views get_earliest_or_latest get_object_or_404 get_or_create i18n indexes inline_formsets inspectdb introspection invalid_models_tests
+          DJANGO_TEST_APPS: redirects_tests expressions get_or_create foreign_object generic_relations_regress many_to_many

@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          DJANGO_TEST_APPS: select_related select_related_onetoone select_related_regress queryset_pickle
+          DJANGO_TEST_APPS: select_related generic_relations queryset_pickle model_inheritance

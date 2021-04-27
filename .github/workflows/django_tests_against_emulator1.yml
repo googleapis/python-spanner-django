@@ -29,4 +29,4 @@ jobs:
           GOOGLE_CLOUD_TESTS_CREATE_SPANNER_INSTANCE: true
           RUNNING_SPANNER_BACKEND_TESTS: 1
           SPANNER_TEST_INSTANCE: google-cloud-django-backend-tests
-          DJANGO_TEST_APPS: mutually_referential nested_foreign_keys null_fk null_fk_ordering null_queries one_to_one ordering order_with_respect_to or_lookups
+          DJANGO_TEST_APPS: introspection multiple_database null_fk_ordering ordering m2m_intermediary null_fk max_lengths dates force_insert_update test_client m2m_multiple test_client_regress sitemaps_tests admin_inlines transactions null_queries test_runner m2m_and_m2o prefetch_related

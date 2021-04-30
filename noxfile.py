@@ -141,7 +141,7 @@ def docfx(session):
         "sphinx",
         "alabaster",
         "recommonmark",
-        "sphinx-docfx-yaml",
+        "gcp-sphinx-docfx-yaml",
         "django==2.2",
     )
 

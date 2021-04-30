@@ -14,12 +14,39 @@ from django.db.models.fields import IntegerField
 from .models import Author
 from django.conf import settings
 from django.db import DatabaseError
+from google.cloud.spanner_v1 import Client
+from google.cloud.spanner_v1.database import Database
 
 
 @unittest.skipIf(
     sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
 )
 class TestUtils(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        test_settings = settings.__dict__["_wrapped"].__dict__
+        client = Client(project=test_settings["PROJECT"])
+        instance = client.instance(
+            test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
+        )
+        if not instance.exists():
+            created_op = instance.create()
+            created_op.result(120)  # block until completion
+        db = Database(test_settings["NAME"], instance)
+        db.create()
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        test_settings = settings.__dict__["_wrapped"].__dict__
+        client = Client(project=test_settings["PROJECT"])
+        instance = client.instance(
+            test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
+        )
+        if instance.exists():
+            instance.delete()
+        super().tearDownClass()
+
     def _get_target_class(self):
         from django_spanner.base import DatabaseWrapper
 
@@ -30,7 +57,6 @@ class TestUtils(TestCase):
         Returns a connection to the database provided in settings.
         """
         test_settings = settings.__dict__["_wrapped"].__dict__
-
         return self._get_target_class()(settings_dict=test_settings)
 
     def _column_classes(self, connection, model):

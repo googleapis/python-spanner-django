@@ -1,3 +1,6 @@
+import time
+import os
+
 DEBUG = True
 USE_TZ = True
 
@@ -14,12 +17,21 @@ INSTALLED_APPS = [
 
 TIME_ZONE = "UTC"
 
+ENGINE = "django_spanner"
+PROJECT = os.getenv(
+    "GOOGLE_CLOUD_PROJECT", os.getenv("PROJECT_ID", "emulator-test-project"),
+)
+
+INSTANCE_CONFIG = f"{PROJECT}/instanceConfigs/regional-us-central1"
+INSTANCE = "django-test-instance"
+NAME = "spanner-django-test-{}".format(str(int(time.time())))
+
 DATABASES = {
     "default": {
-        "ENGINE": "django_spanner",
-        "PROJECT": "emulator-local",
-        "INSTANCE": "django-test-instance",
-        "NAME": "django-test-db",
+        "ENGINE": ENGINE,
+        "PROJECT": PROJECT,
+        "INSTANCE": INSTANCE,
+        "NAME": NAME,
     }
 }
 SECRET_KEY = "spanner emulator secret key"
@@ -32,9 +44,5 @@ SITE_ID = 1
 
 CONN_MAX_AGE = 60
 
-ENGINE = "django_spanner"
-PROJECT = "emulator-local"
-INSTANCE = "django-test-instance"
-NAME = "django-test-db"
 OPTIONS = {}
 AUTOCOMMIT = True

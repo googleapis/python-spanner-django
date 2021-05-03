@@ -48,6 +48,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         :param model: A model for creating a table.
         """
         # Create column SQL, add FK deferreds if needed
+        import pdb
+
+        pdb.set_trace()
         column_sqls = []
         params = []
         for field in model._meta.local_fields:
@@ -91,7 +94,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 self.deferred_sql.append(
                     self._create_unique_sql(model, [field.column])
                 )
+        import pdb
 
+        pdb.set_trace()
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:

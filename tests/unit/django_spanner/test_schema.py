@@ -16,36 +16,37 @@ from django.conf import settings
 from django.db import DatabaseError
 from google.cloud.spanner_v1 import Client
 from google.cloud.spanner_v1.database import Database
+from unittest import mock
 
 
 @unittest.skipIf(
     sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
 )
 class TestUtils(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        test_settings = settings.__dict__["_wrapped"].__dict__
-        client = Client(project=test_settings["PROJECT"])
-        instance = client.instance(
-            test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
-        )
-        if not instance.exists():
-            created_op = instance.create()
-            created_op.result(120)  # block until completion
-        db = Database(test_settings["NAME"], instance)
-        db.create()
-        super().setUpClass()
+    # @classmethod
+    # def setUpClass(cls):
+    #     test_settings = settings.__dict__["_wrapped"].__dict__
+    #     client = Client(project=test_settings["PROJECT"])
+    #     instance = client.instance(
+    #         test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
+    #     )
+    #     if not instance.exists():
+    #         created_op = instance.create()
+    #         created_op.result(120)  # block until completion
+    #     db = Database(test_settings["NAME"], instance)
+    #     db.create()
+    #     super().setUpClass()
 
-    @classmethod
-    def tearDownClass(cls):
-        test_settings = settings.__dict__["_wrapped"].__dict__
-        client = Client(project=test_settings["PROJECT"])
-        instance = client.instance(
-            test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
-        )
-        if instance.exists():
-            instance.delete()
-        super().tearDownClass()
+    # @classmethod
+    # def tearDownClass(cls):
+    #     test_settings = settings.__dict__["_wrapped"].__dict__
+    #     client = Client(project=test_settings["PROJECT"])
+    #     instance = client.instance(
+    #         test_settings["INSTANCE"], test_settings["INSTANCE_CONFIG"]
+    #     )
+    #     if instance.exists():
+    #         instance.delete()
+    #     super().tearDownClass()
 
     def _get_target_class(self):
         from django_spanner.base import DatabaseWrapper
@@ -56,8 +57,10 @@ class TestUtils(TestCase):
         """
         Returns a connection to the database provided in settings.
         """
-        test_settings = settings.__dict__["_wrapped"].__dict__
-        return self._get_target_class()(settings_dict=test_settings)
+        # test_settings = settings.__dict__["_wrapped"].__dict__
+        # return self._get_target_class()(settings_dict=test_settings)
+        dummy_settings = {"dummy_param": "dummy"}
+        return self._get_target_class()(settings_dict=dummy_settings)
 
     def _column_classes(self, connection, model):
         """
@@ -67,13 +70,14 @@ class TestUtils(TestCase):
             columns = {
                 d[0]: (connection.introspection.get_field_type(d[1], d), d)
                 for d in connection.introspection.get_table_description(
-                    cursor, model._meta.db_table,
+                    cursor,
+                    model._meta.db_table,
                 )
             }
         return columns
 
     # Tests
-    def test_quote_value(self):
+    def _test_quote_value(self):
         """
         Tries quoting input value.
         """
@@ -81,7 +85,7 @@ class TestUtils(TestCase):
         schema_editor = DatabaseSchemaEditor(db_wrapper)
         self.assertEqual(schema_editor.quote_value(value=1.1), "1.1")
 
-    def test_skip_default(self):
+    def _test_skip_default(self):
         """
         Tries skipping default as Cloud spanner doesn't support it.
         """
@@ -90,6 +94,48 @@ class TestUtils(TestCase):
         self.assertTrue(schema_editor.skip_default(field=None))
 
     def test_creation_deletion(self):
+        """
+        Tries creating a model's table, and then deleting it.
+        """
+        connection = self._make_one()
+        # connection_ = connection.cursor = mock.MagicMock()
+        # def side_effect(*args, **kw_args):
+        #     import pdb
+
+        #     pdb.set_trace()
+        #     return 1
+
+        # mock_cursor.execute = MagicMock(side_effect=side_effect)
+
+        import pdb
+
+        # pdb.set_trace()
+        with DatabaseSchemaEditor(connection, atomic=False) as schema_editor:
+            connection.execute = mock_cursor = mock.MagicMock()
+            # with self.connection.cursor() as cursor:
+            #     cursor.execute(sql, params)
+            pdb.set_trace()
+            schema_editor.create_model(Author)
+            pdb.set_trace()
+
+            mock_cursor.execute.assert_called_once()
+
+        # with connection.schema_editor() as schema_editor:
+        #     # Create the table
+        #     schema_editor.create_model(Author)
+        #     schema_editor.execute("select 1")
+        #     # The table is there
+        #     list(Author.objects.all())
+        #     # Clean up that table
+        #     schema_editor.delete_model(Author)
+        #     schema_editor.execute("select 1")
+        #     # No deferred SQL should be left over.
+        #     self.assertEqual(schema_editor.deferred_sql, [])
+        # # The table is gone
+        # with self.assertRaises(DatabaseError):
+        #     list(Author.objects.all())
+
+    def _test_creation_deletion(self):
         """
         Tries creating a model's table, and then deleting it.
         """
@@ -109,7 +155,7 @@ class TestUtils(TestCase):
         with self.assertRaises(DatabaseError):
             list(Author.objects.all())
 
-    def test_add_field(self):
+    def _test_add_field(self):
         """
         Tests adding fields to models
         """

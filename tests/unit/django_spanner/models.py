@@ -6,13 +6,7 @@
 """
 Different models used for testing django-spanner code.
 """
-import os
 from django.db import models
-import django
-
-# Load django settings before loading django models.
-os.environ["DJANGO_SETTINGS_MODULE"] = "tests.settings"
-django.setup()
 
 
 # Register transformations for model fields.

@@ -4,15 +4,15 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import unittest
 from django_spanner.utils import check_django_compatability
 from django.core.exceptions import ImproperlyConfigured
 from django_spanner.utils import add_dummy_where
 import django
 import django_spanner
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 
 
-class TestUtils(unittest.TestCase):
+class TestUtils(SpannerSimpleTestClass):
     SQL_WITH_WHERE = "Select 1 from Table WHERE 1=1"
     SQL_WITHOUT_WHERE = "Select 1 from Table"
 

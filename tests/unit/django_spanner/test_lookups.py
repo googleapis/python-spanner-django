@@ -4,28 +4,17 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from django.test import SimpleTestCase
 from django_spanner.compiler import SQLCompiler
 from django.db.models import F
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from .models import Number, Author
 
 
-class TestLookups(SimpleTestCase):
-    settings_dict = {"dummy_instance": "instance"}
-
-    def _get_target_class(self):
-        from django_spanner.base import DatabaseWrapper
-
-        return DatabaseWrapper
-
-    def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
-
+class TestLookups(SpannerSimpleTestClass):
     def test_cast_param_to_float_lte_sql_query(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(decimal_num__lte=1.1).values("decimal_num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -35,11 +24,10 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, (1.1,))
 
     def test_cast_param_to_float_for_int_field_query(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(num__lte=1.1).values("num")
 
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -49,10 +37,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, (1,))
 
     def test_cast_param_to_float_for_foreign_key_field_query(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(item_id__exact="10").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -62,10 +49,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, (10,))
 
     def test_cast_param_to_float_with_no_params_query(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(item_id__exact=F("num")).values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -75,10 +61,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ())
 
     def test_startswith_endswith_sql_query_with_startswith(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__startswith="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -88,10 +73,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("^abc",))
 
     def test_startswith_endswith_sql_query_with_endswith(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__endswith="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -101,10 +85,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc$",))
 
     def test_startswith_endswith_sql_query_case_insensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__istartswith="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -114,13 +97,12 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("(?i)^abc",))
 
     def test_startswith_endswith_sql_query_with_bileteral_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__startswith="abc").values(
             "name"
         )
 
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -132,13 +114,12 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_startswith_endswith_case_insensitive_transform_sql_query(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__istartswith="abc").values(
             "name"
         )
 
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -150,11 +131,10 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_startswith_endswith_endswith_sql_query_with_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__endswith="abc").values("name")
 
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
 
         self.assertEqual(
@@ -167,10 +147,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_regex_sql_query_case_sensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__regex="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -180,10 +159,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_regex_sql_query_case_insensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__iregex="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -193,10 +171,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("(?i)abc",))
 
     def test_regex_sql_query_case_sensitive_with_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__regex="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
 
         self.assertEqual(
@@ -208,10 +185,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_regex_sql_query_case_insensitive_with_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__iregex="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
 
         self.assertEqual(
@@ -223,10 +199,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_contains_sql_query_case_insensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__icontains="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -236,10 +211,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("(?i)abc",))
 
     def test_contains_sql_query_case_sensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__contains="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -249,12 +223,11 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_contains_sql_query_case_insensitive_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__icontains="abc").values(
             "name"
         )
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -266,10 +239,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_contains_sql_query_case_sensitive_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__contains="abc").values("name")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
             sql_compiled,
@@ -281,10 +253,9 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("abc",))
 
     def test_iexact_sql_query_case_insensitive(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__iexact="abc").values("num")
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
 
         self.assertEqual(
@@ -295,12 +266,11 @@ class TestLookups(SimpleTestCase):
         self.assertEqual(params, ("^(?i)abc$",))
 
     def test_iexact_sql_query_case_insensitive_function_transform(self):
-        db_wrapper = self._make_one(self.settings_dict)
 
         qs1 = Author.objects.filter(name__upper__iexact=F("last_name")).values(
             "name"
         )
-        compiler = SQLCompiler(qs1.query, db_wrapper, "default")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
 
         self.assertEqual(

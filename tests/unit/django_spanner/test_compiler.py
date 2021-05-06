@@ -4,25 +4,15 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from django.test import SimpleTestCase
 from django.core.exceptions import EmptyResultSet
 from django.db.utils import DatabaseError
 from django_spanner.compiler import SQLCompiler
 from django.db.models.query import QuerySet
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from .models import Number
 
 
-class TestCompiler(SimpleTestCase):
-    settings_dict = {"dummy_param": "dummy"}
-
-    def _get_target_class(self):
-        from django_spanner.base import DatabaseWrapper
-
-        return DatabaseWrapper
-
-    def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
-
+class TestCompiler(SpannerSimpleTestClass):
     def test_unsupported_ordering_slicing_raises_db_error(self):
         """
         Tries limit/offset and order by in subqueries which are not supported
@@ -31,23 +21,22 @@ class TestCompiler(SimpleTestCase):
         qs1 = Number.objects.all()
         qs2 = Number.objects.all()
         msg = "LIMIT/OFFSET not allowed in subqueries of compound statements"
-        with self.assertRaisesMessage(DatabaseError, msg):
+        with self.assertRaisesRegex(DatabaseError, msg):
             list(qs1.union(qs2[:10]))
         msg = "ORDER BY not allowed in subqueries of compound statements"
-        with self.assertRaisesMessage(DatabaseError, msg):
+        with self.assertRaisesRegex(DatabaseError, msg):
             list(qs1.order_by("id").union(qs2))
 
     def test_get_combinator_sql_all_union_sql_generated(self):
         """
         Tries union sql generator.
         """
-        connection = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs4 = qs1.union(qs2)
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         sql_compiled, params = compiler.get_combinator_sql("union", True)
         self.assertEqual(
             sql_compiled,
@@ -63,13 +52,12 @@ class TestCompiler(SimpleTestCase):
         """
         Tries union sql generator with distinct.
         """
-        connection = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs4 = qs1.union(qs2)
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         sql_compiled, params = compiler.get_combinator_sql("union", False)
         self.assertEqual(
             sql_compiled,
@@ -86,13 +74,11 @@ class TestCompiler(SimpleTestCase):
         """
         Tries difference sql generator.
         """
-        connection = self._make_one(self.settings_dict)
-
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs4 = qs1.difference(qs2)
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         sql_compiled, params = compiler.get_combinator_sql("difference", True)
 
         self.assertEqual(
@@ -109,13 +95,11 @@ class TestCompiler(SimpleTestCase):
         """
         Tries difference sql generator with distinct.
         """
-        connection = self._make_one(self.settings_dict)
-
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs4 = qs1.difference(qs2)
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         sql_compiled, params = compiler.get_combinator_sql("difference", False)
 
         self.assertEqual(
@@ -133,20 +117,18 @@ class TestCompiler(SimpleTestCase):
         """
         Tries sql generator with union of queryset with queryset of difference.
         """
-        connection = self._make_one(self.settings_dict)
-
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs3 = Number.objects.filter(num__exact=10).values("num")
         qs4 = qs1.union(qs2.difference(qs3))
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         sql_compiled, params = compiler.get_combinator_sql("union", False)
         self.assertEqual(
             sql_compiled,
             [
                 "SELECT tests_number.num FROM tests_number WHERE "
-                + "tests_number.num <= %s UNION DISTINCT ("
+                + "tests_number.num <= %s UNION DISTINCT SELECT * FROM ("
                 + "SELECT tests_number.num FROM tests_number WHERE "
                 + "tests_number.num >= %s EXCEPT DISTINCT "
                 + "SELECT tests_number.num FROM tests_number "
@@ -160,14 +142,13 @@ class TestCompiler(SimpleTestCase):
         Tries sql generator with union of queryset with queryset of difference,
         adding support for parentheses in compound sql statement.
         """
-        connection = self._make_one(self.settings_dict)
 
         qs1 = Number.objects.filter(num__lte=1).values("num")
         qs2 = Number.objects.filter(num__gte=8).values("num")
         qs3 = Number.objects.filter(num__exact=10).values("num")
         qs4 = qs1.union(qs2.difference(qs3))
 
-        compiler = SQLCompiler(qs4.query, connection, "default")
+        compiler = SQLCompiler(qs4.query, self.connection, "default")
         compiler.connection.features.supports_parentheses_in_compound = False
         sql_compiled, params = compiler.get_combinator_sql("union", False)
         self.assertEqual(
@@ -187,7 +168,6 @@ class TestCompiler(SimpleTestCase):
         """
         Tries sql generator with empty queryset.
         """
-        connection = self._make_one(self.settings_dict)
-        compiler = SQLCompiler(QuerySet().query, connection, "default")
+        compiler = SQLCompiler(QuerySet().query, self.connection, "default")
         with self.assertRaises(EmptyResultSet):
             compiler.get_combinator_sql("union", False)

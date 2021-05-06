@@ -61,7 +61,7 @@ then
     # 'spanner.googleapis.com').
     export DJANGO_WORKER_COUNT=0
 else
-    export DJANGO_WORKER_COUNT=5
+    export DJANGO_WORKER_COUNT=1
 fi
 
 python3 ./run_testing_worker.py

@@ -44,7 +44,8 @@ worker_count = int(os.getenv("DJANGO_WORKER_COUNT", 1))
 if worker_index >= worker_count:
     print(
         "worker_index ({wi}) > worker_count ({wc})".format(
-            wi=worker_index, wc=worker_count,
+            wi=worker_index,
+            wc=worker_count,
         )
     )
     exit()
@@ -52,16 +53,16 @@ if worker_index >= worker_count:
 with open("django_test_apps.txt", "r") as file:
     all_apps = file.read().split("\n")
 
-apps_per_worker = math.ceil(len(all_apps) / worker_count)
+# apps_per_worker = math.ceil(len(all_apps) / worker_count)
 
-start_index = min(worker_index * apps_per_worker, len(all_apps))
-end_index = min(start_index + apps_per_worker, len(all_apps))
+# start_index = min(worker_index * apps_per_worker, len(all_apps))
+# end_index = min(start_index + apps_per_worker, len(all_apps))
 
-test_apps = all_apps[start_index:end_index]
-print("test apps: ", test_apps)
+# test_apps = all_apps[start_index:end_index]
+# print("test apps: ", test_apps)
 
-if not test_apps:
-    exit()
+# if not test_apps:
+#     exit()
 
 delay = random.randint(10, 60)
 print("creating instance with delay: {} seconds".format(delay))
@@ -70,6 +71,6 @@ time.sleep(delay)
 with TestInstance() as instance_name:
     os.system(
         """DJANGO_TEST_APPS="{apps}" SPANNER_TEST_INSTANCE={instance} bash ./django_test_suite.sh""".format(
-            apps=" ".join(test_apps), instance=instance_name
+            apps=" ".join(all_apps), instance=instance_name
         )
     )

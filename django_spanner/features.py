@@ -233,10 +233,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "queries.test_bulk_update.BulkUpdateTests.test_large_batch",
         # Spanner doesn't support random ordering.
         "ordering.tests.OrderingTests.test_random_ordering",
-        # No matching signature for function MOD for argument types: FLOAT64,
-        # FLOAT64. Supported signatures: MOD(INT64, INT64)
-        "db_functions.math.test_mod.ModTests.test_decimal",
-        "db_functions.math.test_mod.ModTests.test_float",
         # casting DateField to DateTimeField adds an unexpected hour:
         # https://github.com/orijtech/spanner-orm/issues/260
         "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",
@@ -364,6 +360,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
         "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",
         "model_formsets_regress.tests.FormsetTests.test_extraneous_query_is_not_run",
+        # Numeric field is not supported in primary key/unique key.
+        "model_formsets.tests.ModelFormsetTest.test_inline_formsets_with_custom_pk",
+        "model_forms.tests.ModelFormBaseTest.test_exclude_and_validation",
+        "model_forms.tests.UniqueTest.test_unique_together",
+        "model_forms.tests.UniqueTest.test_override_unique_together_message",
         # os.chmod() doesn't work on Kokoro?
         "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
         # Tests that sometimes fail on Kokoro for unknown reasons.

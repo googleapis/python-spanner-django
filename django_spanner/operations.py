@@ -8,6 +8,7 @@ import os
 import re
 from base64 import b64decode
 from datetime import datetime, time
+from decimal import Decimal
 from uuid import UUID
 
 from django.conf import settings
@@ -189,11 +190,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         self, value, max_digits=None, decimal_places=None
     ):
         """
-        Convert value from decimal.Decimal to spanner compatible value.
-        Since spanner supports Numeric storage of decimal and python spanner
-        takes care of the conversion so this is a no-op method call.
+        Convert value from decimal.Decimal into float, for a direct mapping
+        and correct serialization with RPCs to Cloud Spanner.
 
-        :type value: :class:`decimal.Decimal`
+        :type value: :class:`~google.cloud.spanner_v1.types.Numeric`
         :param value: A decimal field value.
 
         :type max_digits: int
@@ -203,10 +203,12 @@ class DatabaseOperations(BaseDatabaseOperations):
         :param decimal_places: (Optional) The number of decimal places to store
                                with the number.
 
-        :rtype: decimal.Decimal
-        :returns: decimal value.
+        :rtype: float
+        :returns: Formatted value.
         """
-        return value
+        if value is None:
+            return None
+        return float(value)
 
     def adapt_timefield_value(self, value):
         """
@@ -242,6 +244,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         internal_type = expression.output_field.get_internal_type()
         if internal_type == "DateTimeField":
             converters.append(self.convert_datetimefield_value)
+        elif internal_type == "DecimalField":
+            converters.append(self.convert_decimalfield_value)
         elif internal_type == "TimeField":
             converters.append(self.convert_timefield_value)
         elif internal_type == "BinaryField":
@@ -306,6 +310,26 @@ class DatabaseOperations(BaseDatabaseOperations):
             if settings.USE_TZ
             else dt
         )
+
+    def convert_decimalfield_value(self, value, expression, connection):
+        """Convert Spanner DecimalField value for Django.
+
+        :type value: float
+        :param value: A decimal field.
+
+        :type expression: :class:`django.db.models.expressions.BaseExpression`
+        :param expression: A query expression.
+
+        :type connection: :class:`~google.cloud.cpanner_dbapi.connection.Connection`
+        :param connection: Reference to a Spanner database connection.
+
+        :rtype: :class:`Decimal`
+        :returns: A converted decimal field.
+        """
+        if value is None:
+            return value
+        # Cloud Spanner returns a float.
+        return Decimal(str(value))
 
     def convert_timefield_value(self, value, expression, connection):
         """Convert Spanner TimeField value for Django.

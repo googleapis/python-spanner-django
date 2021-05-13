@@ -14,10 +14,3 @@ class Author(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     rating = models.DecimalField()
-
-
-class Number(models.Model):
-    num = models.DecimalField()
-
-    def __str__(self):
-        return str(self.num)

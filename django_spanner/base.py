@@ -34,7 +34,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "CharField": "STRING(%(max_length)s)",
         "DateField": "DATE",
         "DateTimeField": "TIMESTAMP",
-        "DecimalField": "NUMERIC",
+        "DecimalField": "FLOAT64",
         "DurationField": "INT64",
         "EmailField": "STRING(%(max_length)s)",
         "FileField": "STRING(%(max_length)s)",

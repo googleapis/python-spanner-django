@@ -1027,12 +1027,20 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.math.test_ceil.CeilTests.test_null",  # noqa
             "db_functions.math.test_ceil.CeilTests.test_transform",  # noqa
             "db_functions.math.test_cos.CosTests.test_null",  # noqa
+            "db_functions.math.test_cos.CosTests.test_transform",  # noqa
             "db_functions.math.test_cot.CotTests.test_null",  # noqa
+            "db_functions.math.test_degrees.DegreesTests.test_decimal",  # noqa
             "db_functions.math.test_degrees.DegreesTests.test_null",  # noqa
+            "db_functions.math.test_exp.ExpTests.test_decimal",  # noqa
             "db_functions.math.test_exp.ExpTests.test_null",  # noqa
+            "db_functions.math.test_exp.ExpTests.test_transform",  # noqa
             "db_functions.math.test_floor.FloorTests.test_null",  # noqa
+            "db_functions.math.test_ln.LnTests.test_decimal",  # noqa
             "db_functions.math.test_ln.LnTests.test_null",  # noqa
+            "db_functions.math.test_ln.LnTests.test_transform",  # noqa
+            "db_functions.math.test_log.LogTests.test_decimal",  # noqa
             "db_functions.math.test_log.LogTests.test_null",  # noqa
+            "db_functions.math.test_mod.ModTests.test_float",  # noqa
             "db_functions.math.test_mod.ModTests.test_null",  # noqa
             "db_functions.math.test_power.PowerTests.test_decimal",  # noqa
             "db_functions.math.test_power.PowerTests.test_float",  # noqa
@@ -1041,7 +1049,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.math.test_radians.RadiansTests.test_null",  # noqa
             "db_functions.math.test_round.RoundTests.test_null",  # noqa
             "db_functions.math.test_sin.SinTests.test_null",  # noqa
+            "db_functions.math.test_sqrt.SqrtTests.test_decimal",  # noqa
             "db_functions.math.test_sqrt.SqrtTests.test_null",  # noqa
+            "db_functions.math.test_sqrt.SqrtTests.test_transform",  # noqa
             "db_functions.math.test_tan.TanTests.test_null",  # noqa
             "db_functions.tests.FunctionTests.test_func_transform_bilateral",  # noqa
             "db_functions.tests.FunctionTests.test_func_transform_bilateral_multivalue",  # noqa

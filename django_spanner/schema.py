@@ -91,6 +91,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 self.deferred_sql.append(
                     self._create_unique_sql(model, [field.column])
                 )
+
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:

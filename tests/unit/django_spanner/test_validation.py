@@ -1,22 +1,17 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
-import unittest
-from django.test import SimpleTestCase
 from django_spanner.validation import DatabaseValidation
 from django.db import connection
 from django.core.checks import Error as DjangoError
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from .models import ModelDecimalField, ModelCharField
 
 
-@unittest.skipIf(
-    sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
-)
-class TestValidation(SimpleTestCase):
+class TestValidation(SpannerSimpleTestClass):
     def test_check_field_type_with_decimal_field_not_support_error(self):
         """
         Checks if decimal field fails database validation as it's not
@@ -42,5 +37,6 @@ class TestValidation(SimpleTestCase):
         field = ModelCharField._meta.get_field("field")
         validator = DatabaseValidation(connection=connection)
         self.assertEqual(
-            validator.check_field(field), [],
+            validator.check_field(field),
+            [],
         )

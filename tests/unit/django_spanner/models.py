@@ -1,26 +1,23 @@
+# Copyright 2021 Google LLC
+#
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file or at
+# https://developers.google.com/open-source/licenses/bsd
 """
 Different models used for testing django-spanner code.
 """
-import os
 from django.db import models
-import django
-from django.db.models import Transform
-from django.db.models import CharField, TextField
-
-# Load django settings before loading dhango models.
-os.environ["DJANGO_SETTINGS_MODULE"] = "tests.settings"
-django.setup()
 
 
 # Register transformations for model fields.
-class UpperCase(Transform):
+class UpperCase(models.Transform):
     lookup_name = "upper"
     function = "UPPER"
     bilateral = True
 
 
-CharField.register_lookup(UpperCase)
-TextField.register_lookup(UpperCase)
+models.CharField.register_lookup(UpperCase)
+models.TextField.register_lookup(UpperCase)
 
 
 # Models

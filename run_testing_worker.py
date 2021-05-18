@@ -30,6 +30,10 @@ class TestInstance:
         name = "spanner-django-test-{}".format(str(int(time.time())))
 
         self._instance = client.instance(name, config)
+        if self._instance.exists():
+            # If test instance already exists first delete it and then create.
+            self._instance.delete()
+            created_op.result(120)  # block until completion
         created_op = self._instance.create()
         created_op.result(120)  # block until completion
         return name

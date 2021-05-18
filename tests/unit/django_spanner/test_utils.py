@@ -1,22 +1,18 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
-import unittest
 from django_spanner.utils import check_django_compatability
 from django.core.exceptions import ImproperlyConfigured
 from django_spanner.utils import add_dummy_where
 import django
 import django_spanner
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 
 
-@unittest.skipIf(
-    sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
-)
-class TestUtils(unittest.TestCase):
+class TestUtils(SpannerSimpleTestClass):
     SQL_WITH_WHERE = "Select 1 from Table WHERE 1=1"
     SQL_WITHOUT_WHERE = "Select 1 from Table"
 

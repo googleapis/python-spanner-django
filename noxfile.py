@@ -10,7 +10,6 @@
 from __future__ import absolute_import
 
 import os
-import pathlib
 import shutil
 
 import nox
@@ -26,15 +25,12 @@ BLACK_PATHS = [
 
 DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
-
-CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
+UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8"]
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint(session):
     """Run linters.
-
     Returns a failure if the linters find linting errors or sufficiently
     serious code quality issues.
     """
@@ -46,9 +42,7 @@ def lint(session):
 @nox.session(python="3.6")
 def blacken(session):
     """Run black.
-
     Format code to uniform standard.
-
     This currently uses Python 3.6 due to the automated Kokoro run of synthtool.
     That run uses an image that doesn't have 3.6 installed. Before updating this
     check the state of the `gcp_ubuntu_config` we use for that Kokoro run.
@@ -89,7 +83,7 @@ def default(session):
         "--cov-report=",
         "--cov-fail-under=68",
         os.path.join("tests", "unit"),
-        *session.posargs,
+        *session.posargs
     )
 
 
@@ -99,60 +93,9 @@ def unit(session):
     default(session)
 
 
-@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
-def system(session):
-    """Run the system test suite."""
-    constraints_path = str(
-        CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
-    )
-    system_test_path = os.path.join("tests", "system.py")
-    system_test_folder_path = os.path.join("tests", "system")
-
-    # Check the value of `RUN_SYSTEM_TESTS` env var. It defaults to true.
-    if os.environ.get("RUN_SYSTEM_TESTS", "true") == "false":
-        session.skip("RUN_SYSTEM_TESTS is set to false, skipping")
-    # Sanity check: Only run tests if the environment variable is set.
-    if not os.environ.get(
-        "GOOGLE_APPLICATION_CREDENTIALS", ""
-    ) and not os.environ.get("SPANNER_EMULATOR_HOST", ""):
-        session.skip(
-            "Credentials or emulator host must be set via environment variable"
-        )
-
-    system_test_exists = os.path.exists(system_test_path)
-    system_test_folder_exists = os.path.exists(system_test_folder_path)
-    # Sanity check: only run tests if found.
-    if not system_test_exists and not system_test_folder_exists:
-        session.skip("System tests were not found")
-
-    # Use pre-release gRPC for system tests.
-    session.install("--pre", "grpcio")
-
-    # Install all test dependencies, then install this package into the
-    # virtualenv's dist-packages.
-    session.install(
-        "django~=2.2",
-        "mock",
-        "pytest",
-        "google-cloud-testutils",
-        "-c",
-        constraints_path,
-    )
-    session.install("-e", ".[tracing]", "-c", constraints_path)
-
-    # Run py.test against the system tests.
-    if system_test_exists:
-        session.run("py.test", "--quiet", system_test_path, *session.posargs)
-    if system_test_folder_exists:
-        session.run(
-            "py.test", "--quiet", system_test_folder_path, *session.posargs
-        )
-
-
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def cover(session):
     """Run the final coverage report.
-
     This outputs the coverage report aggregating coverage from the unit
     test runs (not system test runs), and then erases coverage data.
     """

@@ -25,7 +25,7 @@ BLACK_PATHS = [
 
 DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
@@ -84,7 +84,7 @@ def default(session):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=80",
+        "--cov-fail-under=68",
         os.path.join("tests", "unit"),
         *session.posargs
     )
@@ -104,7 +104,7 @@ def cover(session):
     test runs (not system test runs), and then erases coverage data.
     """
     session.install("coverage", "pytest-cov")
-    session.run("coverage", "report", "--show-missing", "--fail-under=80")
+    session.run("coverage", "report", "--show-missing", "--fail-under=68")
 
     session.run("coverage", "erase")
 

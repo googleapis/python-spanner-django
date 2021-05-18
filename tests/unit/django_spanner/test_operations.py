@@ -7,6 +7,7 @@
 from django.db.utils import DatabaseError
 from datetime import timedelta
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
+from decimal import Decimal
 
 
 class TestOperations(SpannerSimpleTestClass):
@@ -41,14 +42,16 @@ class TestOperations(SpannerSimpleTestClass):
         from django.core.management.color import no_style
 
         self.assertEqual(
-            self.db_operations.sql_flush(style=no_style(), tables=[]), [],
+            self.db_operations.sql_flush(style=no_style(), tables=[]),
+            [],
         )
 
     def test_adapt_datefield_value(self):
         from google.cloud.spanner_dbapi.types import DateStr
 
         self.assertIsInstance(
-            self.db_operations.adapt_datefield_value("dummy_date"), DateStr,
+            self.db_operations.adapt_datefield_value("dummy_date"),
+            DateStr,
         )
 
     def test_adapt_datefield_value_none(self):
@@ -58,7 +61,8 @@ class TestOperations(SpannerSimpleTestClass):
 
     def test_adapt_decimalfield_value(self):
         self.assertIsInstance(
-            self.db_operations.adapt_decimalfield_value(value=1), float,
+            self.db_operations.adapt_decimalfield_value(value=Decimal("1")),
+            Decimal,
         )
 
     def test_adapt_decimalfield_value_none(self):
@@ -91,23 +95,6 @@ class TestOperations(SpannerSimpleTestClass):
     def test_adapt_timefield_value_none(self):
         self.assertIsNone(
             self.db_operations.adapt_timefield_value(value=None),
-        )
-
-    def test_convert_decimalfield_value(self):
-        from decimal import Decimal
-
-        self.assertIsInstance(
-            self.db_operations.convert_decimalfield_value(
-                value=1.0, expression=None, connection=None
-            ),
-            Decimal,
-        )
-
-    def test_convert_decimalfield_value_none(self):
-        self.assertIsNone(
-            self.db_operations.convert_decimalfield_value(
-                value=None, expression=None, connection=None
-            ),
         )
 
     def test_convert_uuidfield_value(self):
@@ -232,7 +219,8 @@ class TestOperations(SpannerSimpleTestClass):
 
     def test_combine_expression_multiply(self):
         self.assertEqual(
-            self.db_operations.combine_expression("*", ["10", "2"]), "10 * 2",
+            self.db_operations.combine_expression("*", ["10", "2"]),
+            "10 * 2",
         )
 
     def test_combine_duration_expression_add(self):
@@ -263,10 +251,16 @@ class TestOperations(SpannerSimpleTestClass):
 
     def test_lookup_cast_match_lookup_type(self):
         self.assertEqual(
-            self.db_operations.lookup_cast("contains",), "CAST(%s AS STRING)",
+            self.db_operations.lookup_cast(
+                "contains",
+            ),
+            "CAST(%s AS STRING)",
         )
 
     def test_lookup_cast_unmatched_lookup_type(self):
         self.assertEqual(
-            self.db_operations.lookup_cast("dummy",), "%s",
+            self.db_operations.lookup_cast(
+                "dummy",
+            ),
+            "%s",
         )

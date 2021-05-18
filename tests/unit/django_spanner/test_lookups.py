@@ -12,8 +12,11 @@ from .models import Number, Author
 
 class TestLookups(SpannerSimpleTestClass):
     def test_cast_param_to_float_lte_sql_query(self):
+        from decimal import Decimal
 
-        qs1 = Number.objects.filter(decimal_num__lte=1.1).values("decimal_num")
+        qs1 = Number.objects.filter(decimal_num__lte=Decimal("1.1")).values(
+            "decimal_num"
+        )
         compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
@@ -21,7 +24,7 @@ class TestLookups(SpannerSimpleTestClass):
             "SELECT tests_number.decimal_num FROM tests_number WHERE "
             + "tests_number.decimal_num <= %s",
         )
-        self.assertEqual(params, (1.1,))
+        self.assertEqual(params, (Decimal("1.1"),))
 
     def test_cast_param_to_float_for_int_field_query(self):
 

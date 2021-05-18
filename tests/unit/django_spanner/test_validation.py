@@ -37,6 +37,5 @@ class TestValidation(SpannerSimpleTestClass):
         field = ModelCharField._meta.get_field("field")
         validator = DatabaseValidation(connection=connection)
         self.assertEqual(
-            validator.check_field(field),
-            [],
+            validator.check_field(field), [],
         )

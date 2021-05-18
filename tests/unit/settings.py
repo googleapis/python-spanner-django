@@ -25,8 +25,7 @@ TIME_ZONE = "UTC"
 
 ENGINE = "django_spanner"
 PROJECT = os.getenv(
-    "GOOGLE_CLOUD_PROJECT",
-    os.getenv("PROJECT_ID", "emulator-test-project"),
+    "GOOGLE_CLOUD_PROJECT", os.getenv("PROJECT_ID", "emulator-test-project"),
 )
 
 INSTANCE = "django-test-instance"

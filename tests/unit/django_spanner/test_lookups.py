@@ -7,12 +7,12 @@
 from django_spanner.compiler import SQLCompiler
 from django.db.models import F
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
+from decimal import Decimal
 from .models import Number, Author
 
 
 class TestLookups(SpannerSimpleTestClass):
     def test_cast_param_to_float_lte_sql_query(self):
-        from decimal import Decimal
 
         qs1 = Number.objects.filter(decimal_num__lte=Decimal("1.1")).values(
             "decimal_num"

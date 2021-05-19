@@ -31,6 +31,7 @@ UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8"]
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint(session):
     """Run linters.
+
     Returns a failure if the linters find linting errors or sufficiently
     serious code quality issues.
     """
@@ -42,7 +43,9 @@ def lint(session):
 @nox.session(python="3.6")
 def blacken(session):
     """Run black.
+
     Format code to uniform standard.
+
     This currently uses Python 3.6 due to the automated Kokoro run of synthtool.
     That run uses an image that doesn't have 3.6 installed. Before updating this
     check the state of the `gcp_ubuntu_config` we use for that Kokoro run.
@@ -96,6 +99,7 @@ def unit(session):
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def cover(session):
     """Run the final coverage report.
+
     This outputs the coverage report aggregating coverage from the unit
     test runs (not system test runs), and then erases coverage data.
     """

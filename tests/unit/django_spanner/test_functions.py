@@ -1,13 +1,10 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
-import unittest
-
-from django.test import SimpleTestCase
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from django_spanner.compiler import SQLCompiler
 from django.db.models import CharField, FloatField, Value
 from django.db.models.functions import (
@@ -27,33 +24,16 @@ from django.db.models.functions import (
 from .models import Author
 
 
-@unittest.skipIf(
-    sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
-)
-class TestUtils(SimpleTestCase):
-    def _get_target_class(self):
-        from django_spanner.base import DatabaseWrapper
-
-        return DatabaseWrapper
-
-    def _make_one(self, *args, **kwargs):
-        """
-        Returns a connection to the database provided in settings.
-        """
-        dummy_settings = {"dummy_param": "dummy"}
-        return self._get_target_class()(settings_dict=dummy_settings)
-
-    # Tests
+class TestUtils(SpannerSimpleTestClass):
     def test_cast_with_max_length(self):
         """
         Tests cast field with max length.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("name").annotate(
             name_as_prefix=Cast("name", output_field=CharField(max_length=10)),
         )
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.name, SUBSTR(CAST(tests_author.name AS "
@@ -65,12 +45,11 @@ class TestUtils(SimpleTestCase):
         """
         Tests cast field without max length.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("num").annotate(
             num_as_float=Cast("num", output_field=FloatField()),
         )
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, CAST(tests_author.num AS FLOAT64) "
@@ -80,16 +59,15 @@ class TestUtils(SimpleTestCase):
 
     def test_concatpair(self):
         """
-        Tests concat pair.
+        Tests concatinating pair of columns.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("name").annotate(
             full_name=Concat(
                 "name", Value(" "), "last_name", output_field=CharField()
             ),
         )
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.name, CONCAT(IFNULL(tests_author.name, %s), "
@@ -100,12 +78,13 @@ class TestUtils(SimpleTestCase):
 
     def test_cot(self):
         """
-        Tests cot function.
+        Tests cot function on a column.
         """
-        connection = self._make_one()
-        q1 = Author.objects.values("num").annotate(num_cot=Cot("num"),)
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        q1 = Author.objects.values("num").annotate(
+            num_cot=Cot("num"),
+        )
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, (1 / TAN(tests_author.num)) AS num_cot "
@@ -115,12 +94,13 @@ class TestUtils(SimpleTestCase):
 
     def test_degrees(self):
         """
-        Tests degrees function.
+        Tests degrees function on a column.
         """
-        connection = self._make_one()
-        q1 = Author.objects.values("num").annotate(num_degrees=Degrees("num"),)
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        q1 = Author.objects.values("num").annotate(
+            num_degrees=Degrees("num"),
+        )
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, ((tests_author.num) * 180 / "
@@ -130,14 +110,13 @@ class TestUtils(SimpleTestCase):
 
     def test_left(self):
         """
-        Tests degrees function.
+        Tests left function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("num").annotate(
             first_initial=Left("name", 1),
         )
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, SUBSTR(tests_author.name, %s, %s) AS "
@@ -147,14 +126,13 @@ class TestUtils(SimpleTestCase):
 
     def test_right(self):
         """
-        Tests degrees function.
+        Tests right function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("num").annotate(
             last_letter=Right("name", 1),
         )
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, SUBSTR(tests_author.name, (%s * %s)) "
@@ -164,13 +142,12 @@ class TestUtils(SimpleTestCase):
 
     def test_log(self):
         """
-        Tests log function.
+        Tests log function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("num").annotate(log=Log("num", Value(10)))
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, LOG(%s, tests_author.num) AS log FROM "
@@ -180,15 +157,14 @@ class TestUtils(SimpleTestCase):
 
     def test_ord(self):
         """
-        Tests ord function.
+        Tests ord function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("name").annotate(
             name_code_point=Ord("name")
         )
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.name, TO_CODE_POINTS(tests_author.name)"
@@ -198,13 +174,12 @@ class TestUtils(SimpleTestCase):
 
     def test_pi(self):
         """
-        Tests pi function.
+        Tests pi function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.filter(num=Pi()).values("num")
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num FROM tests_author WHERE tests_author.num "
@@ -214,13 +189,12 @@ class TestUtils(SimpleTestCase):
 
     def test_radians(self):
         """
-        Tests radians function.
+        Tests radians function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("num").annotate(num_radians=Radians("num"))
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num, ((tests_author.num) * 3.141592653589793 "
@@ -230,15 +204,14 @@ class TestUtils(SimpleTestCase):
 
     def test_strindex(self):
         """
-        Tests str index query.
+        Tests str index function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("name").annotate(
             smith_index=StrIndex("name", Value("Smith"))
         )
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.name, STRPOS(tests_author.name, %s) AS "
@@ -248,15 +221,14 @@ class TestUtils(SimpleTestCase):
 
     def test_substr(self):
         """
-        Tests substr query.
+        Tests substr function applied to a column.
         """
-        connection = self._make_one()
         q1 = Author.objects.values("name").annotate(
             name_prefix=Substr("name", 1, 5)
         )
 
-        compiler = SQLCompiler(q1.query, connection, "default")
-        sql_query, params = compiler.query.as_sql(compiler, connection)
+        compiler = SQLCompiler(q1.query, self.connection, "default")
+        sql_query, params = compiler.query.as_sql(compiler, self.connection)
         self.assertEqual(
             sql_query,
             "SELECT tests_author.name, SUBSTR(tests_author.name, %s, %s) AS "

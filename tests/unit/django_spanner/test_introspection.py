@@ -1,42 +1,24 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-import sys
-import unittest
-
-from django.test import SimpleTestCase
+from django.db.backends.base.introspection import TableInfo, FieldInfo
 from django_spanner.introspection import DatabaseIntrospection
+from google.cloud.spanner_dbapi._helpers import ColumnInfo
+from google.cloud.spanner_dbapi.cursor import ColumnDetails
+from google.cloud.spanner_v1 import TypeCode
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from unittest import mock
 
 
-@unittest.skipIf(
-    sys.version_info < (3, 6), reason="Skipping Python versions <= 3.5"
-)
-class TestUtils(SimpleTestCase):
-    def _get_target_class(self):
-        from django_spanner.base import DatabaseWrapper
-
-        return DatabaseWrapper
-
-    def _make_one(self, *args, **kwargs):
-        """
-        Returns a connection to the database provided in settings.
-        """
-        dummy_settings = {"dummy_param": "dummy"}
-        return self._get_target_class()(settings_dict=dummy_settings)
-
-    # Tests
+class TestUtils(SpannerSimpleTestClass):
     def test_get_field_type_boolean(self):
         """
         Tests get field type for boolean field.
         """
-        from google.cloud.spanner_v1 import TypeCode
-
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
+        db_introspection = DatabaseIntrospection(self.connection)
         self.assertEqual(
             db_introspection.get_field_type(TypeCode.BOOL, description=None),
             "BooleanField",
@@ -46,11 +28,7 @@ class TestUtils(SimpleTestCase):
         """
         Tests get field type for text field.
         """
-        from google.cloud.spanner_v1 import TypeCode
-        from google.cloud.spanner_dbapi._helpers import ColumnInfo
-
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
+        db_introspection = DatabaseIntrospection(self.connection)
         self.assertEqual(
             db_introspection.get_field_type(
                 TypeCode.STRING,
@@ -67,11 +45,7 @@ class TestUtils(SimpleTestCase):
         """
         Tests get table list method.
         """
-        from django.db.backends.base.introspection import TableInfo
-
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
-
+        db_introspection = DatabaseIntrospection(self.connection)
         cursor = mock.MagicMock()
 
         def list_tables(*args, **kwargs):
@@ -91,13 +65,7 @@ class TestUtils(SimpleTestCase):
         """
         Tests get table description method.
         """
-        from google.cloud.spanner_dbapi.cursor import ColumnDetails
-        from django.db.backends.base.introspection import FieldInfo
-        from google.cloud.spanner_v1 import TypeCode
-
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
-
+        db_introspection = DatabaseIntrospection(self.connection)
         cursor = mock.MagicMock()
 
         def description(*args, **kwargs):
@@ -148,9 +116,7 @@ class TestUtils(SimpleTestCase):
         """
         Tests get primary column of table.
         """
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
-
+        db_introspection = DatabaseIntrospection(self.connection)
         cursor = mock.MagicMock()
 
         def run_sql_in_snapshot(*args, **kwargs):
@@ -161,16 +127,15 @@ class TestUtils(SimpleTestCase):
             cursor=cursor, table_name="Table_1"
         )
         self.assertEqual(
-            primary_key, "PK_column",
+            primary_key,
+            "PK_column",
         )
 
     def test_get_primary_key_column_returns_none(self):
         """
-        Tests get primary column of table.
+        Tests get primary column of table when key is None.
         """
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
-
+        db_introspection = DatabaseIntrospection(self.connection)
         cursor = mock.MagicMock()
 
         def run_sql_in_snapshot(*args, **kwargs):
@@ -180,15 +145,15 @@ class TestUtils(SimpleTestCase):
         primary_key = db_introspection.get_primary_key_column(
             cursor=cursor, table_name="Table_1"
         )
-        self.assertIsNone(primary_key,)
+        self.assertIsNone(
+            primary_key,
+        )
 
     def test_get_constraints(self):
         """
-        Tests get constraints.
+        Tests get constraints applied on table columns.
         """
-        connection = self._make_one()
-        db_introspection = DatabaseIntrospection(connection)
-
+        db_introspection = DatabaseIntrospection(self.connection)
         cursor = mock.MagicMock()
 
         def run_sql_in_snapshot(*args, **kwargs):

@@ -7,13 +7,16 @@
 from django_spanner.compiler import SQLCompiler
 from django.db.models import F
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
+from decimal import Decimal
 from .models import Number, Author
 
 
 class TestLookups(SpannerSimpleTestClass):
     def test_cast_param_to_float_lte_sql_query(self):
 
-        qs1 = Number.objects.filter(decimal_num__lte=1.1).values("decimal_num")
+        qs1 = Number.objects.filter(decimal_num__lte=Decimal("1.1")).values(
+            "decimal_num"
+        )
         compiler = SQLCompiler(qs1.query, self.connection, "default")
         sql_compiled, params = compiler.as_sql()
         self.assertEqual(
@@ -21,7 +24,7 @@ class TestLookups(SpannerSimpleTestClass):
             "SELECT tests_number.decimal_num FROM tests_number WHERE "
             + "tests_number.decimal_num <= %s",
         )
-        self.assertEqual(params, (1.1,))
+        self.assertEqual(params, (Decimal("1.1"),))
 
     def test_cast_param_to_float_for_int_field_query(self):
 
@@ -280,3 +283,17 @@ class TestLookups(SpannerSimpleTestClass):
             + "CONCAT('^(?i)', CAST(UPPER(tests_author.name) AS STRING), '$'))",
         )
         self.assertEqual(params, ())
+
+    def test_iexact_sql_query_case_insensitive_value_match(self):
+
+        qs1 = Author.objects.filter(name__upper__iexact="abc").values("name")
+        compiler = SQLCompiler(qs1.query, self.connection, "default")
+        sql_compiled, params = compiler.as_sql()
+
+        self.assertEqual(
+            sql_compiled,
+            "SELECT tests_author.name FROM tests_author WHERE "
+            + "REGEXP_CONTAINS((UPPER(CONCAT('^(?i)', "
+            + "CAST(UPPER(tests_author.name) AS STRING), '$'))), %s)",
+        )
+        self.assertEqual(params, ("abc",))

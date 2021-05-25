@@ -4,10 +4,15 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from django.db.utils import DatabaseError
+from base64 import b64encode
 from datetime import timedelta
-from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from decimal import Decimal
+from django.conf import settings
+from django.core.management.color import no_style
+from django.db.utils import DatabaseError
+from google.cloud.spanner_dbapi.types import DateStr
+from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
+import uuid
 
 
 class TestOperations(SpannerSimpleTestClass):
@@ -29,8 +34,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_sql_flush(self):
-        from django.core.management.color import no_style
-
         self.assertEqual(
             self.db_operations.sql_flush(
                 style=no_style(), tables=["Table1", "Table2"]
@@ -39,17 +42,15 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_sql_flush_empty_table_list(self):
-        from django.core.management.color import no_style
-
         self.assertEqual(
-            self.db_operations.sql_flush(style=no_style(), tables=[]), [],
+            self.db_operations.sql_flush(style=no_style(), tables=[]),
+            [],
         )
 
     def test_adapt_datefield_value(self):
-        from google.cloud.spanner_dbapi.types import DateStr
-
         self.assertIsInstance(
-            self.db_operations.adapt_datefield_value("dummy_date"), DateStr,
+            self.db_operations.adapt_datefield_value("dummy_date"),
+            DateStr,
         )
 
     def test_adapt_datefield_value_none(self):
@@ -69,8 +70,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_convert_binaryfield_value(self):
-        from base64 import b64encode
-
         self.assertEqual(
             self.db_operations.convert_binaryfield_value(
                 value=b64encode(b"abc"), expression=None, connection=None
@@ -96,8 +95,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_convert_uuidfield_value(self):
-        import uuid
-
         uuid_obj = uuid.uuid4()
         self.assertEqual(
             self.db_operations.convert_uuidfield_value(
@@ -126,8 +123,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_datetime_extract_sql(self):
-        from django.conf import settings
-
         settings.USE_TZ = True
         self.assertEqual(
             self.db_operations.datetime_extract_sql(
@@ -137,8 +132,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_datetime_extract_sql_use_tz_false(self):
-        from django.conf import settings
-
         settings.USE_TZ = False
         self.assertEqual(
             self.db_operations.datetime_extract_sql(
@@ -167,8 +160,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_datetime_cast_time_sql(self):
-        from django.conf import settings
-
         settings.USE_TZ = True
         self.assertEqual(
             self.db_operations.datetime_cast_time_sql("dummy_field", "IST"),
@@ -176,8 +167,6 @@ class TestOperations(SpannerSimpleTestClass):
         )
 
     def test_datetime_cast_time_sql_use_tz_false(self):
-        from django.conf import settings
-
         settings.USE_TZ = False
         self.assertEqual(
             self.db_operations.datetime_cast_time_sql("dummy_field", "IST"),
@@ -217,7 +206,8 @@ class TestOperations(SpannerSimpleTestClass):
 
     def test_combine_expression_multiply(self):
         self.assertEqual(
-            self.db_operations.combine_expression("*", ["10", "2"]), "10 * 2",
+            self.db_operations.combine_expression("*", ["10", "2"]),
+            "10 * 2",
         )
 
     def test_combine_duration_expression_add(self):
@@ -248,10 +238,16 @@ class TestOperations(SpannerSimpleTestClass):
 
     def test_lookup_cast_match_lookup_type(self):
         self.assertEqual(
-            self.db_operations.lookup_cast("contains",), "CAST(%s AS STRING)",
+            self.db_operations.lookup_cast(
+                "contains",
+            ),
+            "CAST(%s AS STRING)",
         )
 
     def test_lookup_cast_unmatched_lookup_type(self):
         self.assertEqual(
-            self.db_operations.lookup_cast("dummy",), "%s",
+            self.db_operations.lookup_cast(
+                "dummy",
+            ),
+            "%s",
         )

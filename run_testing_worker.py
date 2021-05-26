@@ -12,12 +12,16 @@ import random
 import time
 
 from google.cloud.spanner_v1 import Client
+from google.api_core.exceptions import AlreadyExists
 
 REGION = "regional-us-central1"
+WORKER_INDEX = int(os.getenv("DJANGO_WORKER_INDEX", 0))
+WORKER_COUNT = int(os.getenv("DJANGO_WORKER_COUNT", 1))
+INSTANCE_CREATION_RETRY_LIMIT = 3
 
 
 class TestInstance:
-    def __enter__(self):
+    def _create_instance(self):
         project = os.getenv(
             "GOOGLE_CLOUD_PROJECT",
             os.getenv("PROJECT_ID", "emulator-test-project"),
@@ -26,30 +30,43 @@ class TestInstance:
         client = Client(project=project)
 
         config = f"{client.project_name}/instanceConfigs/{REGION}"
-
-        name = "spanner-django-test-{}".format(str(int(time.time())))
+        name = "sp-dj-test-{}-{}".format(
+            str(WORKER_INDEX), str(int(time.time()))
+        )
 
         self._instance = client.instance(name, config)
         if self._instance.exists():
             # If test instance already exists first delete it and then create.
             self._instance.delete()
-            created_op.result(120)  # block until completion
+            time.sleep(60)  # sleep until completion
         created_op = self._instance.create()
         created_op.result(120)  # block until completion
+        return name
+
+    def __enter__(self):
+        attempt = 0
+        name = ""
+        instance_created = False
+        while not instance_created:
+            attempt += 1
+            try:
+                name = self._create_instance()
+                instance_created = True
+            except AlreadyExists as e:
+                # if the db already exists then retry.
+                if attempt == INSTANCE_CREATION_RETRY_LIMIT:
+                    raise e
         return name
 
     def __exit__(self, exc, exc_value, traceback):
         self._instance.delete()
 
 
-worker_index = int(os.getenv("DJANGO_WORKER_INDEX", 0))
-worker_count = int(os.getenv("DJANGO_WORKER_COUNT", 1))
-
-if worker_index >= worker_count:
+if WORKER_INDEX >= WORKER_COUNT:
     print(
-        "worker_index ({wi}) > worker_count ({wc})".format(
-            wi=worker_index,
-            wc=worker_count,
+        "WORKER_INDEX ({wi}) > WORKER_COUNT ({wc})".format(
+            wi=WORKER_INDEX,
+            wc=WORKER_COUNT,
         )
     )
     exit()
@@ -57,9 +74,9 @@ if worker_index >= worker_count:
 with open("django_test_apps.txt", "r") as file:
     all_apps = file.read().split("\n")
 
-apps_per_worker = math.ceil(len(all_apps) / worker_count)
+apps_per_worker = math.ceil(len(all_apps) / WORKER_COUNT)
 
-start_index = min(worker_index * apps_per_worker, len(all_apps))
+start_index = min(WORKER_INDEX * apps_per_worker, len(all_apps))
 end_index = min(start_index + apps_per_worker, len(all_apps))
 
 test_apps = all_apps[start_index:end_index]

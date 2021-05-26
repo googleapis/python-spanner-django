@@ -34,10 +34,6 @@ class TestInstance:
         )
 
         self._instance = client.instance(name, config)
-        if self._instance.exists():
-            # If test instance already exists first delete it and then create.
-            self._instance.delete()
-            time.sleep(60)  # sleep until completion
         created_op = self._instance.create()
         created_op.result(120)  # block until completion
         return name

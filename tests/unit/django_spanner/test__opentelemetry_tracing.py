@@ -61,7 +61,6 @@ if HAS_OPENTELEMETRY_INSTALLED:
             importlib.reload(_opentelemetry_tracing)
 
         def test_no_trace_call(self):
-            conn = _make_connection()
             with _opentelemetry_tracing.trace_call(
                 "Test", _make_connection()
             ) as no_span:

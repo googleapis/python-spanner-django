@@ -18,7 +18,6 @@ from tests._helpers import OpenTelemetryBase, HAS_OPENTELEMETRY_INSTALLED
 PROJECT = os.environ["GOOGLE_CLOUD_PROJECT"]
 INSTANCE_ID = "instance_id"
 DATABASE_ID = "database_id"
-USER_AGENT = "django_spanner/2.2.0a1"
 OPTIONS = {"option": "dummy"}
 
 
@@ -38,7 +37,6 @@ def _make_connection():
         "PROJECT": PROJECT,
         "INSTANCE": INSTANCE_ID,
         "NAME": DATABASE_ID,
-        "user_agent": USER_AGENT,
         "OPTIONS": OPTIONS,
     }
     # db_client = DatabaseClient(settings_dict)
@@ -83,7 +81,6 @@ if HAS_OPENTELEMETRY_INSTALLED:
                 "db.project": PROJECT,
                 "db.instance": INSTANCE_ID,
                 "db.name": DATABASE_ID,
-                "db.user_agent": USER_AGENT,
             }
             expected_attributes.update(extra_attributes)
 
@@ -111,7 +108,6 @@ if HAS_OPENTELEMETRY_INSTALLED:
                 "db.project": os.environ["GOOGLE_CLOUD_PROJECT"],
                 "db.instance": "instance_id",
                 "db.name": "database_id",
-                "db.user_agent": "django_spanner/2.2.0a1",
             }
             expected_attributes.update(extra_attributes)
 

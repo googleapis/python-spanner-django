@@ -35,7 +35,6 @@ def trace_call(name, connection, extra_attributes=None):
         "db.project": connection.settings_dict["PROJECT"],
         "db.instance": connection.settings_dict["INSTANCE"],
         "db.name": connection.settings_dict["NAME"],
-        "db.user_agent": connection.settings_dict["user_agent"],
     }
 
     if extra_attributes:

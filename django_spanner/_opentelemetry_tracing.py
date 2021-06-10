@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
@@ -9,14 +9,10 @@
 from contextlib import contextmanager
 
 from google.api_core.exceptions import GoogleAPICallError
-from google.cloud.spanner_v1 import SpannerClient
 
 try:
     from opentelemetry import trace
-    from opentelemetry.trace.status import Status, StatusCanonicalCode
-    from opentelemetry.instrumentation.utils import (
-        http_status_to_canonical_code,
-    )
+    from opentelemetry.trace.status import Status, StatusCode
 
     HAS_OPENTELEMETRY_INSTALLED = True
 except ImportError:
@@ -35,9 +31,11 @@ def trace_call(name, connection, extra_attributes=None):
     # Set base attributes that we know for every trace created
     attributes = {
         "db.type": "spanner",
-        "db.url": SpannerClient.DEFAULT_ENDPOINT,
-        "db.instance": connection.get_connection_params()["db"],
-        "net.host.name": SpannerClient.DEFAULT_ENDPOINT,
+        "db.engine": "django_spanner",
+        "db.project": connection.settings_dict["PROJECT"],
+        "db.instance": connection.settings_dict["INSTANCE"],
+        "db.name": connection.settings_dict["NAME"],
+        "db.user_agent": connection.settings_dict["user_agent"],
     }
 
     if extra_attributes:
@@ -47,17 +45,9 @@ def trace_call(name, connection, extra_attributes=None):
         name, kind=trace.SpanKind.CLIENT, attributes=attributes
     ) as span:
         try:
+            span.set_status(Status(StatusCode.OK))
             yield span
         except GoogleAPICallError as error:
-            if error.code is not None:
-                span.set_status(
-                    Status(http_status_to_canonical_code(error.code))
-                )
-            elif error.grpc_status_code is not None:
-                span.set_status(
-                    # OpenTelemetry's StatusCanonicalCode maps 1-1 with grpc status codes
-                    Status(
-                        StatusCanonicalCode(error.grpc_status_code.value[0])
-                    )
-                )
+            span.set_status(Status(StatusCode.ERROR))
+            span.record_exception(error)
             raise

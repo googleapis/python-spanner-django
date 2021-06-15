@@ -15,7 +15,11 @@
 
 set -eo pipefail
 
-cd github/python-spanner-django
+if [[ -z "${PROJECT_ROOT:-}" ]]; then
+    PROJECT_ROOT="github/python-spanner-django"
+fi
+
+cd "${PROJECT_ROOT}"
 
 # Disable buffering, so that the logs stream through.
 export PYTHONUNBUFFERED=1

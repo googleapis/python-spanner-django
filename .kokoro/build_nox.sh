@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,26 +31,17 @@ export GOOGLE_CLOUD_PROJECT=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 
 export RUNNING_SPANNER_BACKEND_TESTS=1
 
-pip3 install .
-export DJANGO_TESTS_DIR="django_tests_dir"
-mkdir -p $DJANGO_TESTS_DIR && git clone --depth 1 --single-branch --branch "spanner/stable/2.2.x" https://github.com/c24t/django.git $DJANGO_TESTS_DIR/django
+# Remove old nox
+python3 -m pip uninstall --yes --quiet nox-automation
 
-# Install dependencies for Django tests.
-sudo apt-get update
-apt-get install -y libffi-dev libjpeg-dev zlib1g-dev libmemcached-dev
-cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+# Install nox
+python3 -m pip install --upgrade --quiet nox
+python3 -m nox --version
 
-# Hardcode the max number of workers since Spanner has a very low
-# QPS for administrative RPCs of 5QPS (averaged every 100 seconds)
-if [[ $KOKORO_JOB_NAME == *"continuous"* ]]
-then
-    # Disable continuous build as it creates too many Spanner instances
-    # ("Quota exceeded for quota metric 'Instance create requests' and
-    # limit 'Instance create requests per minute' of service
-    # 'spanner.googleapis.com').
-    export DJANGO_WORKER_COUNT=0
+# If NOX_SESSION is set, it only runs the specified session,
+# otherwise run all the sessions.
+if [[ -n "${NOX_SESSION:-}" ]]; then
+    python3 -m nox -s ${NOX_SESSION:-}
 else
-    export DJANGO_WORKER_COUNT=5
+    python3 -m nox
 fi
-
-python3 ./run_testing_worker.py

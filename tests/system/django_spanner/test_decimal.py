@@ -89,12 +89,10 @@ class TestDecimal(TransactionTestCase):
         """
         num_val = Number(num=Decimal(1) / Decimal(3))
         if USE_EMULATOR:
-            msg = "The NUMERIC type supports 38 digits of precision and 9 digits of scale."
-            with self.assertRaisesRegex(IntegrityError, msg):
+            with self.assertRaises(ValueError):
                 num_val.save()
         else:
-            msg = "400 Invalid value for bind parameter a0: Expected NUMERIC."
-            with self.assertRaisesRegex(ProgrammingError, msg):
+            with self.assertRaisesRegex(ProgrammingError):
                 num_val.save()
 
     def test_decimal_update(self):

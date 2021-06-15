@@ -7,7 +7,6 @@
 from .models import Author, Number
 from django.test import TransactionTestCase
 from django.db import connection, ProgrammingError
-from django.db.utils import IntegrityError
 from decimal import Decimal
 from tests.system.django_spanner.utils import (
     setup_instance,

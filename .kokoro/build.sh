@@ -30,7 +30,9 @@ export PROJECT_ID=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 export GOOGLE_CLOUD_PROJECT=$(cat "${KOKORO_GFILE_DIR}/project-id.json")
 
 export RUNNING_SPANNER_BACKEND_TESTS=1
-
+echo "job name:"
+echo $KOKORO_JOB_NAME
+echo ":job name end."
 if [[ $KOKORO_JOB_NAME == *"docs"* ]]
 then
     # Remove old nox

@@ -40,7 +40,7 @@ then
     # Install nox
     python3 -m pip install --upgrade --quiet nox
     # Generate docs.
-    python3 -m nox docs docfx
+    python3 -m nox -s docs docfx
 else
     pip3 install .
     export DJANGO_TESTS_DIR="django_tests_dir"

@@ -35,6 +35,7 @@ echo $KOKORO_JOB_NAME
 echo ":job name end."
 if [[ $KOKORO_JOB_NAME == *"docs"* ]]
 then
+    echo "job name has docs."
     # Remove old nox
     python3 -m pip uninstall --yes --quiet nox-automation
 

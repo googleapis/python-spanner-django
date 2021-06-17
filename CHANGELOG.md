@@ -3,91 +3,39 @@
 ## 2.2.1b1 (2021-06-17)
 
 
-### ⚠ BREAKING CHANGES
+### feat
+Add support for open telemetry (#633) (2ba879a)
+add decimal/numeric support (#620) (d09ad61)
+added unit test with coverage of 68% (#611) (92ad508)
+update docs and nox file to compile it (#610) (876f2fc)
+update workflow files to uniformly distribute the test modules by time taken by each test module (#615) (c386123)
+move migrations test modules to run against different emulator (#613) (5b3b2e4)
 
-* DBAPI code was moved into python-spanner in https://github.com/googleapis/python-spanner/pull/160. This change removes it from this repo and bumps the dependency on python-spanner to 2.0.0, the first released version to include DBAPI.
-* Update python-spanner dep, drop py 3.5 (#557)
+### fix
+correct import path (#649) (bc99bb5)
+remove error msg check from test_decimal_precision_limit for non emulator test (#647) (fe4a062)
+remove error msg check from test_decimal_precision_limit (#646) (9be15c0)
+remove delete of instance if it already exists, as it might be in use by another test (#641) (0544208)
+correct test case for sql_flush for multiple delete table commands (#629) (3de1a81)
+iexact lookup with Transform expression crash issue when RHS is direct value and a transform function is involved (#628) (2772b57)
+Update links in comments to use googleapis repo (#622) (3fa1aeb)
+Remove un necessary file from code base (#608) (58b9969)
+lint_setup_py was failing in Kokoro is now fixed (#607) (d125148)
+Replace, fast-forward Django CI branch (#598) (5d65e3f)
 
-### Features
+### refactor
+update coverage score in nox file and cleanup imports in test_operations (#638) (b1f49f7)
 
-* [WIP] The first stage of `nox` implementation ([#468](https://www.github.com/googleapis/python-spanner-django/issues/468)) ([96f2223](https://www.github.com/googleapis/python-spanner-django/commit/96f2223e3389a0922e0f1db44df72c698cfa5263))
-* add decimal/numeric support ([#620](https://www.github.com/googleapis/python-spanner-django/issues/620)) ([d09ad61](https://www.github.com/googleapis/python-spanner-django/commit/d09ad61ac7a38289bb81ad7b0c06883bc44dcc65))
-* Add dummy WHERE clause to certain statements ([#516](https://www.github.com/googleapis/python-spanner-django/issues/516)) ([af5d8e3](https://www.github.com/googleapis/python-spanner-django/commit/af5d8e3af808a8639e54c691c8f110be0a309d15))
-* add PyPI release support ([#451](https://www.github.com/googleapis/python-spanner-django/issues/451)) ([da82c41](https://www.github.com/googleapis/python-spanner-django/commit/da82c417815e607611743c828f3525e71f9a46f4))
-* Add support for open telemetry ([#633](https://www.github.com/googleapis/python-spanner-django/issues/633)) ([2ba879a](https://www.github.com/googleapis/python-spanner-django/commit/2ba879ac1aaf9c2ffa3d72b53ff2ec6d664ca115))
-* added unit test with coverage of 68% ([#611](https://www.github.com/googleapis/python-spanner-django/issues/611)) ([92ad508](https://www.github.com/googleapis/python-spanner-django/commit/92ad508083e0534374d20c807311f0ce746c3bba))
-* clear session pool on connection close ([#543](https://www.github.com/googleapis/python-spanner-django/issues/543)) ([14e4cac](https://www.github.com/googleapis/python-spanner-django/commit/14e4cac77fd9ba5cf421c56c636528ec77b82451))
-* cursor must detect if the parent connection is closed ([#463](https://www.github.com/googleapis/python-spanner-django/issues/463)) ([a9fd5a3](https://www.github.com/googleapis/python-spanner-django/commit/a9fd5a382463be47e34ec079a606fd9952048469))
-* Implementing DB-API types according to the PEP-0249 specification ([#521](https://www.github.com/googleapis/python-spanner-django/issues/521)) ([62c22b1](https://www.github.com/googleapis/python-spanner-django/commit/62c22b113b470776cddacbab92c4428c6581c551))
-* move migrations test modules to run against different emulator ([#613](https://www.github.com/googleapis/python-spanner-django/issues/613)) ([5b3b2e4](https://www.github.com/googleapis/python-spanner-django/commit/5b3b2e4ed7b98783e547943b27050a594864187d))
-* refactor connect() function, cover it with unit tests ([#462](https://www.github.com/googleapis/python-spanner-django/issues/462)) ([4fedcf1](https://www.github.com/googleapis/python-spanner-django/commit/4fedcf18a235c226d062ce7e61070477bfd3a107))
-* Stage 2 of `nox` implementation - adding `docs` target ([#473](https://www.github.com/googleapis/python-spanner-django/issues/473)) ([45d6b97](https://www.github.com/googleapis/python-spanner-django/commit/45d6b970867627694684b628fb20900388f78663))
-* Stage 3-4 of `nox` implementation - adding auto-format targets ([#478](https://www.github.com/googleapis/python-spanner-django/issues/478)) ([59e7c3f](https://www.github.com/googleapis/python-spanner-django/commit/59e7c3f2cb5ca8381a8674eb3f2aef59c37e9fa6))
-* Stage 5 of `nox` implementation - adding coverage targets ([#479](https://www.github.com/googleapis/python-spanner-django/issues/479)) ([cec6b96](https://www.github.com/googleapis/python-spanner-django/commit/cec6b96d8b8ae662028d7f0901cacceeb2eb1c97))
-* Stage 6 of `nox` implementation - enabling system tests ([#480](https://www.github.com/googleapis/python-spanner-django/issues/480)) ([dc73bf6](https://www.github.com/googleapis/python-spanner-django/commit/dc73bf65f9dbe0f9a62059ea23c6423dfcfd1901))
-* support transactions management ([#535](https://www.github.com/googleapis/python-spanner-django/issues/535)) ([2f2cd86](https://www.github.com/googleapis/python-spanner-django/commit/2f2cd8631817c9f3d898c60e38778ae533c3f803))
-* update docs and nox file to compile it ([#610](https://www.github.com/googleapis/python-spanner-django/issues/610)) ([876f2fc](https://www.github.com/googleapis/python-spanner-django/commit/876f2fc78e908af6f9aade32f5fbcfcfccb28077))
-* update workflow files to uniformly distribute the test modules by time taken by each test module ([#615](https://www.github.com/googleapis/python-spanner-django/issues/615)) ([c386123](https://www.github.com/googleapis/python-spanner-django/commit/c386123db1aeed85768571e19bb4792661e0b414))
+### docs
+add docs build kokoro config for django spanner (#644) (ecf241a)
 
-
-### Bug Fixes
-
-* add description for transaction autocommit ([#587](https://www.github.com/googleapis/python-spanner-django/issues/587)) ([8441edc](https://www.github.com/googleapis/python-spanner-django/commit/8441edcc161a5ad86f171dfc2cd4b9ccef19b2c0))
-* add project env in readme file ([#586](https://www.github.com/googleapis/python-spanner-django/issues/586)) ([55b9d19](https://www.github.com/googleapis/python-spanner-django/commit/55b9d197f023067470f8769615a83e1a11df53ba))
-* Bump version ahead of lateset release ([#571](https://www.github.com/googleapis/python-spanner-django/issues/571)) ([36e5b82](https://www.github.com/googleapis/python-spanner-django/commit/36e5b82facdc8e7a7286b2cf1ab20afa2e9e1aef))
-* Bump version number after 2.2.1b0 release ([#596](https://www.github.com/googleapis/python-spanner-django/issues/596)) ([5f946d2](https://www.github.com/googleapis/python-spanner-django/commit/5f946d2abbf22ac0c16f9ebf40166888b484ae23))
-* Change release script package name ([#489](https://www.github.com/googleapis/python-spanner-django/issues/489)) ([388ea6b](https://www.github.com/googleapis/python-spanner-django/commit/388ea6bc187bd5510e2aeab0fd5d6a6e46efb777))
-* correct import path ([#649](https://www.github.com/googleapis/python-spanner-django/issues/649)) ([bc99bb5](https://www.github.com/googleapis/python-spanner-django/commit/bc99bb55c2442e998ab8e3fef1d913160872eddf))
-* correct test case for sql_flush for multiple delete table commands ([#629](https://www.github.com/googleapis/python-spanner-django/issues/629)) ([3de1a81](https://www.github.com/googleapis/python-spanner-django/commit/3de1a8115aae796a3beb6c2af873b2a12a9ac0f9))
-* DatabaseWrapper method impl and potential bugfix ([#545](https://www.github.com/googleapis/python-spanner-django/issues/545)) ([d8453c7](https://www.github.com/googleapis/python-spanner-django/commit/d8453c7e458b0b476b91785d32ba234e333a4b9f))
-* Fix black, isort compatibility  ([#469](https://www.github.com/googleapis/python-spanner-django/issues/469)) ([dd005d5](https://www.github.com/googleapis/python-spanner-django/commit/dd005d5a8f39634750a8c81b603782f1254dcccf))
-* fix from-scratch tutorial ([#573](https://www.github.com/googleapis/python-spanner-django/issues/573)) ([59ce5e7](https://www.github.com/googleapis/python-spanner-django/commit/59ce5e7abd13a1793c7985ee4b4a092f6afdf770))
-* fix healthchecks app tutorial ([#574](https://www.github.com/googleapis/python-spanner-django/issues/574)) ([65d2e9d](https://www.github.com/googleapis/python-spanner-django/commit/65d2e9dccf494c3283f1abcd936220b5f353c59e))
-* Fix license classifier ([#507](https://www.github.com/googleapis/python-spanner-django/issues/507)) ([9244414](https://www.github.com/googleapis/python-spanner-django/commit/9244414d23fca9facdd05c0e10dde86891001001))
-* Fix package name in README ([#556](https://www.github.com/googleapis/python-spanner-django/issues/556)) ([8b2329a](https://www.github.com/googleapis/python-spanner-django/commit/8b2329afca64863197790681d6bf8c64a9040823))
-* fix typo in README ([#575](https://www.github.com/googleapis/python-spanner-django/issues/575)) ([d25fa86](https://www.github.com/googleapis/python-spanner-django/commit/d25fa86857409a4f0f17c9de3057465bef048df6))
-* iexact lookup with Transform expression crash issue when RHS is direct value and a transform function is involved ([#628](https://www.github.com/googleapis/python-spanner-django/issues/628)) ([2772b57](https://www.github.com/googleapis/python-spanner-django/commit/2772b57ff0a2b7676636e70a85b64c9d2d0efe16))
-* lint_setup_py was failing in Kokoro is now fixed ([#607](https://www.github.com/googleapis/python-spanner-django/issues/607)) ([d125148](https://www.github.com/googleapis/python-spanner-django/commit/d125148e2e1188a7df5093ffd164bb9707bcca9b))
-* override django autocommit to spanner ([#583](https://www.github.com/googleapis/python-spanner-django/issues/583)) ([7ce685d](https://www.github.com/googleapis/python-spanner-django/commit/7ce685d76033fa8a46d4ccf8488af68ee8947ced))
-* permanently broken date & time unit tests on Windows ([#524](https://www.github.com/googleapis/python-spanner-django/issues/524)) ([3f5db62](https://www.github.com/googleapis/python-spanner-django/commit/3f5db62863bd03c85b2a1b4614d5d782895b6d57))
-* remove delete of instance if it already exists, as it might be in use by another test ([#641](https://www.github.com/googleapis/python-spanner-django/issues/641)) ([0544208](https://www.github.com/googleapis/python-spanner-django/commit/0544208d6f9ef81b290cf5c4ee304ba0ec0e95c4))
-* remove error msg check from test_decimal_precision_limit ([#646](https://www.github.com/googleapis/python-spanner-django/issues/646)) ([9be15c0](https://www.github.com/googleapis/python-spanner-django/commit/9be15c0c035016eed9158fc298e33b65b03bee19))
-* remove error msg check from test_decimal_precision_limit for non emulator test ([#647](https://www.github.com/googleapis/python-spanner-django/issues/647)) ([fe4a062](https://www.github.com/googleapis/python-spanner-django/commit/fe4a062797bfec461e4fa7c2fa6e5d83dfb1938c))
-* Remove old quickstart instructions link ([#593](https://www.github.com/googleapis/python-spanner-django/issues/593)) ([03adf65](https://www.github.com/googleapis/python-spanner-django/commit/03adf65edab4f23ed52b2e213282187d572ddafb))
-* Remove un necessary file from code base ([#608](https://www.github.com/googleapis/python-spanner-django/issues/608)) ([58b9969](https://www.github.com/googleapis/python-spanner-django/commit/58b99696d328a631c6a92a0d8cfbf5df63cef146))
-* Replace repo name with pkg name ([#508](https://www.github.com/googleapis/python-spanner-django/issues/508)) ([fbba900](https://www.github.com/googleapis/python-spanner-django/commit/fbba9001344295a9e18cd153d7f8475bc3e1b684))
-* Replace, fast-forward Django CI branch ([#598](https://www.github.com/googleapis/python-spanner-django/issues/598)) ([5d65e3f](https://www.github.com/googleapis/python-spanner-django/commit/5d65e3f12b2ecce240859e4b0cccee7ef596e999))
-* s/installation/installation/ ([#509](https://www.github.com/googleapis/python-spanner-django/issues/509)) ([03c963a](https://www.github.com/googleapis/python-spanner-django/commit/03c963a7aaac61f3ea6575952c193e72c67f5bf2))
-* s/useage/usage/ ([#511](https://www.github.com/googleapis/python-spanner-django/issues/511)) ([6b960ec](https://www.github.com/googleapis/python-spanner-django/commit/6b960ecea66cbe23fb7987763fbcd29ce0b8dc6d))
-* Update links in comments to use googleapis repo ([#622](https://www.github.com/googleapis/python-spanner-django/issues/622)) ([3fa1aeb](https://www.github.com/googleapis/python-spanner-django/commit/3fa1aeb49801fcd0dc598b8ec46879b8812c59f8))
-* update pypi package name ([#454](https://www.github.com/googleapis/python-spanner-django/issues/454)) ([47154d1](https://www.github.com/googleapis/python-spanner-django/commit/47154d1f6c7bf0b1d7150c24ba18e2f1dffd9cc1))
-* Update README for alpha release ([#503](https://www.github.com/googleapis/python-spanner-django/issues/503)) ([3d31167](https://www.github.com/googleapis/python-spanner-django/commit/3d3116752acdc89ec90d56a9fa3b9d26d11ebf67))
-* Update version to 2.2.0a1 ([#506](https://www.github.com/googleapis/python-spanner-django/issues/506)) ([a3a6344](https://www.github.com/googleapis/python-spanner-django/commit/a3a6344656d63e34d6110536aa6830b0db13343a))
-* Use "any" default role in sphinx ([#550](https://www.github.com/googleapis/python-spanner-django/issues/550)) ([196c449](https://www.github.com/googleapis/python-spanner-django/commit/196c44949370fb818e610b21c3b00344fdc3d03a))
-
-
-### Code Refactoring
-
-* erase dbapi directory and all the related tests ([#554](https://www.github.com/googleapis/python-spanner-django/issues/554)) ([8183247](https://www.github.com/googleapis/python-spanner-django/commit/818324708e9ca46fbd80c47745bdf38e8a1a069c))
-* Update python-spanner dep, drop py 3.5 ([#557](https://www.github.com/googleapis/python-spanner-django/issues/557)) ([5910833](https://www.github.com/googleapis/python-spanner-django/commit/5910833216288d2fd5cce57e98eb051d0cf82131))
-
-
-### Documentation
-
-* add a querying example into the main readme ([#515](https://www.github.com/googleapis/python-spanner-django/issues/515)) ([c477cc2](https://www.github.com/googleapis/python-spanner-django/commit/c477cc283ab1f036454eb446f0ca0599235b1e5c))
-* add docs build kokoro config for django spanner ([#644](https://www.github.com/googleapis/python-spanner-django/issues/644)) ([ecf241a](https://www.github.com/googleapis/python-spanner-django/commit/ecf241a6a74160122d2c224e1d9ca4a0b1a378ce))
-* minor fixes to README.md ([#448](https://www.github.com/googleapis/python-spanner-django/issues/448)) ([f969000](https://www.github.com/googleapis/python-spanner-django/commit/f9690007603c94f4c99b244a92c639adfd360a8f))
-* move test suite information to CONTRIBUTING.md ([#442](https://www.github.com/googleapis/python-spanner-django/issues/442)) ([05280ae](https://www.github.com/googleapis/python-spanner-django/commit/05280aecdcbe933e113616b5705f4e76303d9637))
-* Update docstrings for `django_spanner` ([#564](https://www.github.com/googleapis/python-spanner-django/issues/564)) ([7083f1d](https://www.github.com/googleapis/python-spanner-django/commit/7083f1d81dc8b412aab5a4e7d7f110152a87c5d9))
-* updated `README.rst` file ([#563](https://www.github.com/googleapis/python-spanner-django/issues/563)) ([d70cb28](https://www.github.com/googleapis/python-spanner-django/commit/d70cb28c8a20511558fa47818103afb5e0492918))
-* verify and comment the DB API exceptions ([#522](https://www.github.com/googleapis/python-spanner-django/issues/522)) ([5ed0845](https://www.github.com/googleapis/python-spanner-django/commit/5ed08453002a318245d9241cd1e24c222a588159))
-
-
-### Miscellaneous Chores
-
-* release 2.2.0a1 ([803ad0a](https://www.github.com/googleapis/python-spanner-django/commit/803ad0ac15fb7ba55c6882e2e97d5f93620cb166))
-* release 2.2.1b0 ([35420ef](https://www.github.com/googleapis/python-spanner-django/commit/35420eff678d8d6177f86491375d108f94f9e566))
-* release 2.2.1b1 ([#650](https://www.github.com/googleapis/python-spanner-django/issues/650)) ([5f34570](https://www.github.com/googleapis/python-spanner-django/commit/5f3457028a4877f08e3be59912d34169a173abe0))
+### chore
+release 2.2.1b1 (505d3ac)
+add SECURITY.md (#616) (75f1a65)
+add a Code of Conduct (#604) (c996400)
+Remove README note about Variance/StdDev (#601) (4ec363f)
+Add contributing section to README (#600) (2311854)
+README updates (#599) (2c8fb24)
 
 ## 2.2.1b0 (2021-01-29)
 

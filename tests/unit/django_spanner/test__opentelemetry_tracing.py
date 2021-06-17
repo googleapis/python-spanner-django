@@ -36,7 +36,6 @@ def _make_rpc_error(error_cls, trailing_metadata=None):
 
 
 def _make_connection():
-    # from django_spanner.client import DatabaseClient
     from django_spanner.base import DatabaseWrapper
 
     settings_dict = {
@@ -45,11 +44,7 @@ def _make_connection():
         "NAME": DATABASE_ID,
         "OPTIONS": OPTIONS,
     }
-    # db_client = DatabaseClient(settings_dict)
     return DatabaseWrapper(settings_dict)
-    # from google.cloud.spanner_v1.session import Session
-
-    # return mock.Mock(autospec=Session, instance=True)
 
 
 # Skip all of these tests if we don't have OpenTelemetry

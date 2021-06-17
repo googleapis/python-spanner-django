@@ -22,7 +22,8 @@ except ImportError:
 @contextmanager
 def trace_call(name, connection, extra_attributes=None):
     if not HAS_OPENTELEMETRY_INSTALLED or not connection:
-        # Empty context manager. Users will have to check if the generated value is None or a span
+        # Empty context manager. Users will have to check if the generated value
+        # is None or a span.
         yield None
         return
 

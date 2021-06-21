@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
-
 set -eo pipefail
 
 # Start the releasetool reporter
@@ -28,7 +26,7 @@ python3 -m pip install --upgrade twine wheel setuptools
 export PYTHONUNBUFFERED=1
 
 # Move into the package, build the distribution and upload.
-TWINE_PASSWORD=$(cat "${KOKORO_KEYSTORE_DIR}/73713_google_cloud_pypi_password")
+TWINE_PASSWORD=$(cat "${KOKORO_GFILE_DIR}/secret_manager/google-cloud-pypi-token")
 cd github/python-spanner-django
 python3 setup.py sdist bdist_wheel
-twine upload --username gcloudpypi --password "${TWINE_PASSWORD}" dist/*
+twine upload --username __token__ --password "${TWINE_PASSWORD}" dist/*

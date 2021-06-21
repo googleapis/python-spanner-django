@@ -27,7 +27,7 @@ s.move(templated_files / ".kokoro" / "docs")
 s.move(templated_files / ".kokoro" / "release.sh")
 s.move(templated_files / ".kokoro" / "trampoline_v2.sh")
 s.move(templated_files / ".kokoro" / "trampoline.sh")
-s.move(templated_files / ".kokoro" / "populate_secrets.sh")
+s.move(templated_files / ".kokoro" / "populate-secrets.sh")
 s.move(templated_files / ".kokoro" / "release")
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)

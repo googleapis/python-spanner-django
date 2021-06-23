@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2021 Google LLC
+# Copyright 2020 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
@@ -7,7 +7,7 @@
 
 # A script to fetch gpg keys with retry.
 # Avoid jinja parsing the file.
-# 
+#
 
 function retry {
     if [[ "${#}" -le 1 ]]; then
@@ -34,4 +34,4 @@ retry 3 gpg --keyserver ha.pool.sks-keyservers.net --recv-keys \
 retry 3 gpg --keyserver ha.pool.sks-keyservers.net --recv-keys \
       E3FF2839C048B25C084DEBE9B26995E310250568
 
-# 
+#

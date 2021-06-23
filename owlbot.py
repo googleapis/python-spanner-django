@@ -28,8 +28,8 @@ s.move(templated_files / ".kokoro" / "release")
 # with the BSD license expected in this repository
 s.replace(
     ".kokoro/**/*",
-    "# Copyright.*Google LLC.*# limitations under the License\.",
-    """# Copyright 2021 Google LLC
+    "# Copyright.*(\d{4}).*# limitations under the License\.",
+    """# Copyright \g<1> Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at

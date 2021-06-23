@@ -1,6 +1,37 @@
 Cloud Spanner support for Django
 ================================
 
+`Cloud Spanner`_ is the world's first fully managed relational database service
+to offer both strong consistency and horizontal scalability for
+mission-critical online transaction processing (OLTP) applications. With Cloud
+Spanner you enjoy all the traditional benefits of a relational database; but
+unlike any other relational database service, Cloud Spanner scales horizontally
+to hundreds or thousands of servers to handle the biggest transactional
+workloads.
+
+
+- `Client Library Documentation`_
+- `Product Documentation`_
+
+.. _Cloud Spanner: https://cloud.google.com/spanner/
+.. _Client Library Documentation: https://googleapis.dev/python/django-google-spanner/2.2.1b1/index.html
+.. _Product Documentation:  https://cloud.google.com/spanner/docs
+
+Quick Start
+-----------
+
+In order to use this library, you first need to go through the following steps:
+
+1. `Select or create a Cloud Platform project.`_
+2. `Enable billing for your project.`_
+3. `Enable the Google Cloud Spanner API.`_
+4. `Setup Authentication.`_
+
+.. _Select or create a Cloud Platform project.: https://console.cloud.google.com/project
+.. _Enable billing for your project.: https://cloud.google.com/billing/docs/how-to/modify-project#enable_billing_for_a_project
+.. _Enable the Google Cloud Spanner API.:  https://cloud.google.com/spanner
+.. _Setup Authentication.: https://googleapis.dev/python/google-api-core/latest/auth.html
+
 This package provides a `3rd-party database backend
 <https://docs.djangoproject.com/en/2.2/ref/databases/#using-a-3rd-party-database-backend>`__
 for using `Cloud Spanner <https://cloud.google.com/spanner>`__ with the `Django
@@ -11,10 +42,38 @@ under the hood.
 Installation
 ------------
 
-To use this library, you'll need a Google Cloud Platform project with the Cloud
-Spanner API enabled. For details on enabling the API and authenticating with
-GCP, see the `Cloud Spanner Python client library quickstart guide
-<https://github.com/googleapis/python-spanner/#quick-start>`__.
+Install this library in a `virtualenv`_ using pip. `virtualenv`_ is a tool to
+create isolated Python and Django environments. The basic problem it addresses is one of
+dependencies and versions, and indirectly permissions.
+
+With `virtualenv`_, it's possible to install this library without needing system
+install permissions, and without clashing with the installed system
+dependencies.
+
+.. _`virtualenv`: https://virtualenv.pypa.io/en/latest/
+
+
+Mac/Linux
+~~~~~~~~~
+
+.. code-block:: console
+
+    pip install virtualenv
+    virtualenv <your-env>
+    source <your-env>/bin/activate
+    <your-env>/bin/pip install google-cloud-spanner
+
+
+Windows
+~~~~~~~
+
+.. code-block:: console
+
+    pip install virtualenv
+    virtualenv <your-env>
+    <your-env>\Scripts\activate
+    <your-env>\Scripts\pip.exe install google-cloud-spanner
+
 
 Supported versions
 ~~~~~~~~~~~~~~~~~~
@@ -93,21 +152,104 @@ configured:
        }
 
 
+Set credentials and project environment variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You'll need to download a service account JSON key file and point to it using an environment variable:
+
+.. code:: shell
+
+    export GOOGLE_APPLICATION_CREDENTIALS=/path/to/keyfile.json
+    export GOOGLE_CLOUD_PROJECT=gcloud_project
+
+
+Apply the migrations
+~~~~~~~~~~~~~~~~~~~~
+
+Please run:
+
+.. code:: shell
+
+    $ python3 manage.py migrate
+
+
+and that'll take a while running, but when done, it will look like the following
+
+
+After this you should can see the tables and indices created in your Cloud Spanner console
+
+Now run your server
+~~~~~~~~~~~~~~~~~~~
+After those migrations are completed, that will be all. Please continue on with the guides.
+
+Create an Django admin user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+First you’ll need to create a user who can login to the admin site. Run the following command:
+
+.. code:: shell
+
+    $ python3 manage.py createsuperuser
+
+which will then produce a prompt which will allow you to create your super user
+
+.. code:: shell
+
+    Username: admin
+    Email address: admin@example.com
+    Password: **********
+    Password (again): **********
+    Superuser created successfully.
+
+
+Login as admin
+~~~~~~~~~~~~~~
+Let’s run the server
+
+.. code:: shell
+
+    python3 manage.py runserver
+
+Then visit http://127.0.0.1:8000/admin/
+
+Example Usage
+-------------
+
+Create and register your first model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To define your database layout create a models file in your app folder and add the relevant 
+classes to it. Spanner works exactly like any other database you may have used with Django. 
+Here is a simple example you can run with Spanner. In our poll application below we create 
+the following two models:
+
+.. code:: python
+
+    from django.db import models
+    
+    class Question(models.Model):
+    question_text = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+    def __str__(self):
+        return str(self.rating)
+    
+    class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+
+
 How it works
 ------------
 
 Overall design
 ~~~~~~~~~~~~~~
 
-.. figure:: ./assets/overview.png
-   :alt:
+.. figure:: https://raw.githubusercontent.com/googleapis/python-spanner-django/master/assets/internals.png
+   :alt: "Overall Design"
 
 Internals
 ~~~~~~~~~
 
-.. figure:: ./assets/internals.png
-   :alt:
-
+.. figure:: https://github.com/googleapis/python-spanner-django/blob/master/assets/overview.png
+   :alt: "Internals"
 
 
 Executing a query
@@ -134,11 +276,11 @@ Contributing
 
 Contributions to this library are always welcome and highly encouraged.
 
-See [CONTRIBUTING][contributing] for more information on how to get started.
+See `CONTRIBUTING <https://github.com/googleapis/python-spanner-django/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
 
 Please note that this project is released with a Contributor Code of Conduct.
 By participating in this project you agree to abide by its terms. See the `Code
-of Conduct <code-of-conduct.md>`_ for more information.
+of Conduct <https://github.com/googleapis/python-spanner-django/blob/master/CODE_OF_CONDUCT.md>`_ for more information.
 
 Current limitations
 -------------------

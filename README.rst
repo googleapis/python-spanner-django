@@ -249,16 +249,16 @@ Executing a query
     results = cursor.fetchall()
 
 
-Contributing
-------------
+ Contributing
+ ------------
 
-Contributions to this library are always welcome and highly encouraged.
+ Contributions to this library are always welcome and highly encouraged.
 
-See `CONTRIBUTING <https://github.com/googleapis/python-spanner-django/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
+ See `CONTRIBUTING <https://github.com/googleapis/python-spanner-django/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
 
-Please note that this project is released with a Contributor Code of Conduct.
-By participating in this project you agree to abide by its terms. See the `Code
-of Conduct <https://github.com/googleapis/python-spanner-django/blob/master/CODE_OF_CONDUCT.md>`_ for more information.
+ Please note that this project is released with a Contributor Code of Conduct.
+ By participating in this project you agree to abide by its terms. See the `Code
+ of Conduct <https://github.com/googleapis/python-spanner-django/blob/master/CODE_OF_CONDUCT.md>`_ for more information.
 
 Current limitations
 -------------------

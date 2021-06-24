@@ -14,7 +14,7 @@ workloads.
 - `Product Documentation`_
 
 .. _Cloud Spanner: https://cloud.google.com/spanner/
-.. _Client Library Documentation: https://googleapis.dev/python/django-google-spanner/2.2.1b1/index.html
+.. _Client Library Documentation: https://googleapis.dev/python/django-google-spanner/latest/index.html
 .. _Product Documentation:  https://cloud.google.com/spanner/docs
 
 Quick Start
@@ -61,6 +61,7 @@ Mac/Linux
     pip install virtualenv
     virtualenv <your-env>
     source <your-env>/bin/activate
+    <your-env>/bin/pip install python-spanner-django
     <your-env>/bin/pip install google-cloud-spanner
 
 
@@ -72,6 +73,7 @@ Windows
     pip install virtualenv
     virtualenv <your-env>
     <your-env>\Scripts\activate
+    <your-env>\Scripts\pip.exe install python-spanner-django
     <your-env>\Scripts\pip.exe install google-cloud-spanner
 
 
@@ -171,11 +173,7 @@ Please run:
 
     $ python3 manage.py migrate
 
-
-and that'll take a while running, but when done, it will look like the following
-
-
-After this you should can see the tables and indices created in your Cloud Spanner console
+and that'll take a while to run. After this you should can see the tables and indices created in your Cloud Spanner console.
 
 Now run your server
 ~~~~~~~~~~~~~~~~~~~

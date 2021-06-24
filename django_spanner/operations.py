@@ -14,6 +14,7 @@ from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.utils import DatabaseError
 from django.utils import timezone
 from django.utils.duration import duration_microseconds
+from django.conf import settings
 from google.cloud.spanner_dbapi.parse_utils import (
     DateStr,
     TimestampStr,
@@ -168,7 +169,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
         :returns: Formatted Time.
         """
-        from django.conf import settings
 
         if value is None:
             return None
@@ -177,8 +177,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             return value
         # Cloud Spanner doesn't support tz-aware datetimes
         if timezone.is_aware(value):
-            from django.conf import settings
-
             if settings.USE_TZ:
                 value = timezone.make_naive(value, self.connection.timezone)
             else:
@@ -304,7 +302,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             value.second,
             value.microsecond,
         )
-        from django.conf import settings
 
         return (
             timezone.make_aware(dt, self.connection.timezone)
@@ -382,7 +379,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for extracting.
         """
-        from django.conf import settings
 
         tzname = tzname if settings.USE_TZ else "UTC"
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
@@ -448,7 +444,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for truncating.
         """
-        from django.conf import settings
 
         # https://cloud.google.com/spanner/docs/functions-and-operators#timestamp_trunc
         tzname = tzname if settings.USE_TZ else "UTC"
@@ -495,7 +490,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for casting.
         """
-        from django.conf import settings
 
         # https://cloud.google.com/spanner/docs/functions-and-operators#date
         tzname = tzname if settings.USE_TZ else "UTC"
@@ -514,7 +508,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for casting.
         """
-        from django.conf import settings
 
         tzname = tzname if settings.USE_TZ else "UTC"
         # Cloud Spanner doesn't have a function for converting

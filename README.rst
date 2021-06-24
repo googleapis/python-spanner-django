@@ -173,7 +173,7 @@ Please run:
 
     $ python3 manage.py migrate
 
-and that'll take a while to run. After this you should can see the tables and indices created in your Cloud Spanner console.
+and that'll take a while to run. After this you should be able to see the tables and indices created in your Cloud Spanner console.
 
 Now run your server
 ~~~~~~~~~~~~~~~~~~~

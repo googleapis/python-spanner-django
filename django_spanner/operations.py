@@ -10,11 +10,11 @@ from base64 import b64decode
 from datetime import datetime, time
 from uuid import UUID
 
+from django.conf import settings
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.utils import DatabaseError
 from django.utils import timezone
 from django.utils.duration import duration_microseconds
-from django.conf import settings
 from google.cloud.spanner_dbapi.parse_utils import (
     DateStr,
     TimestampStr,
@@ -169,7 +169,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: :class:`~google.cloud.spanner_dbapi.types.TimestampStr`
         :returns: Formatted Time.
         """
-
         if value is None:
             return None
         # Expression values are adapted by the database.
@@ -302,7 +301,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             value.second,
             value.microsecond,
         )
-
         return (
             timezone.make_aware(dt, self.connection.timezone)
             if settings.USE_TZ
@@ -379,7 +377,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for extracting.
         """
-
         tzname = tzname if settings.USE_TZ else "UTC"
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
         return 'EXTRACT(%s FROM %s AT TIME ZONE "%s")' % (
@@ -444,7 +441,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for truncating.
         """
-
         # https://cloud.google.com/spanner/docs/functions-and-operators#timestamp_trunc
         tzname = tzname if settings.USE_TZ else "UTC"
         if lookup_type == "week":
@@ -490,7 +486,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for casting.
         """
-
         # https://cloud.google.com/spanner/docs/functions-and-operators#date
         tzname = tzname if settings.USE_TZ else "UTC"
         return 'DATE(%s, "%s")' % (field_name, tzname)
@@ -508,7 +503,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: str
         :returns: A SQL statement for casting.
         """
-
         tzname = tzname if settings.USE_TZ else "UTC"
         # Cloud Spanner doesn't have a function for converting
         # TIMESTAMP to another time zone.

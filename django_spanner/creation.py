@@ -8,9 +8,9 @@ import os
 import sys
 from unittest import skip
 
+from django.conf import settings
 from django.db.backends.base.creation import BaseDatabaseCreation
 from django.utils.module_loading import import_string
-from django.conf import settings
 
 class DatabaseCreation(BaseDatabaseCreation):
     """
@@ -20,7 +20,6 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def mark_skips(self):
         """Skip tests that don't work on Spanner."""
-
         for test_name in self.connection.features.skip_tests:
             test_case_name, _, method_name = test_name.rpartition(".")
             test_app = test_name.split(".")[0]

@@ -12,6 +12,7 @@ from django.conf import settings
 from django.db.backends.base.creation import BaseDatabaseCreation
 from django.utils.module_loading import import_string
 
+
 class DatabaseCreation(BaseDatabaseCreation):
     """
     Spanner-specific wrapper for Django class encapsulating methods for

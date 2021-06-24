@@ -8,7 +8,6 @@ import os
 import sys
 from unittest import skip
 
-from django.conf import settings
 from django.db.backends.base.creation import BaseDatabaseCreation
 from django.utils.module_loading import import_string
 
@@ -21,10 +20,12 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def mark_skips(self):
         """Skip tests that don't work on Spanner."""
+
         for test_name in self.connection.features.skip_tests:
             test_case_name, _, method_name = test_name.rpartition(".")
             test_app = test_name.split(".")[0]
             # Importing a test app that isn't installed raises RuntimeError.
+            from django.conf import settings
             if test_app in settings.INSTALLED_APPS:
                 test_case = import_string(test_case_name)
                 method = getattr(test_case, method_name)

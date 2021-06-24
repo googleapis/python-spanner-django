@@ -15,3 +15,4 @@ The following classes and methods constitute the Django Spanner API.
     lookups-api
     utils-api
     creation-api
+    operations-api

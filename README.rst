@@ -220,45 +220,38 @@ How it works
 Overall design
 ~~~~~~~~~~~~~~
 
-.. figure:: https://raw.githubusercontent.com/googleapis/python-spanner-django/master/assets/internals.png
+.. figure:: https://raw.githubusercontent.com/googleapis/python-spanner-django/master/assets/overview.png
    :alt: "Overall Design"
 
 Internals
 ~~~~~~~~~
 
-.. figure:: https://raw.githubusercontent.com/googleapis/python-spanner-django/master/assets/overview.png
+.. figure:: https://raw.githubusercontent.com/googleapis/python-spanner-django/master/assets/internals.png
    :alt: "Internals"
 
 
 Executing a query
 ~~~~~~~~~~~~~~~~~
 
-.. code:: python
+Here is an example of how to add a row for Model Author, save it and later query it using Django
 
-    from google.cloud.spanner_dbapi import connect
+.. code:: shell
 
-    connection = connect('<instance_id>', '<database_id>')
-    cursor = connection.cursor()
-
-    cursor.execute(
-        "SELECT *"
-        "FROM Singers"
-        "WHERE SingerId = 15"
-    )
-
-    results = cursor.fetchall()
+    >>> author_kent = Author( first_name="Arthur", last_name="Kent", rating=Decimal("4.1"),)
+    >>> author_kent.save()
+    >>> qs1 = Author.objects.all().values("first_name", "last_name")
 
 
- Contributing
- ------------
+HOW TO CONTRIBUTE
+-----------------
 
- Contributions to this library are always welcome and highly encouraged.
+Contributions to this library are always welcome and highly encouraged.
 
- See `CONTRIBUTING <https://github.com/googleapis/python-spanner-django/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
+See `CONTRIBUTING <https://github.com/googleapis/python-spanner-django/blob/master/CONTRIBUTING.md>`_ for more information on how to get started.
 
- Please note that this project is released with a Contributor Code of Conduct.
- By participating in this project you agree to abide by its terms. See the `Code
- of Conduct <https://github.com/googleapis/python-spanner-django/blob/master/CODE_OF_CONDUCT.md>`_ for more information.
+Please note that this project is released with a Contributor Code of Conduct.
+By participating in this project you agree to abide by its terms. See the `Code 
+of Conduct <https://github.com/googleapis/python-spanner-django/blob/master/CODE_OF_CONDUCT.md>`_ for more information.
 
 Current limitations
 -------------------

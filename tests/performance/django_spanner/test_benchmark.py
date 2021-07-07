@@ -1,7 +1,6 @@
 import random
 import time
 import unittest
-from typing import Any
 
 import pandas as pd
 import pytest
@@ -63,8 +62,9 @@ def insert_many_rows(transaction, many_rows):
         raise ValueError("Wrong number of inserts: " + str(sum(count)))
 
 
-class DjangoBenchmarkTest():
+class DjangoBenchmarkTest:
     """The Django performace testing class."""
+
     def __init__(self):
         with connection.schema_editor() as editor:
             # Create the tables
@@ -73,18 +73,15 @@ class DjangoBenchmarkTest():
         self._many_rows = []
         self._many_rows2 = []
         for i in range(99):
-            num = round(random.randint(0,100000000))
+            num = round(random.randint(0, 100000000))
             self._many_rows.append(Author(num, "Pete", "Allison", "2.1"))
-            num2 = round(random.randint(0,100000000))
+            num2 = round(random.randint(0, 100000000))
             self._many_rows2.append(Author(num2, "Pete", "Allison", "2.1"))
 
     @measure_execution_time
     def insert_one_row_with_fetch_after(self):
         author_kent = Author(
-            id=2,
-            first_name="Pete",
-            last_name="Allison",
-            rating="2.1",
+            id=2, first_name="Pete", last_name="Allison", rating="2.1",
         )
         author_kent.save()
         last_name = Author.objects.get(pk=author_kent.id).last_name
@@ -133,8 +130,9 @@ class DjangoBenchmarkTest():
         return measures
 
 
-class SpannerBenchmarkTest():
+class SpannerBenchmarkTest:
     """The Spanner performace testing class."""
+
     def __init__(self):
         self._create_table()
         self._one_row = (
@@ -150,14 +148,15 @@ class SpannerBenchmarkTest():
         self._many_rows = []
         self._many_rows2 = []
         for i in range(99):
-            num = round(random.randint(0,100000000))
+            num = round(random.randint(0, 100000000))
             self._many_rows.append((num, "Pete", "Allison", "2.1"))
-            num2 = round(random.randint(0,100000000))
+            num2 = round(random.randint(0, 100000000))
             self._many_rows2.append((num2, "Pete", "Allison", "2.1"))
 
         # initiate a session
         with self._database.snapshot():
             pass
+
     def _create_table(self):
         """Create a table for performace testing."""
         conn = spanner_dbapi.connect(INSTANCE_ID, DATABASE_NAME)
@@ -232,6 +231,7 @@ CREATE TABLE Author (
         self._cleanup()
         return measures
 
+
 @pytest.mark.django_db()
 class BenchmarkTest(unittest.TestCase):
     def setUp(self):
@@ -239,21 +239,52 @@ class BenchmarkTest(unittest.TestCase):
         setup_database()
 
     def test_run(self):
-        django_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
-         'insert_many_rows_with_mutations'])
-        spanner_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
-         'insert_many_rows_with_mutations'])
+        django_obj = pd.DataFrame(
+            columns=[
+                "insert_one_row_with_fetch_after",
+                "read_one_row",
+                "insert_many_rows",
+                "select_many_rows",
+                "insert_many_rows_with_mutations",
+            ]
+        )
+        spanner_obj = pd.DataFrame(
+            columns=[
+                "insert_one_row_with_fetch_after",
+                "read_one_row",
+                "insert_many_rows",
+                "select_many_rows",
+                "insert_many_rows_with_mutations",
+            ]
+        )
 
         for _ in range(50):
-            django_obj = django_obj.append(DjangoBenchmarkTest().run(), ignore_index=True)
-            spanner_obj = spanner_obj.append(SpannerBenchmarkTest().run(), ignore_index=True)
+            django_obj = django_obj.append(
+                DjangoBenchmarkTest().run(), ignore_index=True
+            )
+            spanner_obj = spanner_obj.append(
+                SpannerBenchmarkTest().run(), ignore_index=True
+            )
 
-        avg = pd.concat([django_obj.mean(axis = 0), spanner_obj.mean(axis = 0)], axis=1)
-        avg.columns=['Django','Spanner']
-        std = pd.concat([django_obj.std(axis = 0), spanner_obj.std(axis = 0)], axis=1)
-        std.columns=['Django','Spanner']
-        err = pd.concat([django_obj.sem(axis = 0), spanner_obj.sem(axis = 0)], axis=1)
-        err.columns=['Django','Spanner']
-        
-        print("Average: ", avg, "Standard Deviation: ", std, "Error:", err, sep='\n')
-        
+        avg = pd.concat(
+            [django_obj.mean(axis=0), spanner_obj.mean(axis=0)], axis=1
+        )
+        avg.columns = ["Django", "Spanner"]
+        std = pd.concat(
+            [django_obj.std(axis=0), spanner_obj.std(axis=0)], axis=1
+        )
+        std.columns = ["Django", "Spanner"]
+        err = pd.concat(
+            [django_obj.sem(axis=0), spanner_obj.sem(axis=0)], axis=1
+        )
+        err.columns = ["Django", "Spanner"]
+
+        print(
+            "Average: ",
+            avg,
+            "Standard Deviation: ",
+            std,
+            "Error:",
+            err,
+            sep="\n",
+        )

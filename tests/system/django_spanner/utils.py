@@ -13,7 +13,7 @@ from google.api_core import exceptions
 from google.cloud.spanner_v1 import Client
 from google.cloud.spanner_v1.instance import Instance, Backup
 from test_utils.retry import RetryErrors
-import pytest
+
 from django_spanner.creation import DatabaseCreation
 
 CREATE_INSTANCE = (
@@ -30,7 +30,7 @@ INSTANCE_ID = os.environ.get(
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
 DATABASE_NAME = os.getenv("DJANGO_SPANNER_DB", "django_test_db")
 
-@pytest.mark.django_db(transaction=True)
+
 class Config(object):
     """Run-time configuration to be modified at set-up.
 
@@ -47,7 +47,7 @@ class Config(object):
 def _list_instances():
     return list(Config.CLIENT.list_instances())
 
-@pytest.mark.django_db(transaction=True)
+
 def setup_instance():
     if USE_EMULATOR:
         from google.auth.credentials import AnonymousCredentials
@@ -118,7 +118,7 @@ def teardown_instance():
     if CREATE_INSTANCE:
         Config.INSTANCE.delete()
 
-@pytest.mark.django_db(transaction=True)
+
 def setup_database():
     Config.DATABASE = Config.INSTANCE.database(DATABASE_NAME)
     if not Config.DATABASE.exists():

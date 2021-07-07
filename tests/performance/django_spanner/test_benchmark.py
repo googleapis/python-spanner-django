@@ -245,7 +245,7 @@ class BenchmarkTest(unittest.TestCase):
         spanner_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
          'insert_many_rows_with_mutations'])
 
-        for _ in range(2):
+        for _ in range(50):
             django_obj = django_obj.append(DjangoBenchmarkTest().run(), ignore_index=True)
             spanner_obj = spanner_obj.append(SpannerBenchmarkTest().run(), ignore_index=True)
 

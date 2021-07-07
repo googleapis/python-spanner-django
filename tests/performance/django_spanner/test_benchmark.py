@@ -4,6 +4,9 @@ import statistics
 import time
 from decimal import Decimal
 from typing import Any
+import unittest
+import pandas as pd
+from tests.settings import INSTANCE_ID, DATABASE_NAME
 
 from django.db import connection
 from django.test import TransactionTestCase
@@ -21,7 +24,6 @@ from tests.system.django_spanner.utils import (
 import pytest
 
 
-val = "2.1"
 from tests.performance.django_spanner.models import Author
 
 
@@ -36,7 +38,7 @@ def measure_execution_time(function):
         t_start = time.time()
         try:
             function(self)
-            measures[function.__name__] = round(time.time() - t_start, 2)
+            measures[function.__name__] = round(time.time() - t_start, 4)
         except Aborted:
             measures[function.__name__] = 0
 
@@ -73,31 +75,28 @@ def insert_many_rows(transaction, many_rows):
         raise ValueError("Wrong number of inserts: " + str(sum(count)))
 
 
-class DjangoBenchmarkTest(TransactionTestCase):
-    @classmethod
-    def setUpClass(cls):
-        setup_instance()
+class DjangoBenchmarkTest():
+    def __init__(self):
         setup_database()
         with connection.schema_editor() as editor:
             # Create the tables
             editor.create_model(Author)
 
-    @classmethod
-    def tearDownClass(cls):
+        self._many_rows = []
+        self._many_rows2 = []
+        for i in range(99):
+            num = round(random.randint(0,100000000))
+            self._many_rows.append(Author(num, "Pete", "Allison", "2.1"))
+            num2 = round(random.randint(0,100000000))
+            self._many_rows2.append(Author(num2, "Pete", "Allison", "2.1"))
+
+    def _cleanup(self):
+        """Drop the test table."""
         with connection.schema_editor() as editor:
             # delete the table
             editor.delete_model(Author)
         teardown_database()
         # teardown_instance()
-
-    def setUp(self):
-        self._many_rows = []
-        self._many_rows2 = []
-        for i in range(99):
-            num = round(random.random() * 1000000)
-            self._many_rows.append(Author(num, "Pete", "Allison", val))
-            num2 = round(random.random() * 1000000)
-            self._many_rows2.append(Author(num2, "Pete", "Allison", val))
 
     @measure_execution_time
     def insert_one_row_with_fetch_after(self):
@@ -105,7 +104,7 @@ class DjangoBenchmarkTest(TransactionTestCase):
             id=2,
             first_name="Pete",
             last_name="Allison",
-            rating=val,
+            rating="2.1",
         )
         author_kent.save()
         last_name = Author.objects.get(pk=author_kent.id).last_name
@@ -133,7 +132,7 @@ class DjangoBenchmarkTest(TransactionTestCase):
         if len(rows) != 100:
             raise ValueError("Wrong number of rows read")
 
-    def test_run(self):
+    def run(self):
         """Execute every test case."""
         measures = {}
         for method in (
@@ -144,39 +143,41 @@ class DjangoBenchmarkTest(TransactionTestCase):
             self.insert_many_rows_with_mutations,
         ):
             method(measures)
-        import pdb
-        pdb.set_trace()
+        self._cleanup()
+        # import pdb
+        # pdb.set_trace()
         return measures
 
 
-class SpannerBenchmarkTest(TransactionTestCase):
+class SpannerBenchmarkTest():
     """The original Spanner performace testing class."""
-    def setUp(self):
+    def __init__(self):
+        setup_database()
         self._create_table()
         self._one_row = (
             1,
             "Pete",
             "Allison",
-            val,
+            "2.1",
         )
         self._client = Client()
-        self._instance = self._client.instance("django-spanner-test")
-        self._database = self._instance.database("spanner-testdb")
+        self._instance = self._client.instance(INSTANCE_ID)
+        self._database = self._instance.database(DATABASE_NAME)
 
         self._many_rows = []
         self._many_rows2 = []
         for i in range(99):
-            num = round(random.random() * 1000000)
-            self._many_rows.append((num, "Pete", "Allison", val))
-            num2 = round(random.random() * 1000000)
-            self._many_rows2.append((num2, "Pete", "Allison", val))
+            num = round(random.randint(0,100000000))
+            self._many_rows.append((num, "Pete", "Allison", "2.1"))
+            num2 = round(random.randint(0,100000000))
+            self._many_rows2.append((num2, "Pete", "Allison", "2.1"))
 
         # initiate a session
         with self._database.snapshot():
             pass
     def _create_table(self):
         """Create a table for performace testing."""
-        conn = spanner_dbapi.connect("django-spanner-test", "spanner-testdb")
+        conn = spanner_dbapi.connect(INSTANCE_ID, DATABASE_NAME)
         conn.database.update_ddl(
             [
                 """
@@ -230,11 +231,11 @@ CREATE TABLE Author (
 
     def _cleanup(self):
         """Drop the test table."""
-        conn = spanner_dbapi.connect("django-spanner-test", "spanner-testdb")
+        conn = spanner_dbapi.connect(INSTANCE_ID, DATABASE_NAME)
         conn.database.update_ddl(["DROP TABLE Author"])
         conn.close()
 
-    def test_run(self):
+    def run(self):
         """Execute every test case."""
         measures = {}
         for method in (
@@ -246,11 +247,29 @@ CREATE TABLE Author (
         ):
             method(measures)
         self._cleanup()
-        # import pdb
-        # pdb.set_trace()
         return measures
 
+@pytest.mark.django_db(transaction=True)
+class BenchmarkTest(unittest.TestCase):
 
-    
+    def test_run(self):
+        setup_instance()
+        django_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
+         'insert_many_rows_with_mutations'])
+        spanner_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
+         'insert_many_rows_with_mutations'])
 
-#print(DjangoBenchmarkTest().test_run())
+        for _ in range(2):
+            django_obj = django_obj.append(DjangoBenchmarkTest().run(), ignore_index=True)
+            spanner_obj = spanner_obj.append(SpannerBenchmarkTest().run(), ignore_index=True)
+
+        django_avg = django_obj.mean(axis = 0)
+        spanner_avg = spanner_obj.mean(axis = 0)
+        django_std = django_obj.std(axis = 0)
+        spanner_std = spanner_obj.std(axis = 0)
+        django_err = django_obj.sem(axis = 0)
+        spanner_err = spanner_obj.sem(axis = 0)
+        print("Django Average: ", django_avg, "\n Spanner Average: ", spanner_avg, "\n Django Standard Deviation: ", django_std, 
+        "\n Spanner Standard Deviation: ", spanner_std, "\n Django Error: ", django_err, "\n Spanner Error: ", spanner_err, sep='\n')
+
+

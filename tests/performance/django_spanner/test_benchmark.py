@@ -64,6 +64,7 @@ def insert_many_rows(transaction, many_rows):
 
 
 class DjangoBenchmarkTest():
+    """The Django performace testing class."""
     def __init__(self):
         with connection.schema_editor() as editor:
             # Create the tables
@@ -76,13 +77,6 @@ class DjangoBenchmarkTest():
             self._many_rows.append(Author(num, "Pete", "Allison", "2.1"))
             num2 = round(random.randint(0,100000000))
             self._many_rows2.append(Author(num2, "Pete", "Allison", "2.1"))
-
-    def _cleanup(self):
-        """Drop the test table."""
-        with connection.schema_editor() as editor:
-            # delete the table
-            editor.delete_model(Author)
-        # teardown_instance()
 
     @measure_execution_time
     def insert_one_row_with_fetch_after(self):
@@ -118,6 +112,12 @@ class DjangoBenchmarkTest():
         if len(rows) != 100:
             raise ValueError("Wrong number of rows read")
 
+    def _cleanup(self):
+        """Drop the test table."""
+        with connection.schema_editor() as editor:
+            # delete the table
+            editor.delete_model(Author)
+
     def run(self):
         """Execute every test case."""
         measures = {}
@@ -130,13 +130,11 @@ class DjangoBenchmarkTest():
         ):
             method(measures)
         self._cleanup()
-        # import pdb
-        # pdb.set_trace()
         return measures
 
 
 class SpannerBenchmarkTest():
-    """The original Spanner performace testing class."""
+    """The Spanner performace testing class."""
     def __init__(self):
         self._create_table()
         self._one_row = (
@@ -236,10 +234,11 @@ CREATE TABLE Author (
 
 @pytest.mark.django_db()
 class BenchmarkTest(unittest.TestCase):
-
-    def test_run(self):
+    def setUp(self):
         setup_instance()
         setup_database()
+
+    def test_run(self):
         django_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
          'insert_many_rows_with_mutations'])
         spanner_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 

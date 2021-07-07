@@ -1,30 +1,18 @@
-import datetime
 import random
-import statistics
 import time
-from decimal import Decimal
-from typing import Any
 import unittest
-import pandas as pd
-from tests.settings import INSTANCE_ID, DATABASE_NAME
+from typing import Any
 
+import pandas as pd
+import pytest
 from django.db import connection
-from django.test import TransactionTestCase
 from google.api_core.exceptions import Aborted
 from google.cloud import spanner_dbapi
 from google.cloud.spanner_v1 import Client, KeySet
-from scipy.stats import sem
-
-from tests.system.django_spanner.utils import (
-    setup_database,
-    setup_instance,
-    teardown_database,
-    teardown_instance,
-)
-import pytest
-
 
 from tests.performance.django_spanner.models import Author
+from tests.settings import DATABASE_NAME, INSTANCE_ID
+from tests.system.django_spanner.utils import setup_database, setup_instance
 
 
 def measure_execution_time(function):
@@ -77,7 +65,6 @@ def insert_many_rows(transaction, many_rows):
 
 class DjangoBenchmarkTest():
     def __init__(self):
-        setup_database()
         with connection.schema_editor() as editor:
             # Create the tables
             editor.create_model(Author)
@@ -95,7 +82,6 @@ class DjangoBenchmarkTest():
         with connection.schema_editor() as editor:
             # delete the table
             editor.delete_model(Author)
-        teardown_database()
         # teardown_instance()
 
     @measure_execution_time
@@ -152,7 +138,6 @@ class DjangoBenchmarkTest():
 class SpannerBenchmarkTest():
     """The original Spanner performace testing class."""
     def __init__(self):
-        setup_database()
         self._create_table()
         self._one_row = (
             1,
@@ -249,11 +234,12 @@ CREATE TABLE Author (
         self._cleanup()
         return measures
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db()
 class BenchmarkTest(unittest.TestCase):
 
     def test_run(self):
         setup_instance()
+        setup_database()
         django_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
          'insert_many_rows_with_mutations'])
         spanner_obj = pd.DataFrame(columns = ['insert_one_row_with_fetch_after', 'read_one_row', 'insert_many_rows', 'select_many_rows', 
@@ -263,13 +249,12 @@ class BenchmarkTest(unittest.TestCase):
             django_obj = django_obj.append(DjangoBenchmarkTest().run(), ignore_index=True)
             spanner_obj = spanner_obj.append(SpannerBenchmarkTest().run(), ignore_index=True)
 
-        django_avg = django_obj.mean(axis = 0)
-        spanner_avg = spanner_obj.mean(axis = 0)
-        django_std = django_obj.std(axis = 0)
-        spanner_std = spanner_obj.std(axis = 0)
-        django_err = django_obj.sem(axis = 0)
-        spanner_err = spanner_obj.sem(axis = 0)
-        print("Django Average: ", django_avg, "\n Spanner Average: ", spanner_avg, "\n Django Standard Deviation: ", django_std, 
-        "\n Spanner Standard Deviation: ", spanner_std, "\n Django Error: ", django_err, "\n Spanner Error: ", spanner_err, sep='\n')
-
-
+        avg = pd.concat([django_obj.mean(axis = 0), spanner_obj.mean(axis = 0)], axis=1)
+        avg.columns=['Django','Spanner']
+        std = pd.concat([django_obj.std(axis = 0), spanner_obj.std(axis = 0)], axis=1)
+        std.columns=['Django','Spanner']
+        err = pd.concat([django_obj.sem(axis = 0), spanner_obj.sem(axis = 0)], axis=1)
+        err.columns=['Django','Spanner']
+        
+        print("Average: ", avg, "Standard Deviation: ", std, "Error:", err, sep='\n')
+        

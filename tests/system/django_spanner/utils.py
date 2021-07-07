@@ -126,7 +126,7 @@ def setup_database():
         creation._create_test_db(verbosity=0, autoclobber=False, keepdb=True)
 
     # Running migrations on the db.
-    #call_command("migrate", interactive=False)
+    call_command("migrate", interactive=False)
 
 
 def teardown_database():

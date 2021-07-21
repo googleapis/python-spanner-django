@@ -20,6 +20,9 @@ from tests.system.django_spanner.utils import (
 )
 
 
+@unittest.skipIf(
+    USE_EMULATOR, "Check Constraint is not implemented in emulator."
+)
 class TestCheckConstraint(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
@@ -50,9 +53,6 @@ class TestCheckConstraint(TransactionTestCase):
         # Delete data from Event table.
         Event.objects.all().delete()
 
-    @unittest.skipIf(
-        USE_EMULATOR, "Check Constraint is not implemented in emulator."
-    )
     def test_insert_invalid_value(self):
         """
         Tests model object creation with invalid data in Event model.

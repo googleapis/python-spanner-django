@@ -10,7 +10,6 @@ from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from decimal import Decimal
 from .models import Number, Author
 
-
 class TestLookups(SpannerSimpleTestClass):
     def test_cast_param_to_float_lte_sql_query(self):
 
@@ -59,7 +58,7 @@ class TestLookups(SpannerSimpleTestClass):
         self.assertEqual(
             sql_compiled,
             "SELECT tests_number.num FROM tests_number WHERE "
-            + "tests_number.item_id = (tests_number.num)",
+            + "tests_number.item_id = tests_number.num",
         )
         self.assertEqual(params, ())
 
@@ -111,8 +110,8 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT('^', (UPPER(%s))), "
-            + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
+            + "REPLACE(REPLACE(REPLACE(CONCAT(\'^\', UPPER(%s)), "
+            +'"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
 
@@ -128,7 +127,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT('^(?i)', (UPPER(%s))), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT(\'^(?i)\', UPPER(%s)), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -144,7 +143,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT('', (UPPER(%s)), '$'), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT(\'\', UPPER(%s), \'$\'), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -183,7 +182,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.num FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "(UPPER(%s)))",
+            + "UPPER(%s))",
         )
         self.assertEqual(params, ("abc",))
 
@@ -197,7 +196,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.num FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "CONCAT('(?i)', (UPPER(%s))))",
+            + "CONCAT('(?i)', UPPER(%s)))",
         )
         self.assertEqual(params, ("abc",))
 
@@ -236,7 +235,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT('(?i)', (UPPER(%s))), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT(\'(?i)\', UPPER(%s)), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -250,7 +249,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + 'REPLACE(REPLACE(REPLACE((UPPER(%s)), "\\\\", "\\\\\\\\"), '
+            + 'REPLACE(REPLACE(REPLACE(UPPER(%s), "\\\\", "\\\\\\\\"), '
             + '"%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -279,7 +278,7 @@ class TestLookups(SpannerSimpleTestClass):
         self.assertEqual(
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
-            + "REGEXP_CONTAINS((UPPER(tests_author.last_name)), "
+            + "REGEXP_CONTAINS(UPPER(tests_author.last_name), "
             + "CONCAT('^(?i)', CAST(UPPER(tests_author.name) AS STRING), '$'))",
         )
         self.assertEqual(params, ())
@@ -293,7 +292,7 @@ class TestLookups(SpannerSimpleTestClass):
         self.assertEqual(
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
-            + "REGEXP_CONTAINS((UPPER(CONCAT('^(?i)', "
-            + "CAST(UPPER(tests_author.name) AS STRING), '$'))), %s)",
+            + "REGEXP_CONTAINS(UPPER(CONCAT('^(?i)', "
+            + "CAST(UPPER(tests_author.name) AS STRING), '$')), %s)",
         )
         self.assertEqual(params, ("abc",))

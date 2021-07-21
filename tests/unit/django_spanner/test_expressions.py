@@ -20,7 +20,7 @@ class TestExpressions(SpannerSimpleTestClass):
         self.assertEqual(
             sql_compiled,
             "SELECT tests_report.name FROM tests_report ORDER BY "
-            + "tests_report.name IS NULL, tests_report.name DESC",
+            + "tests_report.name IS NULL, tests_report.name DESC NULLS LAST",
         )
 
     def test_order_by_sql_query_with_order_by_null_first(self):
@@ -32,7 +32,7 @@ class TestExpressions(SpannerSimpleTestClass):
         self.assertEqual(
             sql_compiled,
             "SELECT tests_report.name FROM tests_report ORDER BY "
-            + "tests_report.name IS NOT NULL, tests_report.name DESC",
+            + "tests_report.name IS NOT NULL, tests_report.name DESC NULLS FIRST",
         )
 
     def test_order_by_sql_query_with_order_by_name(self):

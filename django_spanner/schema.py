@@ -471,10 +471,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             [],
         )
 
-    def _check_sql(self, name, check):
-        # Spanner doesn't support CHECK constraints.
-        return None
-
     def _unique_sql(self, model, fields, name, condition=None):
         # Inline constraints aren't supported, so create the index separately.
         sql = self._create_unique_sql(

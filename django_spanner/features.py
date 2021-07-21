@@ -30,7 +30,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_sequence_reset = False
     supports_timezones = False
     supports_transactions = False
-    supports_column_check_constraints = False
     supports_table_check_constraints = False
     uses_savepoints = False
 
@@ -184,7 +183,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "db_functions.comparison.test_cast.CastTests.test_cast_to_decimal_field",
         "model_fields.test_decimalfield.DecimalFieldTests.test_fetch_from_db_without_float_rounding",
         "model_fields.test_decimalfield.DecimalFieldTests.test_roundtrip_with_trailing_zeros",
-        # No CHECK constraints in Spanner.
+        # Spanner does not support unsigned integer field.
         "model_fields.test_integerfield.PositiveIntegerFieldTests.test_negative_values",
         # Spanner doesn't support the variance the standard deviation database
         # functions:

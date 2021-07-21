@@ -111,8 +111,8 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT(\'^\', UPPER(%s)), "
-            +'"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
+            + "REPLACE(REPLACE(REPLACE(CONCAT('^', UPPER(%s)), "
+            + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
 
@@ -128,7 +128,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT(\'^(?i)\', UPPER(%s)), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT('^(?i)', UPPER(%s)), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -144,7 +144,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT(\'\', UPPER(%s), \'$\'), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT('', UPPER(%s), '$'), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))
@@ -236,7 +236,7 @@ class TestLookups(SpannerSimpleTestClass):
             sql_compiled,
             "SELECT tests_author.name FROM tests_author WHERE "
             + "REGEXP_CONTAINS(CAST(UPPER(tests_author.name) AS STRING), "
-            + "REPLACE(REPLACE(REPLACE(CONCAT(\'(?i)\', UPPER(%s)), "
+            + "REPLACE(REPLACE(REPLACE(CONCAT('(?i)', UPPER(%s)), "
             + '"\\\\", "\\\\\\\\"), "%%", r"\\%%"), "_", r"\\_"))',
         )
         self.assertEqual(params, ("abc",))

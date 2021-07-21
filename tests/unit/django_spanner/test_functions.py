@@ -179,7 +179,7 @@ class TestUtils(SpannerSimpleTestClass):
         self.assertEqual(
             sql_query,
             "SELECT tests_author.num FROM tests_author WHERE tests_author.num "
-            + "= 3.141592653589793",
+            + "= (3.141592653589793)",
         )
         self.assertEqual(params, ())
 

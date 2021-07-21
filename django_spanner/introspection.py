@@ -96,7 +96,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     None,  # scale
                     details.null_ok,
                     None,  # default
-                    None, # collation
                 )
             )
 

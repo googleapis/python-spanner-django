@@ -98,7 +98,6 @@ class TestUtils(SpannerSimpleTestClass):
                     scale=None,
                     null_ok=False,
                     default=None,
-                    collation=None,
                 ),
                 FieldInfo(
                     name="age",
@@ -109,7 +108,6 @@ class TestUtils(SpannerSimpleTestClass):
                     scale=None,
                     null_ok=True,
                     default=None,
-                    collation=None,
                 ),
             ],
         )

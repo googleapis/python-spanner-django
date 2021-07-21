@@ -30,6 +30,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_sequence_reset = False
     supports_timezones = False
     supports_transactions = False
+    supports_column_check_constraints = False
     supports_table_check_constraints = False
     uses_savepoints = False
 

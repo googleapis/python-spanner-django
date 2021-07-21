@@ -5,5 +5,5 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 docker:
-  image: gcr.io/repo-automation-bots/owlbot-python:latest
-  digest: sha256:b8c131c558606d3cea6e18f8e87befbd448c1482319b0db3c5d5388fa6ea72e3
+  image: gcr.io/cloud-devrel-public-resources/owlbot-python:latest
+  digest: sha256:82d046d572a11b84d64d4b9af93ad55a1b6a4854917504ba7557acdfce907dde

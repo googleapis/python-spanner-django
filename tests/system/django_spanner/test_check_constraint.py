@@ -11,12 +11,12 @@ import unittest
 from django.utils import timezone
 from google.api_core.exceptions import OutOfRange
 from django.db import connection
+from django_spanner import USE_EMULATOR
 from tests.system.django_spanner.utils import (
     setup_instance,
     teardown_instance,
     setup_database,
     teardown_database,
-    USE_EMULATOR,
 )
 
 

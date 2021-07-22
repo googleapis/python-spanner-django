@@ -18,6 +18,7 @@ templated_files = gcp.CommonTemplates().py_library(microgenerator=True)
 # Just move templates for building docs and releases
 # Presubmit and continuous are configured differently
 s.move(templated_files / ".trampolinerc")
+s.move(templated_files / ".kokoro" / "docker")
 s.move(templated_files / ".kokoro" / "docs")
 s.move(templated_files / ".kokoro" / "release.sh")
 s.move(templated_files / ".kokoro" / "trampoline_v2.sh")

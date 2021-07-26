@@ -471,7 +471,8 @@ class M2mThroughReferentialTests(TestCase):
         self.assertQuerysetEqual(
             john.subordinates.all(),
             ['peter', 'mary', 'harry'],
-            attrgetter('name')
+            attrgetter('name'),
+            ordered=False,
         )
 
     def test_self_referential_symmetrical(self):

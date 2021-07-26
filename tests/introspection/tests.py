@@ -22,7 +22,7 @@ class IntrospectionTests(TransactionTestCase):
 
     def test_django_table_names(self):
         with connection.cursor() as cursor:
-            cursor.execute('CREATE TABLE django_ixn_test_table (id INTEGER);')
+            cursor.execute('CREATE TABLE django_ixn_test_table (id INT64) PRIMARY KEY (id)')
             tl = connection.introspection.django_table_names()
             cursor.execute("DROP TABLE django_ixn_test_table;")
             self.assertNotIn('django_ixn_test_table', tl,

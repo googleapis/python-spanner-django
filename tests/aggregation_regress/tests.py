@@ -1075,7 +1075,8 @@ class AggregationTests(TestCase):
                 "Prentice Hall",
                 "Jonno's House of Books",
             ],
-            attrgetter("name")
+            attrgetter("name"),
+            ordered=False,
         )
 
         qs = Publisher.objects.annotate(

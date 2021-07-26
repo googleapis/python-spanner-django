@@ -1171,6 +1171,57 @@ class SchemaTests(TransactionTestCase):
             BookWithO2O.objects.create(author=author, title="Django 2", pub_date=datetime.datetime.now())
         self.assertForeignKeyExists(BookWithO2O, 'author_id', 'schema_author')
 
+    def test_alter_fk_nullability(self):
+        """Test altering FK from null=False to null=True and back again."""
+        expected_fks = 1 if connection.features.supports_foreign_keys else 0
+
+        def verify_index():
+            counts = self.get_constraints_count(
+                Book._meta.db_table,
+                Book._meta.get_field('author').column,
+                (Author._meta.db_table, Author._meta.pk.column),
+            )
+            self.assertEqual(counts, {'fks': expected_fks, 'uniques': 0, 'indexes': 1})
+        # Create the table
+        with connection.schema_editor() as editor:
+            editor.create_model(Author)
+            editor.create_model(Book)
+        self.assertIs(Book._meta.get_field('author_id').null, False)
+        # Check the index is there to begin with.
+        verify_index()
+        with self.assertRaises(IntegrityError):
+            Book.objects.create(
+                title="Much Ado About Foreign Keys",
+                pub_date=datetime.datetime.now(),
+            )
+        old_field = Book._meta.get_field("author")
+        new_field = ForeignKey(Author, CASCADE, null=True)
+        new_field.set_attributes_from_name("author")
+        with connection.schema_editor() as editor:
+            editor.alter_field(Book, old_field, new_field, strict=True)
+        # Can create a book without an author.
+        book = Book.objects.create(
+            title="Much Ado About Foreign Keys",
+            pub_date=datetime.datetime.now(),
+        )
+        book.delete()
+        # The index is still there.
+        verify_index()
+        # Change the field back to null=False.
+        old_field = new_field
+        new_field = ForeignKey(Author, CASCADE)
+        new_field.set_attributes_from_name("author")
+        with connection.schema_editor() as editor:
+            editor.alter_field(Book, old_field, new_field, strict=True)
+        # The index is still there.
+        verify_index()
+        # No author is once again an error.
+        with self.assertRaises(IntegrityError):
+            Book.objects.create(
+                title="Much Ado About Foreign Keys",
+                pub_date=datetime.datetime.now(),
+            )
+
     def test_alter_field_fk_to_o2o(self):
         with connection.schema_editor() as editor:
             editor.create_model(Author)
@@ -1943,17 +1994,7 @@ class SchemaTests(TransactionTestCase):
         with self.assertRaises(IntegrityError):
             Tag.objects.create(title="bar", slug="foo")
         Tag.objects.all().delete()
-        # Rename the field
-        new_field3 = SlugField(unique=True)
-        new_field3.set_attributes_from_name("slug2")
-        with connection.schema_editor() as editor:
-            editor.alter_field(Tag, new_field2, new_field3, strict=True)
-        # Ensure the field is still unique
-        TagUniqueRename.objects.create(title="foo", slug2="foo")
-        with self.assertRaises(IntegrityError):
-            TagUniqueRename.objects.create(title="bar", slug2="foo")
-        Tag.objects.all().delete()
-
+        
     def test_unique_name_quoting(self):
         old_table_name = TagUniqueRename._meta.db_table
         try:
@@ -2903,7 +2944,7 @@ class SchemaTests(TransactionTestCase):
         )
         with atomic(), connection.schema_editor() as editor:
             with self.assertRaisesMessage(TransactionManagementError, message):
-                editor.execute(editor.sql_create_table % {'table': 'foo', 'definition': ''})
+                editor.execute(editor.sql_create_table % {'table': 'foo', 'definition': '', 'primary_key': ''})
 
     @skipUnlessDBFeature('supports_foreign_keys', 'indexes_foreign_keys')
     def test_foreign_key_index_long_names_regression(self):

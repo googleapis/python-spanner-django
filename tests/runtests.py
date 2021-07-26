@@ -254,6 +254,19 @@ def setup(verbosity, test_labels, parallel, start_at, start_after):
 
     apps.set_installed_apps(settings.INSTALLED_APPS)
 
+    # Force declaring available_apps in TransactionTestCase for faster tests.
+    def no_available_apps(self):
+        raise Exception(
+            'Please define available_apps in TransactionTestCase and its '
+            'subclasses.'
+        )
+    TransactionTestCase.available_apps = property(no_available_apps)
+    TestCase.available_apps = None
+
+    if settings.DATABASES['default']['ENGINE'] == 'django_spanner':
+        # Monkey-patch AutoField before configuring INSTALLED_APPS
+        import django_spanner  # noqa
+
     # Set an environment variable that other code may consult to see if
     # Django's own test suite is running.
     os.environ['RUNNING_DJANGOS_TEST_SUITE'] = 'true'

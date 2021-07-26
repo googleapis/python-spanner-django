@@ -177,6 +177,19 @@ class OperationTestBase(MigrationTestBase):
         with connection.schema_editor() as editor:
             with connection.constraint_checks_disabled():
                 for table_name in table_names:
+                    class Model:
+                        pass
+
+                    class Meta:
+                        db_table = table_name
+
+                    model = Model()
+                    model._meta = Meta()
+                    # Spanner requires deleting a table's indexes before
+                    # dropping the table.
+                    index_names = editor._constraint_names(model, index=True, primary_key=False)
+                    for index_name in index_names:
+                        editor.execute(editor._delete_index_sql(model, index_name))
                     editor.execute(editor.sql_delete_table % {
                         'table': editor.quote_name(table_name),
                     })

@@ -243,7 +243,7 @@ class BasicExpressionsTests(TestCase):
     def test_filter_with_join(self):
         # F Expressions can also span joins
         Company.objects.update(point_of_contact=F('ceo'))
-        c = Company.objects.first()
+        c = Company.objects.get(name="Example Inc.")
         c.point_of_contact = Employee.objects.create(firstname="Guido", lastname="van Rossum")
         c.save()
 
@@ -348,6 +348,17 @@ class BasicExpressionsTests(TestCase):
 
         queryset = Employee.objects.filter(firstname__iexact=F('lastname'))
         self.assertSequenceEqual(queryset, [test])
+    
+    def test_regex_f_expression(self):
+        e0 = Employee.objects.create(firstname="John", lastname="John")
+        e1 = Employee.objects.create(firstname="John", lastname="n$")
+        e2 = Employee.objects.create(firstname="John", lastname="^J")
+        e3 = Employee.objects.create(firstname="John", lastname="^j")
+        e4 = Employee.objects.create(firstname="Test", lastname="test")
+        queryset = Employee.objects.filter(firstname__regex=F('lastname'))
+        self.assertCountEqual(queryset, [e0, e1, e2])
+        queryset = Employee.objects.filter(firstname__iregex=F('lastname'))
+        self.assertCountEqual(queryset, [e0, e1, e2, e3, e4])
 
     def test_ticket_16731_startswith_lookup(self):
         Employee.objects.create(firstname="John", lastname="Doe")
@@ -357,9 +368,8 @@ class BasicExpressionsTests(TestCase):
             Employee.objects.filter(lastname__startswith=F('firstname')),
             [e2, e3] if connection.features.has_case_insensitive_like else [e2]
         )
-        qs = Employee.objects.filter(lastname__istartswith=F('firstname')).order_by('pk')
-        self.assertSequenceEqual(qs, [e2, e3])
-
+        qs = Employee.objects.filter(lastname__istartswith=F('firstname'))
+        self.assertCountEqual(qs, [e2, e3])
     def test_ticket_18375_join_reuse(self):
         # Reverse multijoin F() references and the lookup target the same join.
         # Pre #18375 the F() join was generated first and the lookup couldn't

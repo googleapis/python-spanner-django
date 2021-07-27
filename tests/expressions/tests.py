@@ -370,6 +370,7 @@ class BasicExpressionsTests(TestCase):
         )
         qs = Employee.objects.filter(lastname__istartswith=F('firstname'))
         self.assertCountEqual(qs, [e2, e3])
+        
     def test_ticket_18375_join_reuse(self):
         # Reverse multijoin F() references and the lookup target the same join.
         # Pre #18375 the F() join was generated first and the lookup couldn't

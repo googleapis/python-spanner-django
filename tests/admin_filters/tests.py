@@ -918,7 +918,7 @@ class ListFiltersTests(TestCase):
 
         # Make sure the correct queryset is returned
         queryset = changelist.get_queryset(request)
-        self.assertCountEqual(list(queryset), [self.bio_book])
+        self.assertEqual(list(queryset), [self.bio_book])
 
         # Make sure the correct choice is selected
         filterspec = changelist.get_filters(request)[0][3]
@@ -948,7 +948,7 @@ class ListFiltersTests(TestCase):
 
         # Make sure the correct queryset is returned
         queryset = changelist.get_queryset(request)
-        self.assertCountEqual(list(queryset), [self.django_book])
+        self.assertEqual(list(queryset), [self.django_book])
 
         # Make sure the correct choice is selected
         filterspec = changelist.get_filters(request)[0][3]
@@ -1082,7 +1082,7 @@ class ListFiltersTests(TestCase):
 
         # Make sure the correct queryset is returned
         queryset = changelist.get_queryset(request)
-        self.assertEqual(list(queryset), [self.bio_book, self.djangonaut_book])
+        self.assertCountEqual(list(queryset), [self.bio_book, self.djangonaut_book])
 
     def test_fieldlistfilter_invalid_lookup_parameters(self):
         """Filtering by an invalid value."""
@@ -1153,7 +1153,7 @@ class ListFiltersTests(TestCase):
 
         # Make sure the correct queryset is returned
         queryset = changelist.get_queryset(request)
-        self.assertEqual(list(queryset), [self.guitar_book, self.djangonaut_book])
+        self.assertCountEqual(list(queryset), [self.guitar_book, self.djangonaut_book])
 
         # Make sure the correct choice is selected
         filterspec = changelist.get_filters(request)[0][1]

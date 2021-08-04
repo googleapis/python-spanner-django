@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1b3](https://www.github.com/googleapis/python-spanner-django/compare/v2.2.1-b3...v2.2.1b3) (2021-08-04)
+
+
+### Bug Fixes
+
+* Bump version number after 2.2.1b3 release ([#696](https://www.github.com/googleapis/python-spanner-django/issues/696)) ([a8f2aac](https://www.github.com/googleapis/python-spanner-django/commit/a8f2aac06929152067e39b5aac1cebfd74ef5337))
+
 ## 2.2.1b3 (2021-07-30)
 
 ### Miscellaneous Chores

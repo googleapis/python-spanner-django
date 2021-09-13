@@ -4,6 +4,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import uuid
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django_spanner._opentelemetry_tracing import trace_call
@@ -59,7 +60,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             # Check constraints can go on the column SQL here
             db_params = field.db_parameters(connection=self.connection)
             if db_params["check"]:
-                definition += " " + self.sql_check_constraint % db_params
+                definition += (
+                    ", CONSTRAINT constraint_%s_%s_%s "
+                    % (
+                        model._meta.db_table,
+                        self.quote_name(field.name),
+                        uuid.uuid4().hex[:6].lower(),
+                    )
+                    + self.sql_check_constraint % db_params
+                )
             # Autoincrement SQL (for backends with inline variant)
             col_type_suffix = field.db_type_suffix(connection=self.connection)
             if col_type_suffix:
@@ -123,6 +132,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         trace_attributes = {
             "model_name": self.quote_name(model._meta.db_table)
         }
+
         with trace_call(
             "CloudSpannerDjango.create_model",
             self.connection,
@@ -471,14 +481,24 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             [],
         )
 
-    def _check_sql(self, name, check):
-        # Spanner doesn't support CHECK constraints.
-        return None
-
-    def _unique_sql(self, model, fields, name, condition=None):
+    def _unique_sql(
+        self,
+        model,
+        fields,
+        name,
+        condition=None,
+        deferrable=None,  # Spanner does not require this parameter
+        include=None,
+        opclasses=None,
+    ):
         # Inline constraints aren't supported, so create the index separately.
         sql = self._create_unique_sql(
-            model, fields, name=name, condition=condition
+            model,
+            fields,
+            name=name,
+            condition=condition,
+            include=include,
+            opclasses=opclasses,
         )
         if sql:
             self.deferred_sql.append(sql)

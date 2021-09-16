@@ -65,7 +65,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Topic :: Utilities",
         "Framework :: Django",
-        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.2",
     ],
     extras_require=extras,
     python_requires=">=3.6",

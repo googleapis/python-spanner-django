@@ -645,8 +645,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         return re.escape(str(x))
 
-    prep_for_iexact_query = prep_for_like_query
-
     def no_limit_value(self):
         """The largest INT64: (2**63) - 1
 

@@ -215,7 +215,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Check constraints can go on the column SQL here
         db_params = field.db_parameters(connection=self.connection)
         if db_params["check"]:
-            definition += " " + self.sql_check_constraint % db_params
+            definition += (
+                ", CONSTRAINT constraint_%s_%s_%s "
+                % (
+                    model._meta.db_table,
+                    self.quote_name(field.name),
+                    uuid.uuid4().hex[:6].lower(),
+                )
+                + self.sql_check_constraint % db_params
+            )
         # Build the SQL and run it
         sql = self.sql_create_column % {
             "table": self.quote_name(model._meta.db_table),
@@ -387,6 +395,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def quote_value(self, value):
         # A more complete implementation isn't currently required.
+        if isinstance(value, str):
+            return "'%s'" % value.replace("'", "''")
         return str(value)
 
     def _alter_field(

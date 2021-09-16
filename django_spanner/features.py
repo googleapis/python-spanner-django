@@ -31,7 +31,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_timezones = False
     supports_transactions = False
     supports_column_check_constraints = True
-    supports_table_check_constraints = False
+    supports_table_check_constraints = True
     supports_order_by_nulls_modifier = False
     # Spanner does not support json
     supports_json_field = False
@@ -46,10 +46,14 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Django tests that aren't supported by Spanner.
     skip_tests = (
+        # Insert sql with param variables using %(name)s parameter style is failing
+        # https://github.com/googleapis/python-spanner/issues/542
+        "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict",
         # Spanner autofield is replaced with uuid4 so validation is disabled
         "model_fields.test_autofield.AutoFieldTests.test_backend_range_validation",
         "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
         "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
+        "model_fields.test_autofield.BigAutoFieldTests.test_backend_range_validation",
         "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
         "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
         "model_fields.test_autofield.SmallAutoFieldTests.test_backend_range_validation",
@@ -65,6 +69,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_json_object",
         "db_functions.comparison.test_json_object.JSONObjectTests.test_textfield",
         # Spanner does not support iso_week_day but week_day is supported.
+        "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
+        "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
+        "timezones.tests.NewDatabaseTests.test_query_datetime_lookups_in_other_timezone",
         "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_func",
         "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_weekday_func",
         "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func",
@@ -88,6 +95,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "db_functions.math.test_random.RandomTests.test",
         # Spanner supports order by id, but it's does not work the same way as
         # an auto increment field.
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
         "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
         "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
         "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
@@ -97,9 +105,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # appears in the GROUP BY clause.
         "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
         # No foreign key constraints in Spanner.
+        "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
         "backends.tests.FkConstraintsTests.test_check_constraints",
         "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # No Django transaction management in Spanner.
+        "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
+        "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         # django_spanner monkey patches AutoField to have a default value.
         # Tests that expect it to be empty untill saved in db.
@@ -223,6 +234,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "prefetch_related.tests.ForeignKeyToFieldTest.test_m2m",
         "queries.test_bulk_update.BulkUpdateNoteTests.test_multiple_fields",
         "queries.test_bulk_update.BulkUpdateTests.test_inherited_fields",
+        "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
         # "queries.tests.Queries1Tests.test_ticket9411",
         "queries.tests.Queries4Tests.test_ticket15316_exclude_true",
         "queries.tests.Queries5Tests.test_ticket7256",
@@ -238,6 +250,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "syndication_tests.tests.SyndicationFeedTest.test_template_feed",
         # datetimes retrieved from the database with the wrong hour when
         # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
+        "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
         "datetimes.tests.DateTimesTests.test_21432",
         "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
         "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_timezone_applied_before_truncation",  # noqa
@@ -456,6 +469,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         skip_tests += (
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+            "queries.tests.Queries1Tests.test_excluded_intermediary_m2m_table_joined",  # noqa
+            "queries.tests.Queries4Tests.test_combine_or_filter_reuse",  # noqa
+            "queries.tests.Queries1Tests.test_negate_field",  # noqa
+            "queries.tests.Queries1Tests.test_field_with_filterable",  # noqa
+            "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning",  # noqa
+            "queries.tests.Queries1Tests.test_order_by_rawsql",  # noqa
+            "queries.tests.Queries4Tests.test_filter_reverse_non_integer_pk",  # noqa
             "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",  # noqa
             "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa
             "admin_docs.test_middleware.XViewMiddlewareTest.test_no_auth_middleware",  # noqa

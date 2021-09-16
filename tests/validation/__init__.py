@@ -7,8 +7,10 @@ class ValidationAssertions:
             clean(**kwargs)
         self.assertEqual(sorted(failed_fields), sorted(cm.exception.message_dict))
 
-    def assertFieldFailsValidationWithMessage(self, clean, field_name, message):
+    def assertFieldFailsValidationWithMessage(
+        self, clean, field_name, message, **kwargs
+    ):
         with self.assertRaises(ValidationError) as cm:
-            clean()
+            clean(**kwargs)
         self.assertIn(field_name, cm.exception.message_dict)
         self.assertEqual(message, cm.exception.message_dict[field_name])

@@ -8,7 +8,6 @@ import uuid
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django_spanner._opentelemetry_tracing import trace_call
-from django_spanner import USE_EMULATOR
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -390,9 +389,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             "index": "|".join(index.fields),
         }
         with trace_call(
-            "CloudSpannerDjango.add_index",
-            self.connection,
-            trace_attributes,
+            "CloudSpannerDjango.add_index", self.connection, trace_attributes,
         ):
             super().add_index(model, index)
 

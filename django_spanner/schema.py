@@ -469,7 +469,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 self.connection,
                 trace_attributes,
             ):
-                self.execute(self._create_index_sql(model, [new_field]))
+                self.execute(self._create_index_sql(model, fields=[new_field]))
 
     def _alter_column_type_sql(self, model, old_field, new_field, new_type):
         # Spanner needs to use sql_alter_column_not_null if the field is

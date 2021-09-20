@@ -23,6 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
     supports_foreign_keys = False
+    can_create_inline_fk = False
     supports_ignore_conflicts = False
     supports_partial_indexes = False
     supports_regex_backreferencing = False
@@ -46,6 +47,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Django tests that aren't supported by Spanner.
     skip_tests = (
+        # Spanner does not support setting a default value on columns.
+        "schema.tests.SchemaTests.test_alter_text_field_to_not_null_with_default_value",
+        # Direct SQL query test that do not follow spanner syntax.
+        "schema.tests.SchemaTests.test_alter_auto_field_quoted_db_column",
+        "schema.tests.SchemaTests.test_alter_primary_key_quoted_db_table",
         # Insert sql with param variables using %(name)s parameter style is failing
         # https://github.com/googleapis/python-spanner/issues/542
         "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict",
@@ -95,6 +101,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "db_functions.math.test_random.RandomTests.test",
         # Spanner supports order by id, but it's does not work the same way as
         # an auto increment field.
+        "model_forms.test_modelchoicefield.ModelChoiceFieldTests.test_choice_iterator_passes_model_to_widget",
         "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
         "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
         "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
@@ -323,7 +330,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",
         # Tests that fail during tear down on databases that don't support
         # transactions: https://github.com/googleapis/python-spanner-django/issues/271
-        # "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
+        "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
         # Tests that by-pass using django_spanner and generate
         # invalid DDL: https://github.com/googleapis/python-spanner-django/issues/298
         "cache.tests.CreateCacheTableForDBCacheTests",
@@ -376,11 +383,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "migrations.test_commands.MigrateTests.test_migrate_initial_false",
         "migrations.test_executor.ExecutorTests.test_soft_apply",
         # Spanner limitation: Cannot change type of column.
+        "schema.tests.SchemaTests.test_char_field_pk_to_auto_field",
         "migrations.test_executor.ExecutorTests.test_alter_id_type_with_fk",
         "schema.tests.SchemaTests.test_alter_auto_field_to_char_field",
         "schema.tests.SchemaTests.test_alter_text_field_to_date_field",
         "schema.tests.SchemaTests.test_alter_text_field_to_datetime_field",
         "schema.tests.SchemaTests.test_alter_text_field_to_time_field",
+        "schema.tests.SchemaTests.test_ci_cs_db_collation",
         # Spanner limitation: Cannot rename tables and columns.
         "migrations.test_operations.OperationTests.test_rename_field_case",
         "contenttypes_tests.test_operations.ContentTypeOperationsTests",
@@ -455,6 +464,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # os.chmod() doesn't work on Kokoro?
         "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
         # Tests that sometimes fail on Kokoro for unknown reasons.
+        "migrations.test_operations.OperationTests.test_add_constraint_combinable",
         "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
         "migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence",
         "servers.test_liveserverthread.LiveServerThreadTest.test_closes_connections",
@@ -471,6 +481,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         skip_tests += (
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+            "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token_link_redirects_to_set_password_page",  # noqa
+            "admin_docs.test_views.AdminDocViewDefaultEngineOnly.test_template_detail_path_traversal",  # noqa
             "queries.tests.Queries1Tests.test_excluded_intermediary_m2m_table_joined",  # noqa
             "queries.tests.Queries4Tests.test_combine_or_filter_reuse",  # noqa
             "queries.tests.Queries1Tests.test_negate_field",  # noqa

@@ -69,7 +69,7 @@ def lint_setup_py(session):
 def default(session):
     # Install all test dependencies, then install this package in-place.
     session.install(
-        "django~=2.2",
+        "django~=3.2",
         "mock",
         "mock-import",
         "pytest",
@@ -136,7 +136,7 @@ def system(session):
     # Install all test dependencies, then install this package into the
     # virtualenv's dist-packages.
     session.install(
-        "django~=2.2",
+        "django~=3.2",
         "mock",
         "pytest",
         "google-cloud-testutils",
@@ -172,7 +172,7 @@ def docs(session):
     """Build the docs for this library."""
 
     session.install("-e", ".[tracing]")
-    session.install("sphinx", "alabaster", "recommonmark", "django==2.2")
+    session.install("sphinx", "alabaster", "recommonmark", "django==3.2")
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
     # Warnings as errors is disabled for `sphinx-build` because django module
@@ -200,7 +200,7 @@ def docfx(session):
         "alabaster",
         "recommonmark",
         "gcp-sphinx-docfx-yaml",
-        "django==2.2",
+        "django==3.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

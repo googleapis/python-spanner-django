@@ -12,7 +12,12 @@ import os
 from uuid import uuid4
 
 import pkg_resources
-from django.db.models.fields import AutoField, Field
+from django.db.models.fields import (
+    AutoField,
+    SmallAutoField,
+    BigAutoField,
+    Field,
+)
 
 # Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
 # datetime.datetime.
@@ -45,6 +50,14 @@ def autofield_init(self, *args, **kwargs):
 
 
 AutoField.__init__ = autofield_init
+SmallAutoField.__init__ = autofield_init
+BigAutoField.__init__ = autofield_init
+AutoField.db_returning = False
+SmallAutoField.db_returning = False
+BigAutoField.db_returning = False
+AutoField.validators = []
+SmallAutoField.validators = []
+BigAutoField.validators = []
 
 old_datetimewithnanoseconds_eq = getattr(
     DatetimeWithNanoseconds, "__eq__", None

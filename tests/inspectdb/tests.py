@@ -413,8 +413,12 @@ class InspectDBTransactionalTests(TransactionTestCase):
         """inspectdb --include-views creates models for database views."""
         with connection.cursor() as cursor:
             cursor.execute(
-                "CREATE VIEW inspectdb_people_view AS "
-                "SELECT id, name FROM inspectdb_people"
+                "CREATE VIEW inspectdb_people_view "
+                "SQL SECURITY INVOKER "
+                "AS SELECT "
+                "    inspectdb_people.id as id, "
+                "    inspectdb_people.name as name "
+                "FROM inspectdb_people"
             )
         out = StringIO()
         view_model = "class InspectdbPeopleView(models.Model):"
@@ -423,6 +427,7 @@ class InspectDBTransactionalTests(TransactionTestCase):
             call_command(
                 "inspectdb",
                 table_name_filter=inspectdb_views_only,
+                include_views=False,
                 stdout=out,
             )
             no_views_output = out.getvalue()

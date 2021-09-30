@@ -8,6 +8,7 @@ import os
 
 from django.db.backends.base.features import BaseDatabaseFeatures
 from django.db.utils import InterfaceError
+from django_spanner import USE_EMULATOR
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -34,8 +35,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_column_check_constraints = True
     supports_table_check_constraints = True
     supports_order_by_nulls_modifier = False
-    # Spanner does not support json
-    supports_json_field = False
+    if USE_EMULATOR:
+        # Emulator does not support json.
+        supports_json_field = False
+    else:
+        supports_json_field = True
     supports_primitives_in_json_field = False
     # Spanner does not support SELECTing an arbitrary expression that also
     # appears in the GROUP BY clause.
@@ -67,7 +71,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_fields.test_autofield.SmallAutoFieldTests.test_redundant_backend_range_validators",
         # Spanner does not support deferred unique constraints
         "migrations.test_operations.OperationTests.test_create_model_with_deferred_unique_constraint",
-        # Spanner does not support JSON objects
+        # Spanner does not support JSON object query on fields.
         "db_functions.comparison.test_json_object.JSONObjectTests.test_empty",
         "db_functions.comparison.test_json_object.JSONObjectTests.test_basic",
         "db_functions.comparison.test_json_object.JSONObjectTests.test_expressions",
@@ -268,17 +272,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "timezones.tests.NewDatabaseTests.test_query_datetimes",
         # using NULL with + crashes: https://github.com/googleapis/python-spanner-django/issues/201
         "annotations.tests.NonAggregateAnnotationTestCase.test_combined_annotation_commutative",
-        # Spanner loses DecimalField precision due to conversion to float:
-        # https://github.com/googleapis/python-spanner-django/pull/133#pullrequestreview-328482925
-        "aggregation.tests.AggregateTestCase.test_decimal_max_digits_has_no_effect",
-        "aggregation.tests.AggregateTestCase.test_related_aggregate",
+        # Spanner does not support custom precision on DecimalField
         "db_functions.comparison.test_cast.CastTests.test_cast_to_decimal_field",
         "model_fields.test_decimalfield.DecimalFieldTests.test_fetch_from_db_without_float_rounding",
         "model_fields.test_decimalfield.DecimalFieldTests.test_roundtrip_with_trailing_zeros",
-        # Spanner does not support unsigned integer field.
-        "model_fields.test_integerfield.PositiveIntegerFieldTests.test_negative_values",
-        # Spanner doesn't support the variance the standard deviation database
-        # functions:
+        # Spanner doesn't support the variance the standard deviation database functions on full population.
         "aggregation.test_filter_argument.FilteredAggregateTests.test_filtered_numerical_aggregates",
         "aggregation_regress.tests.AggregationTests.test_stddev",
         # SELECT list expression references <column> which is neither grouped
@@ -358,12 +356,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
         "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
         "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
-        # Spanner doesn't support views.
-        "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
-        "introspection.tests.IntrospectionTests.test_table_names_with_views",
-        # Fields: JSON, GenericIPAddressField are mapped to String in Spanner
+        # Field: GenericIPAddressField is mapped to String in Spanner
         "inspectdb.tests.InspectDBTestCase.test_field_types",
-        "inspectdb.tests.InspectDBTestCase.test_json_field",
         # BigIntegerField is mapped to IntegerField in Spanner
         "inspectdb.tests.InspectDBTestCase.test_number_field_types",
         # No sequence for AutoField in Spanner.

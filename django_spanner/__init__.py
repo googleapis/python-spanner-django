@@ -12,12 +12,14 @@ import os
 from uuid import uuid4
 
 import pkg_resources
+from google.cloud.spanner_v1.types.data_types import JsonObject
 from django.db.models.fields import (
     AutoField,
     SmallAutoField,
     BigAutoField,
     Field,
 )
+from django.db.models import JSONField
 
 # Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
 # datetime.datetime.
@@ -58,6 +60,17 @@ BigAutoField.db_returning = False
 AutoField.validators = []
 SmallAutoField.validators = []
 BigAutoField.validators = []
+
+
+def get_prep_value(self, value):
+    # Json encoding and decoding for spanner is done in python-spanner.
+    if not isinstance(value, JsonObject) and isinstance(value, dict):
+        return JsonObject(value)
+
+    return value
+
+
+JSONField.get_prep_value = get_prep_value
 
 old_datetimewithnanoseconds_eq = getattr(
     DatetimeWithNanoseconds, "__eq__", None

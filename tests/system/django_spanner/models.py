@@ -34,3 +34,7 @@ class Event(models.Model):
                 name="check_start_date",
             ),
         ]
+
+
+class Detail(models.Model):
+    value = models.JSONField()

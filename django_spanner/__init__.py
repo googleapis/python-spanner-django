@@ -12,7 +12,7 @@ import os
 from uuid import uuid4
 
 import pkg_resources
-from google.cloud.spanner_v1.types.data_types import JsonObject
+from google.cloud.spanner_v1 import JsonObject
 from django.db.models.fields import (
     AutoField,
     SmallAutoField,

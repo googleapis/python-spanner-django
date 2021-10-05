@@ -473,6 +473,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.
         skip_tests += (
+            # Views are not supported by emulator
+            "inspectdb.tests.InspectDBTransactionalTests.test_include_views",  # noqa
+            "introspection.tests.IntrospectionTests.test_table_names_with_views",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
             "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token_link_redirects_to_set_password_page",  # noqa
@@ -1582,7 +1585,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.Queries1Tests.test_ticket2306",  # noqa
             "queries.tests.Queries1Tests.test_ticket2400",  # noqa
             "queries.tests.Queries1Tests.test_ticket2496",  # noqa
-            # "queries.tests.Queries1Tests.test_ticket2902",  # noqa
             "queries.tests.Queries1Tests.test_ticket3037",  # noqa
             "queries.tests.Queries1Tests.test_ticket3141",  # noqa
             "queries.tests.Queries1Tests.test_ticket4358",  # noqa
@@ -1806,7 +1808,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_http.HTTPSitemapTests.test_paged_sitemap",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_requestsite_sitemap",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_custom_sitemap",  # noqa
-            # "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_i18nsitemap_index",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_index",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_limited",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_xdefault",  # noqa

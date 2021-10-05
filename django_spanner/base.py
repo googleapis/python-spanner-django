@@ -34,6 +34,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "DateField": "DATE",
         "DateTimeField": "TIMESTAMP",
         "DecimalField": "NUMERIC",
+        "JSONField": "JSON",
         "DurationField": "INT64",
         "EmailField": "STRING(%(max_length)s)",
         "FileField": "STRING(%(max_length)s)",

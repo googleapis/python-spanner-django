@@ -49,9 +49,9 @@ class TestUtils(SpannerSimpleTestClass):
         cursor = mock.MagicMock()
 
         def list_tables(*args, **kwargs):
-            return [["Table_1"], ["Table_2"]]
+            return [["Table_1", "t"], ["Table_2", "t"]]
 
-        cursor.list_tables = list_tables
+        cursor.run_sql_in_snapshot = list_tables
         table_list = db_introspection.get_table_list(cursor=cursor)
         self.assertEqual(
             table_list,

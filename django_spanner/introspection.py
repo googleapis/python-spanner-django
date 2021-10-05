@@ -11,6 +11,7 @@ from django.db.backends.base.introspection import (
 )
 from django.db.models import Index
 from google.cloud.spanner_v1 import TypeCode
+from django_spanner import USE_EMULATOR
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
@@ -25,7 +26,28 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         TypeCode.STRING: "CharField",
         TypeCode.TIMESTAMP: "DateTimeField",
         TypeCode.NUMERIC: "DecimalField",
+        TypeCode.JSON: "JSONField",
     }
+    if USE_EMULATOR:
+        # Emulator does not support table_type yet.
+        # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator/issues/43
+        LIST_TABLE_SQL = """
+            SELECT
+                t.table_name, t.table_name
+            FROM
+                information_schema.tables AS t
+            WHERE
+                t.table_catalog = '' and t.table_schema = ''
+        """
+    else:
+        LIST_TABLE_SQL = """
+            SELECT
+                t.table_name, t.table_type
+            FROM
+                information_schema.tables AS t
+            WHERE
+                t.table_catalog = '' and t.table_schema = ''
+        """
 
     def get_field_type(self, data_type, description):
         """A hook for a Spanner database to use the cursor description to
@@ -53,8 +75,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         :rtype: list
         :returns: A list of table and view names in the current database.
         """
+        results = cursor.run_sql_in_snapshot(self.LIST_TABLE_SQL)
+        tables = []
         # The second TableInfo field is 't' for table or 'v' for view.
-        return [TableInfo(row[0], "t") for row in cursor.list_tables()]
+        for row in results:
+            table_type = "t"
+            if row[1] == "VIEW":
+                table_type = "v"
+            tables.append(TableInfo(row[0], table_type))
+        return tables
 
     def get_table_description(self, cursor, table_name):
         """Return a description of the table with the DB-API cursor.description

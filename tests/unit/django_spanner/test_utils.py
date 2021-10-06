@@ -29,7 +29,7 @@ class TestUtils(SpannerSimpleTestClass):
         Checks django compatibility mismatch.
         """
         django_spanner.__version__ = "2.2"
-        django.VERSION = (3, 2, 19, "alpha", 0)
+        django.VERSION = (3, 1, 19, "alpha", 0)
         with self.assertRaises(ImproperlyConfigured):
             check_django_compatability()
 

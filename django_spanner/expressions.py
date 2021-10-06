@@ -5,6 +5,7 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from django.db.models.expressions import OrderBy
+from django_spanner import USING_DJANGO_3
 
 
 def order_by(self, compiler, connection, **extra_context):
@@ -29,5 +30,6 @@ def order_by(self, compiler, connection, **extra_context):
 
 
 def register_expressions():
-    """Add Spanner-specific attribute to the Django OrderBy class."""
-    OrderBy.as_spanner = order_by
+    """Add Spanner-specific attribute to the Django OrderBy class for django 2.2."""
+    if not USING_DJANGO_3:
+        OrderBy.as_spanner = order_by

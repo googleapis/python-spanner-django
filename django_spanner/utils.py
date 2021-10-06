@@ -9,16 +9,20 @@ import sqlparse
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.version import get_version_tuple
 
+# Spanner supported django versions.
+# Only active LTS django versions are supported right now.
+SUPPORTED_DJANGO_VERSIONS = [(2, 2), (3, 2)]
+
 
 def check_django_compatability():
     """
     Verify that this version of django-spanner is compatible with the installed
-    version of Django. For example, any django-spanner 2.2.x is compatible
-    with Django 2.2.y.
+    version of Django. For example, django-spanner is compatible
+    with Django 2.2.y and 3.2.z
     """
     from . import __version__
 
-    if django.VERSION[:2] != get_version_tuple(__version__)[:2]:
+    if django.VERSION[:2] not in SUPPORTED_DJANGO_VERSIONS:
         raise ImproperlyConfigured(
             "You must use the latest version of django-spanner {A}.{B}.x "
             "with Django {A}.{B}.y (found django-spanner {C}).".format(

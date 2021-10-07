@@ -4,17 +4,20 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-from .models import Detail
 import unittest
 from django.test import TransactionTestCase
 from django.db import connection
 from django_spanner import USE_EMULATOR
+from django_spanner import USING_DJANGO_3
 from tests.system.django_spanner.utils import (
     setup_instance,
     teardown_instance,
     setup_database,
     teardown_database,
 )
+
+if USING_DJANGO_3:
+    from .models import Detail
 
 
 @unittest.skipIf(USE_EMULATOR, "Jsonfield is not implemented in emulator.")

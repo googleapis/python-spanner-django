@@ -76,7 +76,7 @@ def default(session, django_version="2.2"):
         "pytest-cov",
         "coverage",
         "sqlparse==0.3.0",
-        "google-cloud-spanner==3.0.0",
+        "google-cloud-spanner==3.11.1",
         "opentelemetry-api==1.1.0",
         "opentelemetry-sdk==1.1.0",
         "opentelemetry-instrumentation==0.20b0",

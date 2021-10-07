@@ -44,7 +44,10 @@ __version__ = pkg_resources.get_distribution("django-google-spanner").version
 
 USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 
-check_django_compatability()
+# Only active LTS django versions (2.2.*, 3.2.*) are supported by this library right now.
+SUPPORTED_DJANGO_VERSIONS = [(2, 2), (3, 2)]
+
+check_django_compatability(SUPPORTED_DJANGO_VERSIONS)
 register_expressions(USING_DJANGO_3)
 register_functions()
 register_lookups()

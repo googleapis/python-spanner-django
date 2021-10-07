@@ -27,5 +27,7 @@ def order_by(self, compiler, connection, **extra_context):
 
 def register_expressions(using_django_3=False):
     """Add Spanner-specific attribute to the Django OrderBy class for django 2.2."""
+    # In Django >= 3.1, this can be replaced with
+    # DatabaseFeatures.supports_order_by_nulls_modifier = False.
     if not using_django_3:
         OrderBy.as_spanner = order_by

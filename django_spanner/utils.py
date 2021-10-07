@@ -8,12 +8,8 @@ import django
 import sqlparse
 from django.core.exceptions import ImproperlyConfigured
 
-# Spanner supported django versions.
-# Only active LTS django versions are supported right now.
-SUPPORTED_DJANGO_VERSIONS = [(2, 2), (3, 2)]
 
-
-def check_django_compatability():
+def check_django_compatability(supported_django_versions):
     """
     Verify that this version of django-spanner is compatible with the installed
     version of Django. For example, django-spanner is compatible
@@ -21,7 +17,7 @@ def check_django_compatability():
     """
     from . import __version__
 
-    if django.VERSION[:2] not in SUPPORTED_DJANGO_VERSIONS:
+    if django.VERSION[:2] not in supported_django_versions:
         raise ImproperlyConfigured(
             "You must use the latest version of django-spanner {A}.{B}.x "
             "with Django {A}.{B}.y (found django-spanner {C}).".format(

@@ -42,12 +42,15 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         supports_column_check_constraints = True
         supports_table_check_constraints = True
         if USING_DJANGO_3:
-            supports_order_by_nulls_modifier = False
             supports_json_field = True
         else:
             # Since JsonField was introduced in django3.1 we don't support it for django 2.2
             supports_json_field = False
     supports_primitives_in_json_field = False
+    # Spanner does not support order by null modifiers.
+    # For Django 2.2 this feature is handled in code.
+    if USING_DJANGO_3:
+        supports_order_by_nulls_modifier = False
     # Spanner does not support SELECTing an arbitrary expression that also
     # appears in the GROUP BY clause.
     supports_subqueries_in_group_by = False
@@ -505,7 +508,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "constraints.tests.CheckConstraintTests.test_name",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
-            "queries.tests.Queries1Tests.test_ticket9411",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_time_zone",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_invalid_params",  # noqa
@@ -2099,6 +2101,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             skip_tests += (
                 # Untyped parameters are not supported:
                 # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+                "queries.tests.Queries1Tests.test_ticket9411",  # noqa
                 "admin_changelist.tests.ChangeListTests.test_distinct_for_inherited_m2m_in_list_filter",  # noqa
                 "admin_changelist.tests.ChangeListTests.test_distinct_for_m2m_in_list_filter",  # noqa
                 "admin_changelist.tests.ChangeListTests.test_distinct_for_m2m_to_inherited_in_list_filter",  # noqa

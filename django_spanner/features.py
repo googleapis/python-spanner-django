@@ -32,16 +32,21 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_sequence_reset = False
     supports_timezones = False
     supports_transactions = False
-    supports_column_check_constraints = True
-    supports_table_check_constraints = True
-    if USING_DJANGO_3:
-        supports_order_by_nulls_modifier = False
-    if not USING_DJANGO_3 or USE_EMULATOR:
-        # Since JsonField was introduced in django3.1 we don't support it for django 2.2
+    if USE_EMULATOR:
         # Emulator does not support json.
         supports_json_field = False
+        # Emulator does not support check constrints.
+        supports_column_check_constraints = False
+        supports_table_check_constraints = False
     else:
-        supports_json_field = True
+        supports_column_check_constraints = True
+        supports_table_check_constraints = True
+        if USING_DJANGO_3:
+            supports_order_by_nulls_modifier = False
+            supports_json_field = True
+        else:
+            # Since JsonField was introduced in django3.1 we don't support it for django 2.2
+            supports_json_field = False
     supports_primitives_in_json_field = False
     # Spanner does not support SELECTing an arbitrary expression that also
     # appears in the GROUP BY clause.
@@ -488,8 +493,19 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.
         skip_tests += (
+            # Emulator doesn't support views.
+            "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
+            "introspection.tests.IntrospectionTests.test_table_names_with_views",
+            # Check constraints are not supported by Spanner emulator.
+            "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
+            "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
+            "constraints.tests.CheckConstraintTests.test_database_constraint_expression",  # noqa
+            "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
+            "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
+            "constraints.tests.CheckConstraintTests.test_name",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+            "queries.tests.Queries1Tests.test_ticket9411",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_time_zone",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_invalid_params",  # noqa

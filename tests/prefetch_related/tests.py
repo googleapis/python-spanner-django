@@ -10,10 +10,30 @@ from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 
 from .models import (
-    Article, Author, Author2, AuthorAddress, AuthorWithAge, Bio, Book,
-    Bookmark, BookReview, BookWithYear, Comment, Department, Employee,
-    FavoriteAuthors, House, LessonEntry, ModelIterableSubclass, Person,
-    Qualification, Reader, Room, TaggedItem, Teacher, WordEntry,
+    Article,
+    Author,
+    Author2,
+    AuthorAddress,
+    AuthorWithAge,
+    Bio,
+    Book,
+    Bookmark,
+    BookReview,
+    BookWithYear,
+    Comment,
+    Department,
+    Employee,
+    FavoriteAuthors,
+    House,
+    LessonEntry,
+    ModelIterableSubclass,
+    Person,
+    Qualification,
+    Reader,
+    Room,
+    TaggedItem,
+    Teacher,
+    WordEntry,
 )
 
 
@@ -1679,19 +1699,17 @@ class DirectPrefetchedObjectCacheReuseTests(TestCase):
             book1, book2 = list(books)
 
         with self.assertNumQueries(0):
-            self.assertSequenceEqual(
+            self.assertCountEqual(
                 book1.first_time_authors.all(), [self.author11, self.author12]
             )
-            self.assertSequenceEqual(book2.first_time_authors.all(), [self.author21])
+            self.assertCountEqual(book2.first_time_authors.all(), [self.author21])
 
-            self.assertSequenceEqual(
+            self.assertCountEqual(
                 book1.first_time_authors.all()[0].addresses.all(),
                 [self.author1_address1],
             )
-            self.assertSequenceEqual(
-                book1.first_time_authors.all()[1].addresses.all(), []
-            )
-            self.assertSequenceEqual(
+            self.assertCountEqual(book1.first_time_authors.all()[1].addresses.all(), [])
+            self.assertCountEqual(
                 book2.first_time_authors.all()[0].addresses.all(),
                 [self.author2_address1],
             )
@@ -1735,7 +1753,7 @@ class DirectPrefetchedObjectCacheReuseTests(TestCase):
             book1, book2 = list(books)
 
         with self.assertNumQueries(0):
-            self.assertEqual(book1.first_authors, [self.author11, self.author12])
+            self.assertCountEqual(book1.first_authors, [self.author11, self.author12])
             self.assertEqual(book2.first_authors, [self.author21])
 
             self.assertEqual(

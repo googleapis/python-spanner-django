@@ -216,7 +216,7 @@ class ModelInheritanceTests(TestCase):
             ),
         )
         qs = Parent.objects.all()
-        self.assertSequenceEqual(qs, [p2, p1])
+        self.assertCountEqual(qs, [p2, p1])
         self.assertIn(expected_order_by_sql, str(qs.query))
 
     @skipUnless(PY37, '__class_getitem__() was added in Python 3.7')

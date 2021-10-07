@@ -176,6 +176,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "prefetch_related.test_prefetch_related_objects.PrefetchRelatedObjectsTests.test_m2m_then_m2m",
         "prefetch_related.tests.CustomPrefetchTests.test_custom_qs",
         "prefetch_related.tests.CustomPrefetchTests.test_nested_prefetch_related_are_not_overwritten",
+        "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched",
+        "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
         "prefetch_related.tests.ForeignKeyToFieldTest.test_m2m",
         "queries.test_bulk_update.BulkUpdateNoteTests.test_multiple_fields",
         "queries.test_bulk_update.BulkUpdateTests.test_inherited_fields",
@@ -465,8 +467,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
             "bulk_create.tests.BulkCreateTests.test_unsaved_parent",
             # Tests that assume a serial pk.
-            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched",
-            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
             "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
             # datetimes retrieved from the database with the wrong hour when
             # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
@@ -508,6 +508,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "constraints.tests.CheckConstraintTests.test_name",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+            "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_time_zone",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_invalid_params",  # noqa
@@ -2003,7 +2004,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "admin_inlines.tests.TestInline.test_inlines_singular_heading_one_to_one",  # noqa
                 "admin_inlines.tests.TestInline.test_non_editable_custom_form_tabular_inline_extra_field_label",  # noqa
                 "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",  # noqa
-                "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa
                 "auth_tests.test_auth_backends.AuthenticateTests.test_authenticate_sensitive_variables",  # noqa
                 "auth_tests.test_auth_backends.AuthenticateTests.test_clean_credentials_sensitive_variables",  # noqa
                 "auth_tests.test_auth_backends.AuthenticateTests.test_skips_backends_with_decorated_method",  # noqa

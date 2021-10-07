@@ -7,7 +7,6 @@
 import django
 import sqlparse
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.version import get_version_tuple
 
 # Spanner supported django versions.
 # Only active LTS django versions are supported right now.

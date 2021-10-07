@@ -6,6 +6,7 @@
 
 import datetime
 import os
+import django
 
 # Monkey-patch AutoField to generate a random value since Cloud Spanner can't
 # do that.
@@ -13,15 +14,24 @@ from uuid import uuid4
 
 import pkg_resources
 from google.cloud.spanner_v1 import JsonObject
-import django
-
-USING_DJANGO_3 = False
-if django.VERSION[:2] == (3, 2):
-    USING_DJANGO_3 = True
 from django.db.models.fields import (
     AutoField,
     Field,
 )
+
+from .expressions import register_expressions
+from .functions import register_functions
+from .lookups import register_lookups
+from .utils import check_django_compatability
+
+# Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
+# datetime.datetime.
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+
+
+USING_DJANGO_3 = False
+if django.VERSION[:2] == (3, 2):
+    USING_DJANGO_3 = True
 
 if USING_DJANGO_3:
     from django.db.models.fields import (
@@ -30,22 +40,12 @@ if USING_DJANGO_3:
     )
     from django.db.models import JSONField
 
-
-# Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
-# datetime.datetime.
-from google.api_core.datetime_helpers import DatetimeWithNanoseconds
-
-from .expressions import register_expressions
-from .functions import register_functions
-from .lookups import register_lookups
-from .utils import check_django_compatability
-
 __version__ = pkg_resources.get_distribution("django-google-spanner").version
 
 USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 
 check_django_compatability()
-register_expressions()
+register_expressions(USING_DJANGO_3)
 register_functions()
 register_lookups()
 

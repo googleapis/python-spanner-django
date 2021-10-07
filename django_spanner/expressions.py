@@ -5,7 +5,6 @@
 # https://developers.google.com/open-source/licenses/bsd
 
 from django.db.models.expressions import OrderBy
-from django_spanner import USING_DJANGO_3
 
 
 def order_by(self, compiler, connection, **extra_context):
@@ -16,9 +15,6 @@ def order_by(self, compiler, connection, **extra_context):
     :rtype: str
     :returns: A SQL query.
     """
-    # TODO: In Django 3.1, this can be replaced with
-    #  DatabaseFeatures.supports_order_by_nulls_modifier = False.
-    #  Also, consider making this a class method.
     template = None
     if self.nulls_last:
         template = "%(expression)s IS NULL, %(expression)s %(ordering)s"
@@ -29,7 +25,7 @@ def order_by(self, compiler, connection, **extra_context):
     )
 
 
-def register_expressions():
+def register_expressions(using_django_3=False):
     """Add Spanner-specific attribute to the Django OrderBy class for django 2.2."""
-    if not USING_DJANGO_3:
+    if not using_django_3:
         OrderBy.as_spanner = order_by

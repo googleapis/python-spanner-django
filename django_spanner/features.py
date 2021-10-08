@@ -386,6 +386,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     )
     if USING_DJANGO_3:
         skip_tests += (
+            # Spanner does not support UUID field natively
+            "model_fields.test_uuid.TestQuerying.test_iexact",
             # Spanner does not support setting a default value on columns.
             "schema.tests.SchemaTests.test_alter_text_field_to_not_null_with_default_value",
             # Direct SQL query test that do not follow spanner syntax.

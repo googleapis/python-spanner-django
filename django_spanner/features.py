@@ -176,8 +176,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "prefetch_related.test_prefetch_related_objects.PrefetchRelatedObjectsTests.test_m2m_then_m2m",
         "prefetch_related.tests.CustomPrefetchTests.test_custom_qs",
         "prefetch_related.tests.CustomPrefetchTests.test_nested_prefetch_related_are_not_overwritten",
-        "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched",
-        "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
         "prefetch_related.tests.ForeignKeyToFieldTest.test_m2m",
         "queries.test_bulk_update.BulkUpdateNoteTests.test_multiple_fields",
         "queries.test_bulk_update.BulkUpdateTests.test_inherited_fields",
@@ -492,6 +490,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # Tests that fail but are not related to spanner.
             "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
         )
+    else:
+        # Tests specific to django 2.2
+        skip_tests += (
+            # Tests that assume a serial pk.
+            "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched",
+            "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
+        )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.
@@ -500,11 +505,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
             "introspection.tests.IntrospectionTests.test_table_names_with_views",
             # Check constraints are not supported by Spanner emulator.
-            "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
             "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
-            "constraints.tests.CheckConstraintTests.test_database_constraint_expression",  # noqa
-            "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
-            "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
             "constraints.tests.CheckConstraintTests.test_name",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
@@ -1981,6 +1982,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         if USING_DJANGO_3:
             # Some tests are different between django 3.2 and 2.2.
             skip_tests += (
+                # Check constraints are not supported by Spanner emulator.
+                "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
+                "constraints.tests.CheckConstraintTests.test_database_constraint_expression",  # noqa
+                "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
+                "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
                 # Untyped parameters are not supported:
                 # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
                 "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_dst_time_zone",  # noqa

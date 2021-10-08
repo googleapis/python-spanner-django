@@ -466,6 +466,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "bulk_create.tests.BulkCreateTests.test_unsaved_parent",
             # Tests that assume a serial pk.
             "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
+            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched",
+            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
             # datetimes retrieved from the database with the wrong hour when
             # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
             "timezones.tests.NewDatabaseTests.test_query_convert_timezones",

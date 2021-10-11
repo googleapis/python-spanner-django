@@ -41,7 +41,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_alter_column_type = "ALTER COLUMN %(column)s %(type)s"
 
     sql_delete_column = "ALTER TABLE %(table)s DROP COLUMN %(column)s"
-    sql_create_inline_fk = "CONSTRAINT FK_%(to_table)s_%(to_column)s_%(from_table)s_%(from_column)s FOREIGN KEY (%(from_column_norm)s) REFERENCES %(to_table_norm)s  (%(to_column_norm)s)"
+    # Spanner does not suppport ON DELETE CASCADE for foreign keys.
+    # This can cause failures in django, hence sql_create_inline_fk is disabled.
+    # sql_create_inline_fk = "CONSTRAINT FK_%(to_table)s_%(to_column)s_%(from_table)s_%(from_column)s FOREIGN KEY (%(from_column_norm)s) REFERENCES %(to_table_norm)s  (%(to_column_norm)s)"  # noqa
+    sql_create_inline_fk = None
 
     def create_model(self, model):
         """

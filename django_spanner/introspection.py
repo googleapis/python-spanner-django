@@ -351,8 +351,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         key_columns = []
         cursor.execute(
-            """
-            SELECT 
+            """SELECT
                 tc.COLUMN_NAME as column_name,
                 ccu.TABLE_NAME as referenced_table,
                 ccu.COLUMN_NAME as referenced_column

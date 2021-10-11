@@ -14,7 +14,7 @@ from django_spanner import USE_EMULATOR, USING_DJANGO_3
 class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_big_integer_field = False
     can_introspect_duration_field = False
-    can_introspect_foreign_keys = True
+    can_introspect_foreign_keys = False
     # TimeField is introspected as DateTimeField because they both use
     # TIMESTAMP.
     can_introspect_time_field = False
@@ -23,7 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
-    supports_foreign_keys = True
+    supports_foreign_keys = False
     can_create_inline_fk = False
     supports_ignore_conflicts = False
     supports_partial_indexes = False

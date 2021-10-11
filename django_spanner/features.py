@@ -23,7 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
-    supports_foreign_keys = False
+    supports_foreign_keys = True
     can_create_inline_fk = False
     supports_ignore_conflicts = False
     supports_partial_indexes = False
@@ -448,8 +448,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # Spanner does not support SELECTing an arbitrary expression that also
             # appears in the GROUP BY clause.
             "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
-            # No foreign key constraints in Spanner.
-            "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
             # No Django transaction management in Spanner.
             "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
             "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",

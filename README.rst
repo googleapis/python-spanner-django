@@ -364,7 +364,4 @@ Additions cannot include ``None`` values. For example:
 
 ::
 
-    >>> Book.objects.annotate(adjusted_rating=F('rating') + None)
-    ...
-    google.api_core.exceptions.InvalidArgument: 400 Operands of + cannot be literal
-    NULL ...
+Django spanner has a set of limitations as well, please go through the `list <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`_.

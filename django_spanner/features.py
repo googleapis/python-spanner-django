@@ -13,7 +13,7 @@ from django.db.utils import InterfaceError
 class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_big_integer_field = False
     can_introspect_duration_field = False
-    can_introspect_foreign_keys = False
+    can_introspect_foreign_keys = True
     # TimeField is introspected as DateTimeField because they both use
     # TIMESTAMP.
     can_introspect_time_field = False
@@ -22,7 +22,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
+<<<<<<< Updated upstream
     supports_foreign_keys = False
+=======
+    supports_foreign_keys = True
+    can_create_inline_fk = False
+>>>>>>> Stashed changes
     supports_ignore_conflicts = False
     supports_partial_indexes = False
     supports_regex_backreferencing = False
@@ -36,11 +41,13 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Django tests that aren't supported by Spanner.
     skip_tests = (
-        # No foreign key constraints in Spanner.
+        # Spanner does not support very long FK name: 400 Foreign Key name not valid
         "backends.tests.FkConstraintsTests.test_check_constraints",
+        "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
+        # No foreign key ON DELETE CASCADE in Spanner.
+        "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # Spanner does not support empty list of DML statement.
         "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
-        "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # No Django transaction management in Spanner.
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         # django_spanner monkey patches AutoField to have a default value.
@@ -274,12 +281,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "introspection.tests.IntrospectionTests.test_table_names_with_views",
         # No sequence for AutoField in Spanner.
         "introspection.tests.IntrospectionTests.test_sequence_list",
-        # DatabaseIntrospection.get_key_columns() is only required if this
-        # backend needs it (which it currently doesn't).
-        "introspection.tests.IntrospectionTests.test_get_key_columns",
-        # DatabaseIntrospection.get_relations() isn't implemented:
-        # https://github.com/googleapis/python-spanner-django/issues/311
-        "introspection.tests.IntrospectionTests.test_get_relations",
         # pyformat parameters not supported on INSERT:
         # https://github.com/googleapis/python-spanner-django/issues/343
         "backends.tests.BackendTestCase.test_cursor_execute_with_pyformat",
@@ -375,6 +376,121 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "view_tests.tests.test_csrf.CsrfViewTests.test_no_referer",
         "view_tests.tests.test_i18n.SetLanguageTests.test_lang_from_translated_i18n_pattern",
     )
+    if USING_DJANGO_3:
+        skip_tests += (
+            # Spanner does not support UUID field natively
+            "model_fields.test_uuid.TestQuerying.test_iexact",
+            # Spanner does not support setting a default value on columns.
+            "schema.tests.SchemaTests.test_alter_text_field_to_not_null_with_default_value",
+            # Direct SQL query test that do not follow spanner syntax.
+            "schema.tests.SchemaTests.test_alter_auto_field_quoted_db_column",
+            "schema.tests.SchemaTests.test_alter_primary_key_quoted_db_table",
+            # Insert sql with param variables using %(name)s parameter style is failing
+            # https://github.com/googleapis/python-spanner/issues/542
+            "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict",
+            # Spanner autofield is replaced with uuid4 so validation is disabled
+            "model_fields.test_autofield.AutoFieldTests.test_backend_range_validation",
+            "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
+            "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
+            "model_fields.test_autofield.BigAutoFieldTests.test_backend_range_validation",
+            "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
+            "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
+            "model_fields.test_autofield.SmallAutoFieldTests.test_backend_range_validation",
+            "model_fields.test_autofield.SmallAutoFieldTests.test_redundant_backend_range_validators",
+            "model_fields.test_autofield.SmallAutoFieldTests.test_redundant_backend_range_validators",
+            # Spanner does not support deferred unique constraints
+            "migrations.test_operations.OperationTests.test_create_model_with_deferred_unique_constraint",
+            # Spanner does not support JSON object query on fields.
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_empty",
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_basic",
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_expressions",
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_empty_json_object",
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_json_object",
+            "db_functions.comparison.test_json_object.JSONObjectTests.test_textfield",
+            # Spanner does not support iso_week_day but week_day is supported.
+            "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
+            "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
+            "timezones.tests.NewDatabaseTests.test_query_datetime_lookups_in_other_timezone",
+            "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_func",
+            "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_weekday_func",
+            "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func",
+            "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
+            "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
+            "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_iso_weekday_func",
+            # Spanner gived SHA encryption output in bytes, django expects it in hex string format.
+            "db_functions.text.test_sha512.SHA512Tests.test_basic",
+            "db_functions.text.test_sha512.SHA512Tests.test_transform",
+            "db_functions.text.test_md5.MD5Tests.test_basic",
+            "db_functions.text.test_md5.MD5Tests.test_transform",
+            "db_functions.text.test_sha1.SHA1Tests.test_basic",
+            "db_functions.text.test_sha1.SHA1Tests.test_transform",
+            "db_functions.text.test_sha224.SHA224Tests.test_basic",
+            "db_functions.text.test_sha224.SHA224Tests.test_transform",
+            "db_functions.text.test_sha256.SHA256Tests.test_basic",
+            "db_functions.text.test_sha256.SHA256Tests.test_transform",
+            "db_functions.text.test_sha384.SHA384Tests.test_basic",
+            "db_functions.text.test_sha384.SHA384Tests.test_transform",
+            # Spanner does not support RANDOM number generation function
+            "db_functions.math.test_random.RandomTests.test",
+            # Spanner supports order by id, but it's does not work the same way as
+            # an auto increment field.
+            "model_forms.test_modelchoicefield.ModelChoiceFieldTests.test_choice_iterator_passes_model_to_widget",
+            "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
+            "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
+            "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
+            "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
+            # Spanner does not support empty list of DML statement.
+            "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
+            # Spanner does not support SELECTing an arbitrary expression that also
+            # appears in the GROUP BY clause.
+            "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
+            # No Django transaction management in Spanner.
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
+            # Tests that expect it to be empty untill saved in db.
+            "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
+            "model_fields.test_jsonfield.TestSerialization.test_dumping",
+            "model_fields.test_jsonfield.TestSerialization.test_dumping",
+            "model_fields.test_jsonfield.TestSerialization.test_dumping",
+            "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+            "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+            "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+            "bulk_create.tests.BulkCreateTests.test_unsaved_parent",
+            # Tests that assume a serial pk.
+            "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
+            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched",
+            "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
+            # datetimes retrieved from the database with the wrong hour when
+            # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
+            "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
+            # Spanner doesn't support random ordering.
+            "aggregation.tests.AggregateTestCase.test_aggregation_random_ordering",
+            # Tests that require transactions.
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_pre_callback",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_using",
+            # Field: GenericIPAddressField is mapped to String in Spanner
+            "inspectdb.tests.InspectDBTestCase.test_field_types",
+            # BigIntegerField is mapped to IntegerField in Spanner
+            "inspectdb.tests.InspectDBTestCase.test_number_field_types",
+            # Spanner limitation: Cannot change type of column.
+            "schema.tests.SchemaTests.test_char_field_pk_to_auto_field",
+            "schema.tests.SchemaTests.test_ci_cs_db_collation",
+            # Spanner limitation: Cannot rename tables and columns.
+            "migrations.test_operations.OperationTests.test_rename_field_case",
+            # Tests that sometimes fail on Kokoro for unknown reasons.
+            "migrations.test_operations.OperationTests.test_add_constraint_combinable",
+            # Tests that fail but are not related to spanner.
+            "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
+        )
+    else:
+        # Tests specific to django 2.2
+        skip_tests += (
+            # Tests that assume a serial pk.
+            "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched",
+            "prefetch_related.tests.DirectPrefechedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
+        )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.

@@ -120,6 +120,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "validation.test_validators.TestModelsWithValidators.test_custom_validator_raises_error_for_incorrect_value",
         "validation.test_validators.TestModelsWithValidators.test_field_validators_can_be_any_iterable",
         # Tests that assume a serial pk.
+        "servers.tests.LiveServerDatabase.test_fixtures_loaded",
         "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_nullbooleanfield",
         "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_tuple",
         "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter",
@@ -370,14 +371,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "model_forms.tests.UniqueTest.test_override_unique_together_message",
         # os.chmod() doesn't work on Kokoro?
         "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
-        # Tests that sometimes fail on Kokoro for unknown reasons.
-        "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
-        "migration_test_data_persistence.tests.MigrationDataNormalPersistenceTestCase.test_persistence",
-        "servers.test_liveserverthread.LiveServerThreadTest.test_closes_connections",
-        "servers.tests.LiveServerDatabase.test_fixtures_loaded",
-        "view_tests.tests.test_csrf.CsrfViewTests.test_no_cookies",
-        "view_tests.tests.test_csrf.CsrfViewTests.test_no_referer",
-        "view_tests.tests.test_i18n.SetLanguageTests.test_lang_from_translated_i18n_pattern",
     )
     if USING_DJANGO_3:
         skip_tests += (
@@ -484,9 +477,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "schema.tests.SchemaTests.test_ci_cs_db_collation",
             # Spanner limitation: Cannot rename tables and columns.
             "migrations.test_operations.OperationTests.test_rename_field_case",
-            # Tests that sometimes fail on Kokoro for unknown reasons.
-            "migrations.test_operations.OperationTests.test_add_constraint_combinable",
-            # Tests that fail but are not related to spanner.
+            # Warning is not raised, not related to spanner.
             "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
         )
     else:

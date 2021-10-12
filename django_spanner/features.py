@@ -63,7 +63,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     skip_tests = (
         # Spanner does not support very long FK name: 400 Foreign Key name not valid
         "backends.tests.FkConstraintsTests.test_check_constraints",
-        "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
         # No foreign key ON DELETE CASCADE in Spanner.
         "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # Spanner does not support empty list of DML statement.
@@ -384,6 +383,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         skip_tests += (
             # Spanner does not support UUID field natively
             "model_fields.test_uuid.TestQuerying.test_iexact",
+            # Spanner does not support very long FK name: 400 Foreign Key name not valid
+            "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
             # Spanner does not support setting a default value on columns.
             "schema.tests.SchemaTests.test_alter_text_field_to_not_null_with_default_value",
             # Direct SQL query test that do not follow spanner syntax.

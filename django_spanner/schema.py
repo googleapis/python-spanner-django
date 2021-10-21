@@ -4,10 +4,11 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+import uuid
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django_spanner._opentelemetry_tracing import trace_call
-from django_spanner import USE_EMULATOR
+from django_spanner import USE_EMULATOR, USING_DJANGO_3
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -40,6 +41,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_alter_column_type = "ALTER COLUMN %(column)s %(type)s"
 
     sql_delete_column = "ALTER TABLE %(table)s DROP COLUMN %(column)s"
+    # Spanner does not suppport ON DELETE CASCADE for foreign keys.
+    # This can cause failures in django, hence sql_create_inline_fk is disabled.
+    # sql_create_inline_fk = "CONSTRAINT FK_%(to_table)s_%(to_column)s_%(from_table)s_%(from_column)s FOREIGN KEY (%(from_column_norm)s) REFERENCES %(to_table_norm)s  (%(to_column_norm)s)"  # noqa
+    sql_create_inline_fk = None
 
     def create_model(self, model):
         """
@@ -60,7 +65,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             # Check constraints can go on the column SQL here
             db_params = field.db_parameters(connection=self.connection)
             if db_params["check"]:
-                definition += " " + self.sql_check_constraint % db_params
+                definition += (
+                    ", CONSTRAINT constraint_%s_%s_%s "
+                    % (
+                        model._meta.db_table,
+                        self.quote_name(field.name),
+                        uuid.uuid4().hex[:6].lower(),
+                    )
+                    + self.sql_check_constraint % db_params
+                )
             # Autoincrement SQL (for backends with inline variant)
             col_type_suffix = field.db_type_suffix(connection=self.connection)
             if col_type_suffix:
@@ -68,14 +81,21 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             params.extend(extra_params)
             # FK
             if field.remote_field and field.db_constraint:
+                from_table = field.model._meta.db_table
+                from_column = field.column
                 to_table = field.remote_field.model._meta.db_table
                 to_column = field.remote_field.model._meta.get_field(
                     field.remote_field.field_name
                 ).column
                 if self.sql_create_inline_fk:
-                    definition += " " + self.sql_create_inline_fk % {
-                        "to_table": self.quote_name(to_table),
-                        "to_column": self.quote_name(to_column),
+                    definition += ", " + self.sql_create_inline_fk % {
+                        "from_table": from_table,
+                        "from_column": from_column,
+                        "to_table": to_table,
+                        "to_column": to_column,
+                        "from_column_norm": self.quote_name(from_column),
+                        "to_table_norm": self.quote_name(to_table),
+                        "to_column_norm": self.quote_name(to_column),
                     }
                 elif self.connection.features.supports_foreign_keys:
                     self.deferred_sql.append(
@@ -124,6 +144,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         trace_attributes = {
             "model_name": self.quote_name(model._meta.db_table)
         }
+
         with trace_call(
             "CloudSpannerDjango.create_model",
             self.connection,
@@ -206,7 +227,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Check constraints can go on the column SQL here
         db_params = field.db_parameters(connection=self.connection)
         if db_params["check"]:
-            definition += " " + self.sql_check_constraint % db_params
+            definition += (
+                ", CONSTRAINT constraint_%s_%s_%s "
+                % (
+                    model._meta.db_table,
+                    self.quote_name(field.name),
+                    uuid.uuid4().hex[:6].lower(),
+                )
+                + self.sql_check_constraint % db_params
+            )
         # Build the SQL and run it
         sql = self.sql_create_column % {
             "table": self.quote_name(model._meta.db_table),
@@ -378,6 +407,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     def quote_value(self, value):
         # A more complete implementation isn't currently required.
+        if isinstance(value, str):
+            return "'%s'" % value.replace("'", "''")
         return str(value)
 
     def _alter_field(
@@ -450,7 +481,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 self.connection,
                 trace_attributes,
             ):
-                self.execute(self._create_index_sql(model, [new_field]))
+                self.execute(self._create_index_sql(model, fields=[new_field]))
 
     def _alter_column_type_sql(self, model, old_field, new_field, new_type):
         # Spanner needs to use sql_alter_column_not_null if the field is
@@ -481,11 +512,30 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             "constraint": self.sql_check_constraint % {"check": check},
         }
 
-    def _unique_sql(self, model, fields, name, condition=None):
+    def _unique_sql(
+        self,
+        model,
+        fields,
+        name,
+        condition=None,
+        deferrable=None,  # Spanner does not require this parameter
+        include=None,
+        opclasses=None,
+    ):
         # Inline constraints aren't supported, so create the index separately.
-        sql = self._create_unique_sql(
-            model, fields, name=name, condition=condition
-        )
+        if USING_DJANGO_3:
+            sql = self._create_unique_sql(
+                model,
+                fields,
+                name=name,
+                condition=condition,
+                include=include,
+                opclasses=opclasses,
+            )
+        else:
+            sql = self._create_unique_sql(
+                model, fields, name=name, condition=condition
+            )
         if sql:
             self.deferred_sql.append(sql)
         return None

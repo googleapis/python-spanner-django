@@ -11,6 +11,8 @@ from django.db.backends.base.introspection import (
 )
 from django.db.models import Index
 from google.cloud.spanner_v1 import TypeCode
+from django_spanner import USE_EMULATOR
+from django_spanner import USING_DJANGO_3
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
@@ -25,7 +27,28 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         TypeCode.STRING: "CharField",
         TypeCode.TIMESTAMP: "DateTimeField",
         TypeCode.NUMERIC: "DecimalField",
+        TypeCode.JSON: "JSONField",
     }
+    if USE_EMULATOR:
+        # Emulator does not support table_type yet.
+        # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator/issues/43
+        LIST_TABLE_SQL = """
+            SELECT
+                t.table_name, t.table_name
+            FROM
+                information_schema.tables AS t
+            WHERE
+                t.table_catalog = '' and t.table_schema = ''
+        """
+    else:
+        LIST_TABLE_SQL = """
+            SELECT
+                t.table_name, t.table_type
+            FROM
+                information_schema.tables AS t
+            WHERE
+                t.table_catalog = '' and t.table_schema = ''
+        """
 
     def get_field_type(self, data_type, description):
         """A hook for a Spanner database to use the cursor description to
@@ -53,8 +76,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         :rtype: list
         :returns: A list of table and view names in the current database.
         """
+        results = cursor.run_sql_in_snapshot(self.LIST_TABLE_SQL)
+        tables = []
         # The second TableInfo field is 't' for table or 'v' for view.
-        return [TableInfo(row[0], "t") for row in cursor.list_tables()]
+        for row in results:
+            table_type = "t"
+            if row[1] == "VIEW":
+                table_type = "v"
+            tables.append(TableInfo(row[0], table_type))
+        return tables
 
     def get_table_description(self, cursor, table_name):
         """Return a description of the table with the DB-API cursor.description
@@ -86,29 +116,39 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     internal_size = int(internal_size)
             else:
                 internal_size = None
-            descriptions.append(
-                FieldInfo(
-                    column_name,
-                    type_code,
-                    None,  # display_size
-                    internal_size,
-                    None,  # precision
-                    None,  # scale
-                    details.null_ok,
-                    None,  # default
+            if USING_DJANGO_3:
+                descriptions.append(
+                    FieldInfo(
+                        column_name,
+                        type_code,
+                        None,  # display_size
+                        internal_size,
+                        None,  # precision
+                        None,  # scale
+                        details.null_ok,
+                        None,  # default
+                        None,  # collation
+                    )
                 )
-            )
+            else:
+                descriptions.append(
+                    FieldInfo(
+                        column_name,
+                        type_code,
+                        None,  # display_size
+                        internal_size,
+                        None,  # precision
+                        None,  # scale
+                        details.null_ok,
+                        None,  # default
+                    )
+                )
 
         return descriptions
 
     def get_relations(self, cursor, table_name):
         """Return a dictionary of {field_name: (field_name_other_table, other_table)}
         representing all the relationships in the table.
-
-        TODO: DO NOT USE THIS METHOD UNTIL
-            https://github.com/googleapis/python-spanner-django/issues/313
-         is resolved so that foreign keys can be supported, as documented in:
-            https://github.com/googleapis/python-spanner-django/issues/311
 
         :type cursor: :class:`~google.cloud.spanner_dbapi.cursor.Cursor`
         :param cursor: A reference to a Spanner Database cursor.
@@ -303,3 +343,33 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             constraints[index_name]["unique"] = is_unique
 
         return constraints
+
+    def get_key_columns(self, cursor, table_name):
+        """
+        Return a list of (column_name, referenced_table, referenced_column)
+        for all key columns in the given table.
+        """
+        key_columns = []
+        cursor.execute(
+            """SELECT
+                tc.COLUMN_NAME as column_name,
+                ccu.TABLE_NAME as referenced_table,
+                ccu.COLUMN_NAME as referenced_column
+            from
+                INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS tc
+            JOIN
+                INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS as rc
+            ON
+                tc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+            JOIN
+                INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE as ccu
+            ON
+                rc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
+            WHERE
+                tc.TABLE_NAME="{table}"
+            """.format(
+                table=self.connection.ops.quote_name(table_name)
+            )
+        )
+        key_columns.extend(cursor.fetchall())
+        return key_columns

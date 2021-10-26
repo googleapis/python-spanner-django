@@ -1,6 +1,8 @@
 Cloud Spanner support for Django
 ================================
 
+|GA| |pypi| |versions|
+
 `Cloud Spanner`_ is the world's first fully managed relational database service
 to offer both strong consistency and horizontal scalability for
 mission-critical online transaction processing (OLTP) applications. With Cloud

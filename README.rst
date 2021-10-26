@@ -83,7 +83,8 @@ Supported versions
 The library supports `Django 2.2
 <https://docs.djangoproject.com/en/2.2/>`_, and `Django 3.2
 <https://docs.djangoproject.com/en/3.2/>`_.
-Both versions are long-term support (LTS) releases for the Django project. 
+Both versions are long-term support (LTS) releases for the
+`Django project<https://www.djangoproject.com/download/#supported-versions>_`.
 The minimum required Python version is 3.6.
 
 

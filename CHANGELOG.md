@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.2.1](https://www.github.com/googleapis/python-spanner-django/compare/v2.2.1-b4...v2.2.1) (2021-10-26)
+
+
+### Documentation
+
+* update limitations about json query support and django version support. ([#729](https://www.github.com/googleapis/python-spanner-django/issues/729)) ([c3b111f](https://www.github.com/googleapis/python-spanner-django/commit/c3b111ff19d58f6ff67eb381a9efef042c70ec54))
+
 ## [2.2.1b4](https://www.github.com/googleapis/python-spanner-django/compare/v2.2.1-b3...v2.2.1b4) (2021-10-25)
 
 

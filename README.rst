@@ -53,30 +53,6 @@ dependencies.
 .. _`virtualenv`: https://virtualenv.pypa.io/en/latest/
 
 
-Mac/Linux
-~~~~~~~~~
-
-.. code-block:: console
-
-    pip install virtualenv
-    virtualenv <your-env>
-    source <your-env>/bin/activate
-    <your-env>/bin/pip install python-spanner-django
-    <your-env>/bin/pip install google-cloud-spanner
-
-
-Windows
-~~~~~~~
-
-.. code-block:: console
-
-    pip install virtualenv
-    virtualenv <your-env>
-    <your-env>\Scripts\activate
-    <your-env>\Scripts\pip.exe install python-spanner-django
-    <your-env>\Scripts\pip.exe install google-cloud-spanner
-
-
 Supported versions
 ~~~~~~~~~~~~~~~~~~
 
@@ -86,6 +62,10 @@ The library supports `Django 2.2
 Both versions are long-term support (LTS) releases for the
 `Django project<https://www.djangoproject.com/download/#supported-versions>_`.
 The minimum required Python version is 3.6.
+
+.. code:: shell
+
+    pip3 install django==3.2
 
 
 Installing the package
@@ -238,8 +218,8 @@ Here is an example of how to add a row for Model Author, save it and later query
     >>> qs1 = Author.objects.all().values("first_name", "last_name")
 
 
-HOW TO CONTRIBUTE
------------------
+How to contribute
+~~~~~~~~~~~~~~~~~
 
 Contributions to this library are always welcome and highly encouraged.
 
@@ -250,8 +230,8 @@ By participating in this project you agree to abide by its terms. See the `Code
 of Conduct <https://github.com/googleapis/python-spanner-django/blob/main/CODE_OF_CONDUCT.md>`_ for more information.
 
 
-LIMITATIONS
-------------
+Limitations
+~~~~~~~~~~~
 
 Spanner has certain limitations of its own. The full set of limitations is documented
 `here <https://cloud.google.com/spanner/quotas#schema_limits>`__.

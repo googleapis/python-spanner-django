@@ -172,13 +172,10 @@ Please run:
 
     $ python3 manage.py migrate
 
-and that'll take a while to run. After this you should be able to see the tables and indices created in your Cloud Spanner console.
+That'll take a while to run. After this you should be able to see the tables and indexes created in your Cloud Spanner console.
 
-Now run your server
-~~~~~~~~~~~~~~~~~~~
-After those migrations are completed, that will be all. Please continue on with the guides.
 
-Create an Django admin user
+Create a Django admin user
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 First you’ll need to create a user who can login to the admin site. Run the following command:
 
@@ -199,7 +196,7 @@ which will then produce a prompt which will allow you to create your super user
 
 Login as admin
 ~~~~~~~~~~~~~~
-Let’s run the server
+Now, run the server
 
 .. code:: shell
 
@@ -256,7 +253,9 @@ of Conduct <https://github.com/googleapis/python-spanner-django/blob/main/CODE_O
 LIMITATIONS
 -----------------
 
-Spanner has certain limitations of it's own and a full set of limitations are documented over `here <https://cloud.google.com/spanner/quotas#schema_limits>`_
+Spanner has certain limitations of its own. The full set of limitations is documented
+`here <https://cloud.google.com/spanner/quotas#schema_limits>`_.
 It is recommended that you go through that list.
 
-Django spanner has a set of limitations as well, please go through the `list <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`_.
+Django spanner has a set of limitations as well, which you can find
+`here <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`_.

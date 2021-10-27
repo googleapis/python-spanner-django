@@ -251,7 +251,7 @@ of Conduct <https://github.com/googleapis/python-spanner-django/blob/main/CODE_O
 
 
 LIMITATIONS
------------------
+------------
 
 Spanner has certain limitations of its own. The full set of limitations is documented
 `here <https://cloud.google.com/spanner/quotas#schema_limits>`_.

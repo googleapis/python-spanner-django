@@ -254,8 +254,8 @@ LIMITATIONS
 ------------
 
 Spanner has certain limitations of its own. The full set of limitations is documented
-`here <https://cloud.google.com/spanner/quotas#schema_limits>`_.
+`here <https://cloud.google.com/spanner/quotas#schema_limits>`__.
 It is recommended that you go through that list.
 
 Django spanner has a set of limitations as well, which you can find
-`here <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`_.
+`here <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`__.

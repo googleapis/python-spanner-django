@@ -1,6 +1,8 @@
 Cloud Spanner support for Django
 ================================
 
+|GA| |pypi| |versions|
+
 `Cloud Spanner`_ is the world's first fully managed relational database service
 to offer both strong consistency and horizontal scalability for
 mission-critical online transaction processing (OLTP) applications. With Cloud
@@ -13,6 +15,12 @@ workloads.
 - `Client Library Documentation`_
 - `Product Documentation`_
 
+.. |GA| image:: https://img.shields.io/badge/support-GA-gold.svg
+   :target: https://github.com/googleapis/google-cloud-python/blob/main/README.rst#general-availability
+.. |pypi| image:: https://img.shields.io/pypi/v/django-google-spanner.svg
+   :target: https://pypi.org/project/django-google-spanner/
+.. |versions| image:: https://img.shields.io/pypi/pyversions/django-google-spanner.svg
+   :target: https://pypi.org/project/django-google-spanner/
 .. _Cloud Spanner: https://cloud.google.com/spanner/
 .. _Client Library Documentation: https://googleapis.dev/python/django-google-spanner/latest/index.html
 .. _Product Documentation:  https://cloud.google.com/spanner/docs
@@ -53,41 +61,20 @@ dependencies.
 .. _`virtualenv`: https://virtualenv.pypa.io/en/latest/
 
 
-Mac/Linux
-~~~~~~~~~
-
-.. code-block:: console
-
-    pip install virtualenv
-    virtualenv <your-env>
-    source <your-env>/bin/activate
-    <your-env>/bin/pip install python-spanner-django
-    <your-env>/bin/pip install google-cloud-spanner
-
-
-Windows
-~~~~~~~
-
-.. code-block:: console
-
-    pip install virtualenv
-    virtualenv <your-env>
-    <your-env>\Scripts\activate
-    <your-env>\Scripts\pip.exe install python-spanner-django
-    <your-env>\Scripts\pip.exe install google-cloud-spanner
-
-
 Supported versions
 ~~~~~~~~~~~~~~~~~~
 
-At the moment, this library only supports `Django 2.2
-<https://docs.djangoproject.com/en/2.2/>`__. It also requires Python version
-3.6 or later.
+The library supports `Django 2.2
+<https://docs.djangoproject.com/en/2.2/>`_, and `Django 3.2
+<https://docs.djangoproject.com/en/3.2/>`_.
+Both versions are long-term support (LTS) releases for the
+`Django project<https://www.djangoproject.com/download/#supported-versions>_`.
+The minimum required Python version is 3.6.
 
-This package follows a common versioning convention for Django plugins: the
-major and minor version components of this package should match the installed
-version of Django. That is, ``django-google-spanner~=2.2`` works with
-``Django~=2.2``.
+.. code:: shell
+
+    pip3 install django==3.2
+
 
 Installing the package
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -173,13 +160,10 @@ Please run:
 
     $ python3 manage.py migrate
 
-and that'll take a while to run. After this you should be able to see the tables and indices created in your Cloud Spanner console.
+That'll take a while to run. After this you should be able to see the tables and indexes created in your Cloud Spanner console.
 
-Now run your server
-~~~~~~~~~~~~~~~~~~~
-After those migrations are completed, that will be all. Please continue on with the guides.
 
-Create an Django admin user
+Create a Django admin user
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 First you’ll need to create a user who can login to the admin site. Run the following command:
 
@@ -200,7 +184,7 @@ which will then produce a prompt which will allow you to create your super user
 
 Login as admin
 ~~~~~~~~~~~~~~
-Let’s run the server
+Now, run the server
 
 .. code:: shell
 
@@ -242,8 +226,8 @@ Here is an example of how to add a row for Model Author, save it and later query
     >>> qs1 = Author.objects.all().values("first_name", "last_name")
 
 
-HOW TO CONTRIBUTE
------------------
+How to contribute
+~~~~~~~~~~~~~~~~~
 
 Contributions to this library are always welcome and highly encouraged.
 
@@ -254,10 +238,12 @@ By participating in this project you agree to abide by its terms. See the `Code
 of Conduct <https://github.com/googleapis/python-spanner-django/blob/main/CODE_OF_CONDUCT.md>`_ for more information.
 
 
-LIMITATIONS
------------------
+Limitations
+~~~~~~~~~~~
 
-Spanner has certain limitations of it's own and a full set of limitations are documented over `here <https://cloud.google.com/spanner/quotas#schema_limits>`_
+Spanner has certain limitations of its own. The full set of limitations is documented
+`here <https://cloud.google.com/spanner/quotas#schema_limits>`__.
 It is recommended that you go through that list.
 
-Django spanner has a set of limitations as well, please go through the `list <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`_.
+Django spanner has a set of limitations as well, which you can find
+`here <https://github.com/googleapis/python-spanner-django/blob/main/docs/limitations.rst>`__.

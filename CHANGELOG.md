@@ -1,5 +1,50 @@
 # Changelog
 
+### [3.0.1](https://github.com/googleapis/python-spanner-django/compare/v3.0.0...v3.0.1) (2022-02-07)
+
+
+### Bug Fixes
+
+* downgrade google-cloud-spanner to v 3.11.1 ([#747](https://github.com/googleapis/python-spanner-django/issues/747)) ([a1f1cac](https://github.com/googleapis/python-spanner-django/commit/a1f1cac6a630cf71643b27580bb0f98c8f06d3ef))
+
+## [3.0.0](https://www.github.com/googleapis/python-spanner-django/compare/v2.2.1-b4...v3.0.0) (2021-10-29)
+
+
+### Documentation
+
+* typo fixes in readme ([#732](https://www.github.com/googleapis/python-spanner-django/issues/732)) ([bb60a16](https://www.github.com/googleapis/python-spanner-django/commit/bb60a1621be50a12286b939e99e6390b0c4f1bab))
+* update limitations about json query support and django version support. ([#729](https://www.github.com/googleapis/python-spanner-django/issues/729)) ([c3b111f](https://www.github.com/googleapis/python-spanner-django/commit/c3b111ff19d58f6ff67eb381a9efef042c70ec54))
+
+
+### Miscellaneous Chores
+
+* release 3.0.0 ([#734](https://www.github.com/googleapis/python-spanner-django/issues/734)) ([a285571](https://www.github.com/googleapis/python-spanner-django/commit/a285571ce2339a16acc922d82c013817659931f4))
+
+## [2.2.1b4](https://www.github.com/googleapis/python-spanner-django/compare/v2.2.1-b3...v2.2.1b4) (2021-10-25)
+
+
+### Features
+
+* enable support for `get_key_columns` and cleanup tests with unknown failures to specific failures. ([#721](https://www.github.com/googleapis/python-spanner-django/issues/721)) ([1ec0784](https://www.github.com/googleapis/python-spanner-django/commit/1ec07849787dfcfeda7206e038e0a63c0b45d74c))
+* merge django 2.2 and django 3.2 branches into 1 branch ([#717](https://www.github.com/googleapis/python-spanner-django/issues/717)) ([bfb2e20](https://www.github.com/googleapis/python-spanner-django/commit/bfb2e20e26ad63ae41bcc9a5442e9f3b3b383b31))
+
+
+### Bug Fixes
+
+* Bump version number after 2.2.1b3 release ([#696](https://www.github.com/googleapis/python-spanner-django/issues/696)) ([a8f2aac](https://www.github.com/googleapis/python-spanner-django/commit/a8f2aac06929152067e39b5aac1cebfd74ef5337))
+
+
+### Documentation
+
+* fix changelog link and sample examples. ([#700](https://www.github.com/googleapis/python-spanner-django/issues/700)) ([08b80ce](https://www.github.com/googleapis/python-spanner-django/commit/08b80cef7723819c22dae53c4ff7f45c4fc8c518))
+* lint fix for samples ([#697](https://www.github.com/googleapis/python-spanner-django/issues/697)) ([ed404f5](https://www.github.com/googleapis/python-spanner-django/commit/ed404f57ed4a23c7b60f4f9c238f5b5fa9f81d0c))
+* update dbapi location in overview asset file ([#702](https://www.github.com/googleapis/python-spanner-django/issues/702)) ([4643876](https://www.github.com/googleapis/python-spanner-django/commit/4643876219e8a54feb94bf14a79f0fe2fbe3971a))
+
+
+### Miscellaneous Chores
+
+* release 2.2.1b4 ([#724](https://www.github.com/googleapis/python-spanner-django/issues/724)) ([6581d7b](https://www.github.com/googleapis/python-spanner-django/commit/6581d7bdbe2dcbd204596b70043ab75f9932fcf5))
+
 ## 2.2.1b3 (2021-07-30)
 
 ### Miscellaneous Chores

@@ -78,19 +78,35 @@ Instances for spanner are not managed by Django so it does not support it inhere
 The workaround is to use python-spanner objects and use Instance config features via that.
 
 Workaround
-==========
+----------
 
-| Features | Is a workaround available? |
-| --- | --- |
-| Query Hints | Raw Queries can be used for Query hints [Link] (https://stackoverflow.com/a/28350704/3027854) |
-| Mutations | Python-spanner database objects can be used to run Mutation queries. [Link] (https://cloud.google.com/spanner/docs/modify-mutation-api#python) |
-| Batch DDL | Using unmanaged tables in Django. [Link] (https://docs.djangoproject.com/en/4.0/ref/models/options/#managed) and Directly using Python spanner objects to execute batch DDL statements. [Link] (https://cloud.google.com/spanner/docs/getting-started/python#create_a_database) |
-| Stale Reads | Python-spanner database objects can be used to perform stale reads. [Link] (https://cloud.google.com/spanner/docs/reads#python) |
-| Interleaving | Using unmanaged tables in Django. [Link] (https://docs.djangoproject.com/en/4.0/ref/models/options/#managed) and Directly using Python spanner objects to create interleaved tables. [Link] (https://cloud.google.com/spanner/docs/getting-started/python#create_a_database) |
-| Partitioned DML | Python-spanner database objects can be used to perform Partitioned DML. [Link] (https://cloud.google.com/spanner/docs/dml-partitioned#python) |
-| Session Labeling | Python-spanner connection objects can be used to perform Session creation and labeling . [Link] (https://cloud.google.com/spanner/docs/sessions#python) |
-| Request Priority | Python-spanner connection objects can be used to make backend calls with request priority. [Link] (https://cloud.google.com/spanner/docs/reference/rest/v1/RequestOptions) |
-| Tagging | Python-spanner connection objects can be used to make backend calls with request tags. [Link] (https://cloud.google.com/spanner/docs/reference/rest/v1/RequestOptions) |
-| Configurable Leader Option | Python-spanner database objects can be used to set or update leader options. [Link] (https://cloud.google.com/spanner/docs/modifying-leader-region#python) |
-| Cross region backup | Python-spanner library can be used to perform db backups across regions. [Link] (https://cloud.google.com/spanner/docs/backup) |
-| Custom Instance Config | Python-spanner library can be used to manage instances. [Link] (https://googleapis.dev/python/spanner/latest/instance-api.html) |
+.. list-table:: Workaround
+   :widths: 33 67
+   :header-rows: 1
+
+   * - Features
+     - Is a workaround available?
+   * - Query Hints
+     - Raw Queries can be used for Query hints `Link <https://stackoverflow.com/a/28350704/3027854>`__.
+   * - Mutations
+     - Python-spanner database objects can be used to run Mutation queries. `Link <https://cloud.google.com/spanner/docs/modify-mutation-api#python>`__.
+   * - Batch DDL
+     - Using unmanaged tables in Django. `Link <https://docs.djangoproject.com/en/4.0/ref/models/options/#managed>`__ and Directly using Python spanner objects to execute batch DDL statements. `Link <https://cloud.google.com/spanner/docs/getting-started/python#create_a_database>`__.
+   * - Stale Reads
+     - Python-spanner database objects can be used to perform stale reads. `Link <https://cloud.google.com/spanner/docs/reads#python>`__.
+   * - Interleaving
+     - Using unmanaged tables in Django. `Link <https://docs.djangoproject.com/en/4.0/ref/models/options/#managed>`__ and Directly using Python spanner objects to create interleaved tables. `Link <https://cloud.google.com/spanner/docs/getting-started/python#create_a_database>`__.
+   * - Partitioned DML
+     - Python-spanner database objects can be used to perform Partitioned DML. `Link <https://cloud.google.com/spanner/docs/dml-partitioned#python>`__.
+   * - Session Labeling
+     - Python-spanner connection objects can be used to perform Session creation and labeling . `Link <https://cloud.google.com/spanner/docs/sessions#python>`__.
+   * - Request Priority
+     - Python-spanner connection objects can be used to make backend calls with request priority. `Link <https://cloud.google.com/spanner/docs/reference/rest/v1/RequestOptions>`__.
+   * - Tagging
+     - Python-spanner connection objects can be used to make backend calls with request tags. `Link <https://cloud.google.com/spanner/docs/reference/rest/v1/RequestOptions>`__.
+   * - Configurable Leader Option
+     - Python-spanner database objects can be used to set or update leader options. `Link <https://cloud.google.com/spanner/docs/modifying-leader-region#python>`__.
+   * - Cross region backup
+     - Python-spanner library can be used to perform db backups across regions. `Link <https://cloud.google.com/spanner/docs/backup>`__.
+   * - Custom Instance Config
+     - Python-spanner library can be used to manage instances. `Link <https://googleapis.dev/python/spanner/latest/instance-api.html>`__.

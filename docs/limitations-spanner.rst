@@ -80,7 +80,7 @@ The workaround is to use python-spanner objects and use Instance config features
 Workaround
 ----------
 
-.. list-table:: Workaround
+.. list-table::
    :widths: 33 67
    :header-rows: 1
 

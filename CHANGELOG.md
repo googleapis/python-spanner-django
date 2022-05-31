@@ -1,6 +1,6 @@
 # Changelog
 
-### [3.0.1](https://github.com/googleapis/python-spanner-django/compare/v3.0.0...v3.0.1) (2022-02-07)
+## [3.0.1](https://github.com/googleapis/python-spanner-django/compare/v3.0.0...v3.0.1) (2022-02-07)
 
 
 ### Bug Fixes

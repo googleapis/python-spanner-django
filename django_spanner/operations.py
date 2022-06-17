@@ -88,9 +88,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         :rtype: int
         :returns: The maximum number of query parameters (constant).
         """
-        raise ValueError(
-            "max_query: " + str(self.connection.features.max_query_params)
-        )
         return self.connection.features.max_query_params
 
     def bulk_insert_sql(self, fields, placeholder_rows):

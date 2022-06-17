@@ -269,6 +269,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "delete.tests.DeletionTests.test_model_delete_returns_num_rows",
         "delete.tests.DeletionTests.test_deletion_order",
         "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
+        "delete.tests.DeletionTests.test_large_delete",
+        "delete.tests.FastDeleteTests.test_fast_delete_large_batch",
         # Tests that require transactions.
         "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
         "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",

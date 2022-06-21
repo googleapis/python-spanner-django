@@ -67,15 +67,7 @@ class OnConflict(Enum):
     UPDATE = "update"
 
 
-def spanner_bulk_create(
-    self,
-    objs,
-    batch_size=None,
-    ignore_conflicts=False,
-    update_conflicts=False,
-    update_fields=None,
-    unique_fields=None,
-):
+def bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
     """
     Insert each of the instances into the database. Do *not* call
     save() on each of the instances, do not send any pre/post_save
@@ -107,13 +99,8 @@ def spanner_bulk_create(
     if not objs:
         return objs
 
-    on_conflict = self._check_bulk_create_options(
-        ignore_conflicts,
-        update_conflicts,
-        update_fields,
-        unique_fields,
-    )
     self._for_write = True
+    connection = connections[self.db]
     opts = self.model._meta
     fields = opts.concrete_fields
     objs = list(objs)
@@ -124,7 +111,6 @@ def spanner_bulk_create(
     with transaction.atomic(using=self.db, savepoint=False):
         objs_with_pk, objs_without_pk = partition(lambda o: o.pk is None, objs)
         if objs_with_pk:
-
             for chunk_with_pk in [
                 objs_with_pk[x : x + batch_size]
                 for x in range(0, len(objs_with_pk), batch_size)
@@ -133,9 +119,7 @@ def spanner_bulk_create(
                     chunk_with_pk,
                     fields,
                     batch_size,
-                    on_conflict=on_conflict,
-                    update_fields=update_fields,
-                    unique_fields=unique_fields,
+                    ignore_conflicts=ignore_conflicts,
                 )
                 for obj_with_pk, results in zip(
                     chunk_with_pk, returned_columns
@@ -156,14 +140,11 @@ def spanner_bulk_create(
                 objs_without_pk,
                 fields,
                 batch_size,
-                on_conflict=on_conflict,
-                update_fields=update_fields,
-                unique_fields=unique_fields,
+                ignore_conflicts=ignore_conflicts,
             )
-            connection = connections[self.db]
             if (
                 connection.features.can_return_rows_from_bulk_insert
-                and on_conflict is None
+                and not ignore_conflicts
             ):
                 assert len(returned_columns) == len(objs_without_pk)
             for obj_without_pk, results in zip(
@@ -177,87 +158,7 @@ def spanner_bulk_create(
     return objs
 
 
-def spanner_check_bulk_create_options(
-    self, ignore_conflicts, update_conflicts, update_fields, unique_fields
-):
-    if ignore_conflicts and update_conflicts:
-        raise ValueError(
-            "ignore_conflicts and update_conflicts are mutually exclusive."
-        )
-    db_features = connections[self.db].features
-    if ignore_conflicts:
-        if not db_features.supports_ignore_conflicts:
-            raise NotSupportedError(
-                "This database backend does not support ignoring conflicts."
-            )
-        return OnConflict.IGNORE
-    elif update_conflicts:
-        if not db_features.supports_update_conflicts:
-            raise NotSupportedError(
-                "This database backend does not support updating conflicts."
-            )
-        if not update_fields:
-            raise ValueError(
-                "Fields that will be updated when a row insertion fails "
-                "on conflicts must be provided."
-            )
-        if (
-            unique_fields
-            and not db_features.supports_update_conflicts_with_target
-        ):
-            raise NotSupportedError(
-                "This database backend does not support updating "
-                "conflicts with specifying unique fields that can trigger "
-                "the upsert."
-            )
-        if (
-            not unique_fields
-            and db_features.supports_update_conflicts_with_target
-        ):
-            raise ValueError(
-                "Unique fields that can trigger the upsert must be provided."
-            )
-        # Updating primary keys and non-concrete fields is forbidden.
-        update_fields = [
-            self.model._meta.get_field(name) for name in update_fields
-        ]
-        if any(not f.concrete or f.many_to_many for f in update_fields):
-            raise ValueError(
-                "bulk_create() can only be used with concrete fields in "
-                "update_fields."
-            )
-        if any(f.primary_key for f in update_fields):
-            raise ValueError(
-                "bulk_create() cannot be used with primary keys in "
-                "update_fields."
-            )
-        if unique_fields:
-            # Primary key is allowed in unique_fields.
-            unique_fields = [
-                self.model._meta.get_field(name)
-                for name in unique_fields
-                if name != "pk"
-            ]
-            if any(not f.concrete or f.many_to_many for f in unique_fields):
-                raise ValueError(
-                    "bulk_create() can only be used with concrete fields "
-                    "in unique_fields."
-                )
-        return OnConflict.UPDATE
-    return None
-
-
-def spanner_prepare_for_bulk_create(self, objs):
-    for obj in objs:
-        if obj.pk is None:
-            # Populate new PK values.
-            obj.pk = obj._meta.pk.get_pk_value_on_save(obj)
-        obj._prepare_related_fields_for_save(operation_name="bulk_create")
-
-
 QuerySet.bulk_create = spanner_bulk_create
-QuerySet._check_bulk_create_options = spanner_check_bulk_create_options
-QuerySet._prepare_for_bulk_create = spanner_prepare_for_bulk_create
 
 
 def gen_rand_int64():

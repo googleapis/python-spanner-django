@@ -24,7 +24,6 @@ from django.db.models.fields import (
     AutoField,
     Field,
 )
-from django.db.models.constants import OnConflict
 from django.db.models.query import QuerySet
 from django.utils.functional import partition
 
@@ -60,6 +59,11 @@ check_django_compatability(SUPPORTED_DJANGO_VERSIONS)
 register_expressions(USING_DJANGO_3)
 register_functions()
 register_lookups()
+
+
+class OnConflict(Enum):
+    IGNORE = "ignore"
+    UPDATE = "update"
 
 
 def spanner_bulk_create(

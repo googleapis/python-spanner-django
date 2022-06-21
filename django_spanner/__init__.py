@@ -67,7 +67,7 @@ class OnConflict(Enum):
     UPDATE = "update"
 
 
-def bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
+def spanner_bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
     """
     Insert each of the instances into the database. Do *not* call
     save() on each of the instances, do not send any pre/post_save

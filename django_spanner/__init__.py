@@ -14,11 +14,17 @@ from uuid import uuid4
 
 import pkg_resources
 from google.cloud.spanner_v1 import JsonObject
-from django.db import connection as connection_db, connections, transaction
+from django.db import (
+    connection as connection_db,
+    connections,
+    transaction,
+    NotSupportedError,
+)
 from django.db.models.fields import (
     AutoField,
     Field,
 )
+from django.db.models.constants import OnConflict
 from django.db.models.query import QuerySet
 from django.utils.functional import partition
 
@@ -166,7 +172,78 @@ def spanner_bulk_create(
     return objs
 
 
+def spanner_check_bulk_create_options(
+    self, ignore_conflicts, update_conflicts, update_fields, unique_fields
+):
+    if ignore_conflicts and update_conflicts:
+        raise ValueError(
+            "ignore_conflicts and update_conflicts are mutually exclusive."
+        )
+    db_features = connections[self.db].features
+    if ignore_conflicts:
+        if not db_features.supports_ignore_conflicts:
+            raise NotSupportedError(
+                "This database backend does not support ignoring conflicts."
+            )
+        return OnConflict.IGNORE
+    elif update_conflicts:
+        if not db_features.supports_update_conflicts:
+            raise NotSupportedError(
+                "This database backend does not support updating conflicts."
+            )
+        if not update_fields:
+            raise ValueError(
+                "Fields that will be updated when a row insertion fails "
+                "on conflicts must be provided."
+            )
+        if (
+            unique_fields
+            and not db_features.supports_update_conflicts_with_target
+        ):
+            raise NotSupportedError(
+                "This database backend does not support updating "
+                "conflicts with specifying unique fields that can trigger "
+                "the upsert."
+            )
+        if (
+            not unique_fields
+            and db_features.supports_update_conflicts_with_target
+        ):
+            raise ValueError(
+                "Unique fields that can trigger the upsert must be provided."
+            )
+        # Updating primary keys and non-concrete fields is forbidden.
+        update_fields = [
+            self.model._meta.get_field(name) for name in update_fields
+        ]
+        if any(not f.concrete or f.many_to_many for f in update_fields):
+            raise ValueError(
+                "bulk_create() can only be used with concrete fields in "
+                "update_fields."
+            )
+        if any(f.primary_key for f in update_fields):
+            raise ValueError(
+                "bulk_create() cannot be used with primary keys in "
+                "update_fields."
+            )
+        if unique_fields:
+            # Primary key is allowed in unique_fields.
+            unique_fields = [
+                self.model._meta.get_field(name)
+                for name in unique_fields
+                if name != "pk"
+            ]
+            if any(not f.concrete or f.many_to_many for f in unique_fields):
+                raise ValueError(
+                    "bulk_create() can only be used with concrete fields "
+                    "in unique_fields."
+                )
+        return OnConflict.UPDATE
+    return None
+
+
 QuerySet.bulk_create = spanner_bulk_create
+QuerySet._check_bulk_create_options = spanner_check_bulk_create_options
 
 
 def gen_rand_int64():

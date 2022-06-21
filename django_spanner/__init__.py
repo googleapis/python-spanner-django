@@ -11,6 +11,7 @@ import django
 # Monkey-patch AutoField to generate a random value since Cloud Spanner can't
 # do that.
 from uuid import uuid4
+from enum import Enum
 
 import pkg_resources
 from google.cloud.spanner_v1 import JsonObject

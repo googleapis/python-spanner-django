@@ -158,7 +158,16 @@ def spanner_bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
     return objs
 
 
+def spanner_prepare_for_bulk_create(self, objs):
+    for obj in objs:
+        if obj.pk is None:
+            # Populate new PK values.
+            obj.pk = obj._meta.pk.get_pk_value_on_save(obj)
+        obj._prepare_related_fields_for_save(operation_name="bulk_create")
+
+
 QuerySet.bulk_create = spanner_bulk_create
+QuerySet._prepare_for_bulk_create = spanner_prepare_for_bulk_create
 
 
 def gen_rand_int64():

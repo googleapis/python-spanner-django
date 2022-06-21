@@ -163,7 +163,7 @@ def spanner_prepare_for_bulk_create(self, objs):
             # Populate new PK values.
             obj.pk = obj._meta.pk.get_pk_value_on_save(obj)
 
-        raise ValueError(str(type(obj)))
+        raise ValueError(str(dir(obj)))
         obj._prepare_related_fields_for_save(operation_name="bulk_create")
 
 

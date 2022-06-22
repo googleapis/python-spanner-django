@@ -97,9 +97,11 @@ def spanner_create_permissions(
         for ct, (codename, name) in searched_perms
         if (ct.pk, codename) not in all_perms
     ]
+    from django.forms.models import model_to_dict
 
-    if len(perms) > 900:
-        raise ValueError(len(perms))
+    for i in perms:
+        if len(model_to_dict(i)) > 900:
+            raise ValueError(len(model_to_dict(i)))
 
     Permission.objects.using(using).bulk_create(perms, batch_size=900)
     if verbosity >= 2:

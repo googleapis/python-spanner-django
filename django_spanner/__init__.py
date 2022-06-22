@@ -97,7 +97,7 @@ def spanner_create_permissions(
         for ct, (codename, name) in searched_perms
         if (ct.pk, codename) not in all_perms
     ]
-    raise ValueError(str(perms))
+    raise ValueError(str(perms[0]))
     Permission.objects.using(using).bulk_create(perms, batch_size=900)
     if verbosity >= 2:
         for perm in perms:

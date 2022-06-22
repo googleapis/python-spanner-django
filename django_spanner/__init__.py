@@ -99,7 +99,7 @@ def spanner_create_permissions(
     ]
 
     if len(perms) < 900:
-        raise ValueError("many")
+        raise ValueError(len(perms))
 
     Permission.objects.using(using).bulk_create(perms, batch_size=900)
     if verbosity >= 2:

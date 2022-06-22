@@ -98,7 +98,7 @@ def spanner_create_permissions(
         if (ct.pk, codename) not in all_perms
     ]
 
-    if len(perms) < 900:
+    if len(perms) > 900:
         raise ValueError(len(perms))
 
     Permission.objects.using(using).bulk_create(perms, batch_size=900)

@@ -26,7 +26,7 @@ from django.db.models.fields import (
 )
 from django.db.models.query import QuerySet
 from django.utils.functional import partition
-from django.contrib.contenttypes import ContentType
+from django.contrib.contenttypes.models import ContentType
 
 from .expressions import register_expressions
 from .functions import register_functions

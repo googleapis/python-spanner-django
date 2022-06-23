@@ -80,12 +80,12 @@ def spanner_bulk_create(
     if not objs:
         return objs
 
-    on_conflict = self._check_bulk_create_options(
-        ignore_conflicts,
-        update_conflicts,
-        update_fields,
-        unique_fields,
-    )
+    # on_conflict = self._check_bulk_create_options(
+    #     ignore_conflicts,
+    #     update_conflicts,
+    #     update_fields,
+    #     unique_fields,
+    # )
     self._for_write = True
     opts = self.model._meta
     fields = opts.concrete_fields
@@ -106,7 +106,7 @@ def spanner_bulk_create(
                     chunk_with_pk,
                     fields,
                     batch_size,
-                    on_conflict=on_conflict,
+                    # on_conflict=on_conflict,
                     update_fields=update_fields,
                     unique_fields=unique_fields,
                 )
@@ -129,15 +129,12 @@ def spanner_bulk_create(
                 objs_without_pk,
                 fields,
                 batch_size,
-                on_conflict=on_conflict,
+                # on_conflict=on_conflict,
                 update_fields=update_fields,
                 unique_fields=unique_fields,
             )
             connection = connections[self.db]
-            if (
-                connection.features.can_return_rows_from_bulk_insert
-                and on_conflict is None
-            ):
+            if connection.features.can_return_rows_from_bulk_insert:
                 assert len(returned_columns) == len(objs_without_pk)
             for obj_without_pk, results in zip(
                 objs_without_pk, returned_columns

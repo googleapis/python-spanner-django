@@ -100,7 +100,7 @@ def spanner_create_permissions(
     from django.forms.models import model_to_dict
 
     for i in perms:
-        if len(model_to_dict(i)) > 900:
+        if len(model_to_dict(i)) > 950:
             raise ValueError(len(model_to_dict(i)))
 
     Permission.objects.using(using).bulk_create(perms, batch_size=900)

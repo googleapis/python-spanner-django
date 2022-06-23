@@ -90,7 +90,6 @@ def spanner_bulk_create(
     opts = self.model._meta
     fields = opts.concrete_fields
     objs = list(objs)
-    ValueError(str(objs))
     self._prepare_for_bulk_create(objs)
 
     batch_size = connection_db.features.max_query_params

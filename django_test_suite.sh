@@ -42,6 +42,7 @@ TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}
 
 create_settings() {
     cat << ! > "$SETTINGS_FILE.py"
+USE_TZ = True
 DATABASES = {
    'default': {
        'ENGINE': 'django_spanner',

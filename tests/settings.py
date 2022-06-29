@@ -7,7 +7,6 @@
 import os
 
 DEBUG = True
-USE_TZ = True
 
 INSTALLED_APPS = [
     "django_spanner",  # Must be the first entry

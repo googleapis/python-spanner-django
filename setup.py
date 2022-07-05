@@ -20,7 +20,6 @@ release_status = "Development Status :: 5 - Production/Stable"
 dependencies = [
     "sqlparse >= 0.3.0",
     "google-cloud-spanner >= 3.13.0",
-    "requests",
 ]
 extras = {
     "tracing": [

@@ -11,8 +11,12 @@ import django
 from django.conf import settings
 from django.core import exceptions
 from django.db import (
-    DJANGO_VERSION_PICKLE_KEY, IntegrityError, NotSupportedError, connections,
-    router, transaction,
+    DJANGO_VERSION_PICKLE_KEY,
+    IntegrityError,
+    NotSupportedError,
+    connections,
+    router,
+    transaction,
 )
 from django.db.models import AutoField, DateField, DateTimeField, sql
 from django.db.models.constants import LOOKUP_SEP
@@ -328,9 +332,9 @@ class QuerySet:
                 % type(k).__name__
             )
         assert (not isinstance(k, slice) and (k >= 0)) or (
-            isinstance(k, slice) and
-            (k.start is None or k.start >= 0) and
-            (k.stop is None or k.stop >= 0)
+            isinstance(k, slice)
+            and (k.start is None or k.start >= 0)
+            and (k.stop is None or k.stop >= 0)
         ), "Negative indexing is not supported."
 
         if self._result_cache is not None:
@@ -438,9 +442,9 @@ class QuerySet:
                 raise TypeError("%s is not an aggregate expression" % alias)
             for expr in annotation.get_source_expressions():
                 if (
-                    expr.contains_aggregate and
-                    isinstance(expr, Ref) and
-                    expr.refs in kwargs
+                    expr.contains_aggregate
+                    and isinstance(expr, Ref)
+                    and expr.refs in kwargs
                 ):
                     name = expr.refs
                     raise exceptions.FieldError(
@@ -477,8 +481,8 @@ class QuerySet:
             clone = clone.order_by()
         limit = None
         if (
-            not clone.query.select_for_update or
-            connections[clone.db].features.supports_select_for_update_with_limit
+            not clone.query.select_for_update
+            or connections[clone.db].features.supports_select_for_update_with_limit
         ):
             limit = MAX_GET_RESULTS
             clone.query.set_limits(high=limit)
@@ -549,6 +553,7 @@ class QuerySet:
         opts = self.model._meta
         fields = opts.concrete_fields
         objs = list(objs)
+        batch_size = 900
         self._prepare_for_bulk_create(objs)
         with transaction.atomic(using=self.db, savepoint=False):
             objs_with_pk, objs_without_pk = partition(lambda o: o.pk is None, objs)
@@ -575,8 +580,8 @@ class QuerySet:
                     ignore_conflicts=ignore_conflicts,
                 )
                 if (
-                    connection.features.can_return_rows_from_bulk_insert and
-                    not ignore_conflicts
+                    connection.features.can_return_rows_from_bulk_insert
+                    and not ignore_conflicts
                 ):
                     assert len(returned_columns) == len(objs_without_pk)
                 for obj_without_pk, results in zip(objs_without_pk, returned_columns):
@@ -612,7 +617,7 @@ class QuerySet:
         )
         batch_size = min(batch_size, max_batch_size) if batch_size else max_batch_size
         requires_casting = connections[self.db].features.requires_casted_case_in_updates
-        batches = (objs[i: i + batch_size] for i in range(0, len(objs), batch_size))
+        batches = (objs[i : i + batch_size] for i in range(0, len(objs), batch_size))
         updates = []
         for batch_objs in batches:
             update_kwargs = {}
@@ -761,10 +766,10 @@ class QuerySet:
             if len(constraint.fields) == 1
         ]
         if (
-            field_name != "pk" and
-            not opts.get_field(field_name).unique and
-            field_name not in unique_fields and
-            self.query.distinct_fields != (field_name,)
+            field_name != "pk"
+            and not opts.get_field(field_name).unique
+            and field_name not in unique_fields
+            and self.query.distinct_fields != (field_name,)
         ):
             raise ValueError(
                 "in_bulk()'s field_name must be a unique field but %r isn't."
@@ -781,7 +786,7 @@ class QuerySet:
             if batch_size and batch_size < len(id_list):
                 qs = ()
                 for offset in range(0, len(id_list), batch_size):
-                    batch = id_list[offset: offset + batch_size]
+                    batch = id_list[offset : offset + batch_size]
                     qs += tuple(self.filter(**{filter_key: batch}).order_by())
             else:
                 qs = self.filter(**{filter_key: id_list}).order_by()
@@ -1370,8 +1375,9 @@ class QuerySet:
         if self.query.extra_order_by or self.query.order_by:
             return True
         elif (
-            self.query.default_ordering and
-            self.query.get_meta().ordering and
+            self.query.default_ordering
+            and self.query.get_meta().ordering
+            and
             # A default ordering doesn't affect GROUP BY queries.
             not self.query.group_by
         ):
@@ -1418,8 +1424,8 @@ class QuerySet:
         Helper method for bulk_create() to insert objs one batch at a time.
         """
         if (
-            ignore_conflicts and
-            not connections[self.db].features.supports_ignore_conflicts
+            ignore_conflicts
+            and not connections[self.db].features.supports_ignore_conflicts
         ):
             raise NotSupportedError(
                 "This database backend does not support ignoring conflicts."
@@ -1429,7 +1435,7 @@ class QuerySet:
         batch_size = min(batch_size, max_batch_size) if batch_size else max_batch_size
         inserted_rows = []
         bulk_return = connections[self.db].features.can_return_rows_from_bulk_insert
-        for item in [objs[i: i + batch_size] for i in range(0, len(objs), batch_size)]:
+        for item in [objs[i : i + batch_size] for i in range(0, len(objs), batch_size)]:
             if bulk_return and not ignore_conflicts:
                 inserted_rows.extend(
                     self._insert(
@@ -1503,9 +1509,9 @@ class QuerySet:
     def _merge_sanity_check(self, other):
         """Check that two QuerySet classes may be merged."""
         if self._fields is not None and (
-            set(self.query.values_select) != set(other.query.values_select) or
-            set(self.query.extra_select) != set(other.query.extra_select) or
-            set(self.query.annotation_select) != set(other.query.annotation_select)
+            set(self.query.values_select) != set(other.query.values_select)
+            or set(self.query.extra_select) != set(other.query.extra_select)
+            or set(self.query.annotation_select) != set(other.query.annotation_select)
         ):
             raise TypeError(
                 "Merging '%s' classes must involve the same values in each case."
@@ -1768,10 +1774,10 @@ class Prefetch:
         # `prefetch_to` is the path to the attribute that stores the result.
         self.prefetch_to = lookup
         if queryset is not None and (
-            isinstance(queryset, RawQuerySet) or
-            (
-                hasattr(queryset, "_iterable_class") and
-                not issubclass(queryset._iterable_class, ModelIterable)
+            isinstance(queryset, RawQuerySet)
+            or (
+                hasattr(queryset, "_iterable_class")
+                and not issubclass(queryset._iterable_class, ModelIterable)
             )
         ):
             raise ValueError(
@@ -1946,9 +1952,9 @@ def prefetch_related_objects(model_instances, *related_lookups):
                 # are already on an automatically added lookup, don't add
                 # the new lookups from relationships we've seen already.
                 if not (
-                    prefetch_to in done_queries and
-                    lookup in auto_lookups and
-                    descriptor in followed_descriptors
+                    prefetch_to in done_queries
+                    and lookup in auto_lookups
+                    and descriptor in followed_descriptors
                 ):
                     done_queries[prefetch_to] = obj_list
                     new_lookups = normalize_prefetch_lookups(
@@ -2200,7 +2206,7 @@ class RelatedPopulator:
             self.cols_start = select_fields[0]
             self.cols_end = select_fields[-1] + 1
             self.init_list = [
-                f[0].target.attname for f in select[self.cols_start: self.cols_end]
+                f[0].target.attname for f in select[self.cols_start : self.cols_end]
             ]
             self.reorder_for_init = None
         else:
@@ -2227,7 +2233,7 @@ class RelatedPopulator:
         if self.reorder_for_init:
             obj_data = self.reorder_for_init(row)
         else:
-            obj_data = row[self.cols_start: self.cols_end]
+            obj_data = row[self.cols_start : self.cols_end]
         if obj_data[self.pk_idx] is None:
             obj = None
         else:

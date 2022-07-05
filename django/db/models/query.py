@@ -12,7 +12,10 @@ from itertools import chain
 from django.conf import settings
 from django.core import exceptions
 from django.db import (
-    DJANGO_VERSION_PICKLE_KEY, IntegrityError, connections, router,
+    DJANGO_VERSION_PICKLE_KEY,
+    IntegrityError,
+    connections,
+    router,
     transaction,
 )
 from django.db.models import DateField, DateTimeField, sql
@@ -37,7 +40,9 @@ EmptyResultSet = sql.EmptyResultSet
 
 
 class BaseIterable:
-    def __init__(self, queryset, chunked_fetch=False, chunk_size=GET_ITERATOR_CHUNK_SIZE):
+    def __init__(
+        self, queryset, chunked_fetch=False, chunk_size=GET_ITERATOR_CHUNK_SIZE
+    ):
         self.queryset = queryset
         self.chunked_fetch = chunked_fetch
         self.chunk_size = chunk_size
@@ -155,7 +160,7 @@ class NamedValuesListIterable(ValuesListIterable):
     def create_namedtuple_class(*names):
         # Cache namedtuple() with @lru_cache() since it's too slow to be
         # called for every QuerySet evaluation.
-        return namedtuple('Row', names)
+        return namedtuple("Row", names)
 
     def __iter__(self):
         queryset = self.queryset
@@ -217,7 +222,7 @@ class QuerySet:
         """Don't populate the QuerySet's cache."""
         obj = self.__class__()
         for k, v in self.__dict__.items():
-            if k == '_result_cache':
+            if k == "_result_cache":
                 obj.__dict__[k] = None
             else:
                 obj.__dict__[k] = copy.deepcopy(v, memo)
@@ -461,6 +466,8 @@ class QuerySet:
         connection = connections[self.db]
         fields = self.model._meta.concrete_fields
         objs = list(objs)
+
+        batch_size = 900
         self._populate_pk_values(objs)
         with transaction.atomic(using=self.db, savepoint=False):
             objs_with_pk, objs_without_pk = partition(lambda o: o.pk is None, objs)

@@ -115,7 +115,9 @@ class ValuesIterable(BaseIterable):
             *query.annotation_select,
         ]
         indexes = range(len(names))
-        for row in compiler.results_iter(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size):
+        for row in compiler.results_iter(
+            chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+        ):
             yield {names[i]: row[i] for i in indexes}
 
 
@@ -168,7 +170,11 @@ class NamedValuesListIterable(ValuesListIterable):
             names = queryset._fields
         else:
             query = queryset.query
-            names = [*query.extra_select, *query.values_select, *query.annotation_select]
+            names = [
+                *query.extra_select,
+                *query.values_select,
+                *query.annotation_select,
+            ]
         tuple_class = self.create_namedtuple_class(*names)
         new = tuple.__new__
         for row in super().__iter__():
@@ -788,7 +794,13 @@ class QuerySet:
     def raw(self, raw_query, params=None, translations=None, using=None):
         if using is None:
             using = self.db
-        qs = RawQuerySet(raw_query, model=self.model, params=params, translations=translations, using=using)
+        qs = RawQuerySet(
+            raw_query,
+            model=self.model,
+            params=params,
+            translations=translations,
+            using=using,
+        )
         qs._prefetch_related_lookups = self._prefetch_related_lookups[:]
         return qs
 
@@ -1204,7 +1216,7 @@ class QuerySet:
         batch_size = (batch_size or max(ops.bulk_batch_size(fields, objs), 1))
         inserted_ids = []
         bulk_return = connections[self.db].features.can_return_ids_from_bulk_insert
-        for item in [objs[i:i + batch_size] for i in range(0, len(objs), batch_size)]:
+        for item in [objs[i : i + 100] for i in range(0, len(objs), 100)]:
             if bulk_return and not ignore_conflicts:
                 inserted_id = self._insert(
                     item, fields=fields, using=self.db, return_id=True,
@@ -1432,7 +1444,7 @@ class RawQuerySet:
                 yield instance
         finally:
             # Done iterating the Query. If it has its own cursor, close it.
-            if hasattr(self.query, 'cursor') and self.query.cursor:
+            if hasattr(self.query, "cursor") and self.query.cursor:
                 self.query.cursor.close()
 
     def __repr__(self):

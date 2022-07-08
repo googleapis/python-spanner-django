@@ -139,7 +139,7 @@ class BulkCreateTests(TestCase):
             Restaurant() for i in range(0, 501)
         ])
 
-    @skipIf(True)
+    @skipIf(True, "Spanner doesn't support more than 950 params in single query")
     def test_large_batch_efficiency(self):
         with override_settings(DEBUG=True):
             connection.queries_log.clear()
@@ -164,7 +164,7 @@ class BulkCreateTests(TestCase):
         self.assertEqual(TwoFields.objects.filter(id__in=id_range).count(), 500)
         self.assertEqual(TwoFields.objects.exclude(id__in=id_range).count(), 500)
 
-    @skipIf(True)
+    @skipIf(True, "Spanner doesn't support more than 950 params in single query")
     def test_large_batch_mixed_efficiency(self):
         """
         Test inserting a large batch with objects having primary key set

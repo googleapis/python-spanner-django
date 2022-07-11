@@ -1429,7 +1429,7 @@ class QuerySet:
         batch_size = min(batch_size, max_batch_size) if batch_size else max_batch_size
         inserted_rows = []
         bulk_return = connections[self.db].features.can_return_rows_from_bulk_insert
-        for item in [objs[i: i + batch_size] for i in range(0, len(objs), batch_size)]:
+        for item in [objs[i : i + 100] for i in range(0, len(objs), 100)]:
             if bulk_return and not ignore_conflicts:
                 inserted_rows.extend(
                     self._insert(

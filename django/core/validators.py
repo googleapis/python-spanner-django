@@ -75,7 +75,7 @@ class URLValidator(RegexValidator):
     ul = '\u00a1-\uffff'  # unicode letters range (must not be a raw string)
 
     # IP patterns
-    ipv4_re = r'(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}'
+    ipv4_re = r'(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}'
     ipv6_re = r'\[[0-9a-f:\.]+\]'  # (simple regex, validated later)
 
     # Host patterns
@@ -101,6 +101,7 @@ class URLValidator(RegexValidator):
         r'\Z', re.IGNORECASE)
     message = _('Enter a valid URL.')
     schemes = ['http', 'https', 'ftp', 'ftps']
+    unsafe_chars = frozenset('\t\r\n')
 
     def __init__(self, schemes=None, **kwargs):
         super().__init__(**kwargs)
@@ -108,7 +109,9 @@ class URLValidator(RegexValidator):
             self.schemes = schemes
 
     def __call__(self, value):
-        # Check first if the scheme is valid
+        if isinstance(value, str) and self.unsafe_chars.intersection(value):
+            raise ValidationError(self.message, code=self.code)
+        # Check if the scheme is valid.
         scheme = value.split('://')[0].lower()
         if scheme not in self.schemes:
             raise ValidationError(self.message, code=self.code)
@@ -253,6 +256,18 @@ def validate_ipv4_address(value):
         ipaddress.IPv4Address(value)
     except ValueError:
         raise ValidationError(_('Enter a valid IPv4 address.'), code='invalid')
+    else:
+        # Leading zeros are forbidden to avoid ambiguity with the octal
+        # notation. This restriction is included in Python 3.9.5+.
+        # TODO: Remove when dropping support for PY39.
+        if any(
+            octet != '0' and octet[0] == '0'
+            for octet in value.split('.')
+        ):
+            raise ValidationError(
+                _('Enter a valid IPv4 address.'),
+                code='invalid',
+            )
 
 
 def validate_ipv6_address(value):

@@ -1,4 +1,5 @@
 import os
+import pathlib
 from datetime import datetime
 from urllib.parse import urljoin
 
@@ -6,6 +7,7 @@ from django.conf import settings
 from django.core.exceptions import SuspiciousFileOperation
 from django.core.files import File, locks
 from django.core.files.move import file_move_safe
+from django.core.files.utils import validate_file_name
 from django.core.signals import setting_changed
 from django.utils import timezone
 from django.utils._os import safe_join
@@ -49,7 +51,10 @@ class Storage:
             content = File(content, name)
 
         name = self.get_available_name(name, max_length=max_length)
-        return self._save(name, content)
+        name = self._save(name, content)
+        # Ensure that the name returned from the storage system is still valid.
+        validate_file_name(name, allow_relative_path=True)
+        return name
 
     # These methods are part of the public API, with default implementations.
 
@@ -65,7 +70,11 @@ class Storage:
         Return a filename that's free on the target storage system and
         available for new content to be written to.
         """
+        name = str(name).replace('\\', '/')
         dir_name, file_name = os.path.split(name)
+        if '..' in pathlib.PurePath(dir_name).parts:
+            raise SuspiciousFileOperation("Detected path traversal attempt in '%s'" % dir_name)
+        validate_file_name(file_name)
         file_root, file_ext = os.path.splitext(file_name)
         # If the filename already exists, add an underscore and a random 7
         # character alphanumeric string (before the file extension, if one
@@ -96,8 +105,11 @@ class Storage:
         Validate the filename by calling get_valid_name() and return a filename
         to be passed to the save() method.
         """
+        filename = str(filename).replace('\\', '/')
         # `filename` may include a path as returned by FileField.upload_to.
         dirname, filename = os.path.split(filename)
+        if '..' in pathlib.PurePath(dirname).parts:
+            raise SuspiciousFileOperation("Detected path traversal attempt in '%s'" % dirname)
         return os.path.normpath(os.path.join(dirname, self.get_valid_name(filename)))
 
     def path(self, name):
@@ -289,6 +301,8 @@ class FileSystemStorage(Storage):
         if self.file_permissions_mode is not None:
             os.chmod(full_path, self.file_permissions_mode)
 
+        # Ensure the saved path is always relative to the storage root.
+        name = os.path.relpath(full_path, self.location)
         # Store filenames with forward slashes, even on Windows.
         return name.replace('\\', '/')
 

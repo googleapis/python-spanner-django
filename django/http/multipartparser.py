@@ -7,6 +7,7 @@ file upload handlers for processing.
 import base64
 import binascii
 import cgi
+import html
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -18,7 +19,6 @@ from django.core.files.uploadhandler import (
 )
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import force_text
-from django.utils.text import unescape_entities
 
 __all__ = ('MultiPartParser', 'MultiPartParserError', 'InputStreamExhausted')
 
@@ -205,7 +205,7 @@ class MultiPartParser:
                     file_name = disposition.get('filename')
                     if file_name:
                         file_name = force_text(file_name, encoding, errors='replace')
-                        file_name = self.IE_sanitize(unescape_entities(file_name))
+                        file_name = self.sanitize_file_name(file_name)
                     if not file_name:
                         continue
 
@@ -240,6 +240,8 @@ class MultiPartParser:
                                 remaining = len(stripped_chunk) % 4
                                 while remaining != 0:
                                     over_chunk = field_stream.read(4 - remaining)
+                                    if not over_chunk:
+                                        break
                                     stripped_chunk += b"".join(over_chunk.split())
                                     remaining = len(stripped_chunk) % 4
 
@@ -293,9 +295,28 @@ class MultiPartParser:
                 self._files.appendlist(force_text(old_field_name, self._encoding, errors='replace'), file_obj)
                 break
 
-    def IE_sanitize(self, filename):
-        """Cleanup filename from Internet Explorer full paths."""
-        return filename and filename[filename.rfind("\\") + 1:].strip()
+    def sanitize_file_name(self, file_name):
+        """
+        Sanitize the filename of an upload.
+
+        Remove all possible path separators, even though that might remove more
+        than actually required by the target system. Filenames that could
+        potentially cause problems (current/parent dir) are also discarded.
+
+        It should be noted that this function could still return a "filepath"
+        like "C:some_file.txt" which is handled later on by the storage layer.
+        So while this function does sanitize filenames to some extent, the
+        resulting filename should still be considered as untrusted user input.
+        """
+        file_name = html.unescape(file_name)
+        file_name = file_name.rsplit('/')[-1]
+        file_name = file_name.rsplit('\\')[-1]
+
+        if file_name in {'', '.', '..'}:
+            return None
+        return file_name
+
+    IE_sanitize = sanitize_file_name
 
     def _close_files(self):
         # Free up all file handles.

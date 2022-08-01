@@ -499,7 +499,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # Check constraints are not supported by Spanner emulator.
             "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
             "constraints.tests.CheckConstraintTests.test_name",  # noqa
-            "admin_docs.test_views.AdminDocViewDefaulstEngineOnly.test_template_detail_path_traversal",
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
             "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa

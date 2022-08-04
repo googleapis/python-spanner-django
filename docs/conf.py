@@ -95,6 +95,7 @@ else:
 django_next_version = '3.0'
 
 extlinks = {
+    'bpo': ('https://bugs.python.org/issue%s', 'bpo-'),
     'commit': ('https://github.com/django/django/commit/%s', ''),
     'cve': ('https://nvd.nist.gov/vuln/detail/CVE-%s', 'CVE-'),
     # A file or directory. GitHub redirects from blob to tree if needed.
@@ -117,7 +118,7 @@ today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '_theme']
+exclude_patterns = ['_build', '_theme', 'requirements.txt']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -233,7 +234,6 @@ modindex_common_prefix = ["django."]
 # Appended to every page
 rst_epilog = """
 .. |django-users| replace:: :ref:`django-users <django-users-mailing-list>`
-.. |django-core-mentorship| replace:: :ref:`django-core-mentorship <django-core-mentorship-mailing-list>`
 .. |django-developers| replace:: :ref:`django-developers <django-developers-mailing-list>`
 .. |django-announce| replace:: :ref:`django-announce <django-announce-mailing-list>`
 .. |django-updates| replace:: :ref:`django-updates <django-updates-mailing-list>`

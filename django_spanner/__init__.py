@@ -45,26 +45,23 @@ register_expressions(USING_DJANGO_3)
 register_functions()
 register_lookups()
 
-
 def gen_rand_int64():
     # Credit to https://stackoverflow.com/a/3530326.
     return uuid4().int & 0x7FFFFFFFFFFFFFFF
 
 def _fix_id_generator(cls):
-    old_get_db_prep_value = cls.get_db_prep_value
+    old_contribute_to_class = cls.contribute_to_class
+    
+    def spanner_autofield_contribute_to_class(self, cls, name, **kwargs):
+        if self.default == fields.NOT_PROVIDED:
+            using = django.db.router.db_for_write(cls)
+            if django.db.connections[using].settings_dict["ENGINE"] == "django_spanner":
+                self.default = gen_rand_int64
 
-    def spanner_autofield_get_db_prep_value(self, value, connection, prepared=False):
-        value = old_get_db_prep_value(self, value, connection, prepared)
+        return old_contribute_to_class(self, cls, name, **kwargs)
 
-        if (
-            connection.settings_dict["ENGINE"] == "django_spanner"
-            and value is None
-        ):
-            value = gen_rand_int64()
+    cls.contribute_to_class = spanner_autofield_contribute_to_class
 
-        return value
-
-    cls.get_db_prep_value = spanner_autofield_get_db_prep_value
     cls.db_returning = False
     cls.validators = []
 

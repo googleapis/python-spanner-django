@@ -21,7 +21,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         "CREATE TABLE %(table)s (%(definition)s) PRIMARY KEY(%(primary_key)s)"
     )
     sql_delete_table = "DROP TABLE %(table)s"
-    sql_create_fk = None
+    sql_create_fk = sql_create_fk = (
+        "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) "
+        "REFERENCES %(to_table)s (%(to_column)s)"
+    )
     # Spanner doesn't support partial indexes. This string omits the
     # %(condition)s placeholder so that partial indexes are ignored.
     sql_create_index = (

@@ -23,7 +23,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
-    if os.environ.get("TEST_DBNAME"):
+    if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
         supports_foreign_keys = False
     else:
         supports_foreign_keys = True

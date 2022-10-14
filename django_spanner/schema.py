@@ -22,7 +22,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         "CREATE TABLE %(table)s (%(definition)s) PRIMARY KEY(%(primary_key)s)"
     )
     sql_delete_table = "DROP TABLE %(table)s"
-    if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS"):
+    if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
         sql_create_fk = None
     else:
         sql_create_fk = (

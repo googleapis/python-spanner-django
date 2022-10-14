@@ -23,7 +23,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     )
     sql_delete_table = "DROP TABLE %(table)s"
     if os.environ.get("TEST_DBNAME"):
-        sql_create_fk = ""
+        sql_create_fk = None
     else:
         sql_create_fk = (
             "ALTER TABLE %(table)s ADD CONSTRAINT %(name)s FOREIGN KEY (%(column)s) "

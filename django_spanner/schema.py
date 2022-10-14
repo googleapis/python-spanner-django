@@ -28,7 +28,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             "REFERENCES %(to_table)s (%(to_column)s)"
         )
     else:
-        sql_create_fk = None
+        sql_create_fk = ""
     # Spanner doesn't support partial indexes. This string omits the
     # %(condition)s placeholder so that partial indexes are ignored.
     sql_create_index = (

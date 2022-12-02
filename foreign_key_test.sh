@@ -4,6 +4,7 @@ mkdir django_test
 cd django_test
 
 django-admin startproject foreign_keys
+cd foreign_keys
 python manage.py startapp applic
 
 models_code = "

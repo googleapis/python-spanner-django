@@ -22,7 +22,26 @@ class City(models.Model):
 
 echo "$models_code" > applic/models.py
 
+test_code = "
+from django.test import TestCase
+from .models import City, Country
+
+
+class EnqueuedRoutesTest(TestCase):
+    def setUp(self):
+        self.country = Country.objects.create(name='Country123')
+        self.city = City.objects.create('name=City123', country=self.country)
+    
+    def test_foreign_key(self):
+        city = City.objects.get(pk=1)
+        assert city.country == Country.objects.get(pk=1)
+"
+
+echo "$test_code" > applic/tests.py
+
 sed -i 's/INSTALLED_APPS = [/INSTALLED_APPS = ["applic.apps.ApplicConfig",/g' foreign_keys/setting.py
 
 python manage.py makemigrations
 python manage.py migrate
+
+python manage.py test

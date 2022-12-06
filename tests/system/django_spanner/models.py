@@ -41,12 +41,3 @@ if USING_DJANGO_3:
 
     class Detail(models.Model):
         value = models.JSONField()
-
-
-class Country(models.Model):
-    name = models.CharField(max_length=32)
-
-
-class City(models.Model):
-    name = models.CharField(max_length=32)
-    country = models.ForeignKey(Country, on_delete=models.DO_NOTHING)

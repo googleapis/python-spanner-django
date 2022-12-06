@@ -34,7 +34,7 @@ class EnqueuedRoutesTest(TestCase):
         city = City.objects.get(pk=1)
         assert city.country == Country.objects.get(pk=1)" > applic/tests.py
 
-sed -i -- 's/INSTALLED_APPS = [/INSTALLED_APPS = ["applic.apps.ApplicConfig",/g' foreign_keys/setting.py
+sed -i -- 's/INSTALLED_APPS = \[/INSTALLED_APPS = \[\"applic\.apps\.ApplicConfig\"\,/g' foreign_keys/setting.py
 
 python manage.py makemigrations
 python manage.py migrate

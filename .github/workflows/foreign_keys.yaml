@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Run Django foreign key test
-        run: sh foreign_key_test.sh
+        run: nox -s system
         env:
           SPANNER_EMULATOR_HOST: localhost:9010
           GOOGLE_CLOUD_PROJECT: emulator-test-project

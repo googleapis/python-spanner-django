@@ -7,7 +7,7 @@ django-admin startproject foreign_keys
 cd foreign_keys
 python manage.py startapp applic
 
-models_code = "
+echo "
 from django.db import models
 
 
@@ -18,12 +18,10 @@ class Country(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=32)
     country = models.ForeignKey(Country, on_delete=models.DO_NOTHING)
-"
+" > applic/models.py
 
-echo "$models_code" > applic/models.py
 
-test_code = "
-from django.test import TestCase
+echo "from django.test import TestCase
 from .models import City, Country
 
 
@@ -34,10 +32,7 @@ class EnqueuedRoutesTest(TestCase):
     
     def test_foreign_key(self):
         city = City.objects.get(pk=1)
-        assert city.country == Country.objects.get(pk=1)
-"
-
-echo "$test_code" > applic/tests.py
+        assert city.country == Country.objects.get(pk=1)" > applic/tests.py
 
 sed -i 's/INSTALLED_APPS = [/INSTALLED_APPS = ["applic.apps.ApplicConfig",/g' foreign_keys/setting.py
 

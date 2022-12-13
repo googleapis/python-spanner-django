@@ -72,4 +72,6 @@ for DJANGO_TEST_APP in $DJANGO_TEST_APPS
 do
    python3 runtests.py $DJANGO_TEST_APP --verbosity=3 --noinput --settings $SETTINGS_FILE || EXIT_STATUS=$?
 done
+
+nox -s system
 exit $EXIT_STATUS

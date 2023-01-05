@@ -12,6 +12,7 @@ from __future__ import absolute_import
 import os
 import pathlib
 import shutil
+import sys
 
 import nox
 
@@ -38,6 +39,9 @@ def lint(session):
     Returns a failure if the linters find linting errors or sufficiently
     serious code quality issues.
     """
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
+
     session.install("flake8", BLACK_VERSION)
     session.run("black", "--check", *BLACK_PATHS)
     session.run("flake8", "django_spanner", "tests")
@@ -53,6 +57,9 @@ def blacken(session):
     That run uses an image that doesn't have 3.6 installed. Before updating this
     check the state of the `gcp_ubuntu_config` we use for that Kokoro run.
     """
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
+
     session.install(BLACK_VERSION)
     session.run("black", *BLACK_PATHS)
 
@@ -60,6 +67,9 @@ def blacken(session):
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
+
     session.install("docutils", "pygments")
     session.run(
         "python", "setup.py", "check", "--restructuredtext", "--strict"
@@ -101,6 +111,9 @@ def default(session, django_version="2.2"):
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
+    if not sys.version.startswith(UNIT_TEST_PYTHON_VERSIONS):
+        session.skip()
+
     print("Unit tests with django 2.2")
     default(session)
     print("Unit tests with django 3.2")
@@ -157,6 +170,9 @@ def system_test(session, django_version="2.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
+    if not sys.version.startswith(SYSTEM_TEST_PYTHON_VERSIONS):
+        session.skip()
+
     print("System tests with django 2.2")
     system_test(session)
     print("System tests with django 3.2")
@@ -170,6 +186,9 @@ def cover(session):
     This outputs the coverage report aggregating coverage from the unit
     test runs (not system test runs), and then erases coverage data.
     """
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
+
     session.install("coverage", "pytest-cov")
     session.run("coverage", "report", "--show-missing", "--fail-under=80")
 
@@ -179,6 +198,8 @@ def cover(session):
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def docs(session):
     """Build the docs for this library."""
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
 
     session.install("-e", ".[tracing]")
     session.install(
@@ -204,6 +225,8 @@ def docs(session):
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def docfx(session):
     """Build the docfx yaml files for this library."""
+    if not sys.version.startswith(DEFAULT_PYTHON_VERSION):
+        session.skip()
 
     session.install("-e", ".[tracing]")
     session.install(

@@ -258,7 +258,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "ordering.tests.OrderingTests.test_random_ordering",
         # casting DateField to DateTimeField adds an unexpected hour:
         # https://github.com/googleapis/python-spanner-django/issues/260
-        "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",``
+        "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",
         # "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
         # Tests that by-pass using django_spanner and generate
         # invalid DDL: https://github.com/googleapis/python-spanner-django/issues/298

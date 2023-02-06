@@ -34,7 +34,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_select_for_update_with_limit = False
     supports_sequence_reset = False
     supports_timezones = False
-    supports_transactions = True
+    supports_transactions = False
     if USE_EMULATOR:
         # Emulator does not support json.
         supports_json_field = False
@@ -70,7 +70,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
         # Spanner does not support empty list of DML statement.
         "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
-        # "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
+        # No Django transaction management in Spanner.
+        "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         # django_spanner monkey patches AutoField to have a default value.
         "basic.tests.ModelTest.test_hash",
         "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
@@ -259,7 +260,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # casting DateField to DateTimeField adds an unexpected hour:
         # https://github.com/googleapis/python-spanner-django/issues/260
         "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",
-        # "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
+        # Tests that fail during tear down on databases that don't support
+        # transactions: https://github.com/googleapis/python-spanner-django/issues/271
+        "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
         # Tests that by-pass using django_spanner and generate
         # invalid DDL: https://github.com/googleapis/python-spanner-django/issues/298
         "cache.tests.CreateCacheTableForDBCacheTests",
@@ -269,19 +272,20 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "delete.tests.DeletionTests.test_model_delete_returns_num_rows",
         "delete.tests.DeletionTests.test_deletion_order",
         "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_on_reconnect",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_no_hooks_run_from_failed_transaction",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_no_savepoints_atomic_merged_with_outer",
+        # Tests that require transactions.
+        "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_on_reconnect",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_no_hooks_run_from_failed_transaction",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_no_savepoints_atomic_merged_with_outer",
         # Tests that require savepoints.
         "get_or_create.tests.UpdateOrCreateTests.test_integrity",
         "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
         "get_or_create.tests.UpdateOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",
-        # "test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
-        # "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
+        "test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
+        "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
         # No sequence for AutoField in Spanner.
         "introspection.tests.IntrospectionTests.test_sequence_list",
         # pyformat parameters not supported on INSERT:
@@ -337,7 +341,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "schema.tests.SchemaTests.test_alter_int_pk_to_int_unique",
         # Spanner limitation: migrations aren't atomic since Spanner doesn't
         # support transactions.
-        # "migrations.test_executor.ExecutorTests.test_atomic_operation_in_non_atomic_migration",
+        "migrations.test_executor.ExecutorTests.test_atomic_operation_in_non_atomic_migration",
         # changing a not null constraint isn't allowed if it affects an index:
         # https://github.com/googleapis/python-spanner-django/issues/378
         "migrations.test_operations.OperationTests.test_alter_field_with_index",
@@ -349,7 +353,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "multiple_database.tests.AuthTestCase",
         # This test isn't isolated on databases like Spanner that don't
         # support transactions: https://code.djangoproject.com/ticket/31413
-        # "migrations.test_loader.LoaderTests.test_loading_squashed",
+        "migrations.test_loader.LoaderTests.test_loading_squashed",
         # Probably due to django-spanner setting a default on AutoField:
         # https://github.com/googleapis/python-spanner-django/issues/422
         "model_inheritance_regress.tests.ModelInheritanceTest.test_issue_6755",
@@ -444,8 +448,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # appears in the GROUP BY clause.
             "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
             # No Django transaction management in Spanner.
-            # "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
-            # "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
             # Tests that expect it to be empty untill saved in db.
             "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
             "model_fields.test_jsonfield.TestSerialization.test_dumping",
@@ -465,10 +469,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # Spanner doesn't support random ordering.
             "aggregation.tests.AggregateTestCase.test_aggregation_random_ordering",
             # Tests that require transactions.
-            # "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
-            # "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
-            # "test_utils.tests.CaptureOnCommitCallbacksTests.test_pre_callback",
-            # "test_utils.tests.CaptureOnCommitCallbacksTests.test_using",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_pre_callback",
+            "test_utils.tests.CaptureOnCommitCallbacksTests.test_using",
             # Field: GenericIPAddressField is mapped to String in Spanner
             "inspectdb.tests.InspectDBTestCase.test_field_types",
             # BigIntegerField is mapped to IntegerField in Spanner
@@ -493,7 +497,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # Some code isn't yet supported by the Spanner emulator.
         skip_tests += (
             # Emulator doesn't support views.
-            # "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
+            "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
             "introspection.tests.IntrospectionTests.test_table_names_with_views",
             # Check constraints are not supported by Spanner emulator.
             "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
@@ -1199,7 +1203,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.text.test_upper.UpperTests.test_basic",  # noqa
             "db_functions.text.test_upper.UpperTests.test_transform",  # noqa
             "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related",  # noqa
-            # "delete_regress.tests.DeleteCascadeTransactionTests.test_inheritance",  # noqa
+            "delete_regress.tests.DeleteCascadeTransactionTests.test_inheritance",  # noqa
             "delete_regress.tests.DeleteLockingTest.test_concurrent_delete",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_chained_values_with_expression",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_values_expression",  # noqa
@@ -1258,7 +1262,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "expressions.tests.ValueTests.test_update_UUIDField_using_Value",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_loaddata_error_message",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_ambiguous_compressed_fixture",  # noqa
-            # "fixtures.tests.FixtureTransactionTests.test_format_discovery",  # noqa
+            "fixtures.tests.FixtureTransactionTests.test_format_discovery",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",  # noqa
             "flatpages_tests.test_csrf.FlatpageCSRFTests.test_view_authenticated_flatpage",  # noqa
@@ -1948,7 +1952,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "test_client_regress.tests.SessionTests.test_session",  # noqa
             "test_client_regress.tests.SessionTests.test_session_initiated",  # noqa
             "timezones.tests.NewDatabaseTests.test_null_datetime",
-            # "transactions.tests.NonAutocommitTests.test_orm_query_after_error_and_rollback",  # noqa
+            "transactions.tests.NonAutocommitTests.test_orm_query_after_error_and_rollback",  # noqa
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_empty_update_fields",  # noqa
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_num_queries_inheritance",  # noqa
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_select_related_only_interaction",  # noqa

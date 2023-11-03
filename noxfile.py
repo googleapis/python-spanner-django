@@ -207,10 +207,9 @@ def docfx(session):
 
     session.install("-e", ".[tracing]")
     session.install(
-        "sphinx==4.0.1",
+        "gcp-sphinx-docfx-yaml",
         "alabaster",
         "recommonmark",
-        "gcp-sphinx-docfx-yaml",
         "django==2.2",
     )
 

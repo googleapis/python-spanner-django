@@ -12,7 +12,6 @@ import django
 # do that.
 from uuid import uuid4
 
-import pkg_resources
 from google.cloud.spanner_v1 import JsonObject
 from django.db.models.fields import (
     NOT_PROVIDED,
@@ -24,6 +23,7 @@ from .expressions import register_expressions
 from .functions import register_functions
 from .lookups import register_lookups
 from .utils import check_django_compatability
+from .version import __version__
 
 # Monkey-patch google.DatetimeWithNanoseconds's __eq__ compare against
 # datetime.datetime.
@@ -40,8 +40,6 @@ if USING_DJANGO_3:
         BigAutoField,
     )
     from django.db.models import JSONField
-
-__version__ = pkg_resources.get_distribution("django-google-spanner").version
 
 USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 

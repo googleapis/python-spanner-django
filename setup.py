@@ -33,9 +33,7 @@ package_root = os.path.abspath(BASE_DIR)
 
 version = None
 
-with open(
-    os.path.join(package_root, "django_spanner/version.py")
-) as fp:
+with open(os.path.join(package_root, "django_spanner/version.py")) as fp:
     version_candidates = re.findall(r"(?<=\")\d+.\d+.\d+(?=\")", fp.read())
     assert len(version_candidates) == 1
     version = version_candidates[0]

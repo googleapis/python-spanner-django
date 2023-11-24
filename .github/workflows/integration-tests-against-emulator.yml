@@ -3,7 +3,7 @@ on:
     branches:
       - main
   pull_request:
-name: Run Django Spanner integration tests against emulator 3.9
+name: Run Django Spanner integration tests against emulator
 jobs:
   system-tests:
     runs-on: ubuntu-latest
@@ -15,19 +15,23 @@ jobs:
           - 9010:9010
           - 9020:9020
 
+    strategy:
+      matrix:
+        # Exclude python 3.6 which is not available in ubuntu-latest
+        # `The version '3.6' with architecture 'x64' was not found for Ubuntu 22.04.`
+        python: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Python 3.9
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python }}
       - name: Install nox
         run: python -m pip install nox
-      with:
-          python-version: 3.9
       - name: Run nox
-        run: nox -s unit-3.9
+        run: nox -s unit-${{ matrix.python }}
         env:
           SPANNER_EMULATOR_HOST: localhost:9010
           GOOGLE_CLOUD_PROJECT: emulator-test-project

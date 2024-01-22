@@ -194,7 +194,7 @@ def docs(session):
         "sphinx==4.5.0",
         "alabaster",
         "recommonmark",
-        "django==2.2"
+        "django==2.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

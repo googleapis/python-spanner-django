@@ -31,7 +31,7 @@ from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
 
 USING_DJANGO_3 = False
-if django.VERSION[:2] == (3, 2):
+if django.VERSION[:2] == (3, 2) or django.VERSION[:2] == (4, 2):
     USING_DJANGO_3 = True
 
 if USING_DJANGO_3:
@@ -46,7 +46,7 @@ __version__ = pkg_resources.get_distribution("django-google-spanner").version
 USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 
 # Only active LTS django versions (2.2.*, 3.2.*) are supported by this library right now.
-SUPPORTED_DJANGO_VERSIONS = [(2, 2), (3, 2)]
+SUPPORTED_DJANGO_VERSIONS = [(2, 2), (3, 2), (4, 2)]
 
 check_django_compatability(SUPPORTED_DJANGO_VERSIONS)
 register_expressions(USING_DJANGO_3)

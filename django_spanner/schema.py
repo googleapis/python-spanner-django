@@ -118,13 +118,13 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             # allow them inline on a column.
             if field.unique and not field.primary_key:
                 self.deferred_sql.append(
-                    self._create_unique_sql(model, [field.column])
+                    self._create_unique_sql(model, [field])
                 )
 
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:
-            columns = [model._meta.get_field(field).column for field in fields]
+            columns = [model._meta.get_field(field) for field in fields]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
         constraints = [
             constraint.constraint_sql(model, self)

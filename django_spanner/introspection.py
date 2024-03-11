@@ -316,7 +316,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME="{table}"
             WHERE
-                idx.TABLE_NAME="{table}" AND TABLE_SCHEMA="{schema_name}"
+                idx.TABLE_NAME="{table}" AND idx.TABLE_SCHEMA="{schema_name}"
             ORDER BY
                 idx_col.ORDINAL_POSITION
             """.format(
@@ -378,7 +378,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_NAME="{table}" AND TABLE_SCHEMA="{schema_name}"
+                tc.TABLE_NAME="{table}" AND tc.TABLE_SCHEMA="{schema_name}"
             """.format(
                 table=self.connection.ops.quote_name(table_name),
                 schema_name=schema_name,

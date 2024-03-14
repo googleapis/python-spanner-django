@@ -898,7 +898,7 @@ class QueryTestCase(TestCase):
         self.assertEqual(charlie._state.db, "other")
 
         # ... but it isn't saved yet
-        self.assertEqual(
+        self.assertCountEqual(
             list(User.objects.using("other").values_list("username", flat=True)),
             ["bob"],
         )

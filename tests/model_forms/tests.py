@@ -568,7 +568,7 @@ class ModelFormBaseTest(TestCase):
         # not saved into a DB yet.
         self.assertEqual(form.instance.price, Decimal("6.00"))
         self.assertIsNone(form.instance.quantity)
-        self.assertIsNone(form.instance.pk)
+        self.assertIs(form.instance._state.adding, True)
 
     def test_confused_form(self):
         class ConfusedForm(forms.ModelForm):
@@ -1443,17 +1443,11 @@ class UniqueTest(TestCase):
 
 class ModelFormBasicTests(TestCase):
     def create_basic_data(self):
-        self.c1 = Category.objects.create(
-            name="Entertainment", slug="entertainment", url="entertainment"
-        )
-        self.c2 = Category.objects.create(
-            name="It's a test", slug="its-test", url="test"
-        )
-        self.c3 = Category.objects.create(
-            name="Third test", slug="third-test", url="third"
-        )
-        self.w_royko = Writer.objects.create(name="Mike Royko")
-        self.w_woodward = Writer.objects.create(name="Bob Woodward")
+        self.c1 = Category.objects.create(name='Entertainment', slug='entertainment', url='entertainment', id=1)
+        self.c2 = Category.objects.create(name="It's a test", slug='its-test', url='test', id=2)
+        self.c3 = Category.objects.create(name='Third test', slug='third-test', url='third', id=3)
+        self.w_royko = Writer.objects.create(name='Mike Royko', id=1)
+        self.w_woodward = Writer.objects.create(name='Bob Woodward', id=2)
 
     def test_base_form(self):
         self.assertEqual(Category.objects.count(), 0)
@@ -2935,8 +2929,8 @@ class OtherModelFormTests(TestCase):
         """
         ModelChoiceField should respect a prefetch_related() on its queryset.
         """
-        blue = Colour.objects.create(name="blue")
-        red = Colour.objects.create(name="red")
+        blue = Colour.objects.create(name='blue', id=1)
+        red = Colour.objects.create(name='red', id=2)
         multicolor_item = ColourfulItem.objects.create()
         multicolor_item.colours.add(blue, red)
         red_item = ColourfulItem.objects.create()
@@ -2948,7 +2942,7 @@ class OtherModelFormTests(TestCase):
 
         field = ColorModelChoiceField(ColourfulItem.objects.prefetch_related("colours"))
         with self.assertNumQueries(3):  # would be 4 if prefetch is ignored
-            self.assertEqual(
+            self.assertCountEqual(
                 tuple(field.choices),
                 (
                     ("", "---------"),

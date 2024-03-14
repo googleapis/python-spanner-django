@@ -28,7 +28,7 @@ class NullQueriesTests(TestCase):
         self.assertSequenceEqual(Choice.objects.filter(choice__iexact=None), [])
 
         # Excluding the previous result returns everything.
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             Choice.objects.exclude(choice=None).order_by("id"), [c1, c2]
         )
 

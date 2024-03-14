@@ -327,6 +327,10 @@ def setup_run_tests(verbosity, start_at, start_after, test_labels=None):
     TransactionTestCase.available_apps = property(no_available_apps)
     TestCase.available_apps = None
 
+    if settings.DATABASES['default']['ENGINE'] == 'django_spanner':
+        # Monkey-patch AutoField before configuring INSTALLED_APPS
+        import django_spanner  # noqa
+
     # Set an environment variable that other code may consult to see if
     # Django's own test suite is running.
     os.environ["RUNNING_DJANGOS_TEST_SUITE"] = "true"

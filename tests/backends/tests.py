@@ -306,14 +306,10 @@ class BackendTestCase(TransactionTestCase):
         tbl = connection.introspection.identifier_converter(opts.db_table)
         f1 = connection.ops.quote_name(opts.get_field("root").column)
         f2 = connection.ops.quote_name(opts.get_field("square").column)
-        if paramstyle == "format":
-            query = "INSERT INTO %s (%s, %s) VALUES (%%s, %%s)" % (tbl, f1, f2)
-        elif paramstyle == "pyformat":
-            query = "INSERT INTO %s (%s, %s) VALUES (%%(root)s, %%(square)s)" % (
-                tbl,
-                f1,
-                f2,
-            )
+        if paramstyle == 'format':
+            query = 'INSERT INTO %s (%s, %s, %s) VALUES (%%s, %%s, %%s)' % (tbl, f0, f1, f2)
+        elif paramstyle == 'pyformat':
+            query = 'INSERT INTO %s (%s, %s, %s) VALUES (%%(id)s, %%(root)s, %%(square)s)' % (tbl, f0, f1, f2)
         else:
             raise ValueError("unsupported paramstyle in test")
         with connection.cursor() as cursor:
@@ -324,7 +320,7 @@ class BackendTestCase(TransactionTestCase):
 
     def test_cursor_executemany(self):
         # Test cursor.executemany #4896
-        args = [(i, i**2) for i in range(-5, 6)]
+        args = [(i, i, i ** 2) for i in range(-5, 6)]
         self.create_squares_with_executemany(args)
         self.assertEqual(Square.objects.count(), 11)
         for i in range(-5, 6):
@@ -339,11 +335,11 @@ class BackendTestCase(TransactionTestCase):
 
     def test_cursor_executemany_with_iterator(self):
         # Test executemany accepts iterators #10320
-        args = ((i, i**2) for i in range(-3, 2))
+        args = ((i, i, i ** 2) for i in range(-3, 2))
         self.create_squares_with_executemany(args)
         self.assertEqual(Square.objects.count(), 5)
 
-        args = ((i, i**2) for i in range(3, 7))
+        args = ((i, i, i ** 2) for i in range(3, 7))
         with override_settings(DEBUG=True):
             # same test for DebugCursorWrapper
             self.create_squares_with_executemany(args)
@@ -352,14 +348,14 @@ class BackendTestCase(TransactionTestCase):
     @skipUnlessDBFeature("supports_paramstyle_pyformat")
     def test_cursor_execute_with_pyformat(self):
         # Support pyformat style passing of parameters #10070
-        args = {"root": 3, "square": 9}
+        args = {'id': 1, 'root': 3, 'square': 9}
         self.create_squares(args, "pyformat", multiple=False)
         self.assertEqual(Square.objects.count(), 1)
 
     @skipUnlessDBFeature("supports_paramstyle_pyformat")
     def test_cursor_executemany_with_pyformat(self):
         # Support pyformat style passing of parameters #10070
-        args = [{"root": i, "square": i**2} for i in range(-5, 6)]
+        args = [{'id': i+10, 'root': i, 'square': i ** 2} for i in range(-5, 6)]
         self.create_squares(args, "pyformat", multiple=True)
         self.assertEqual(Square.objects.count(), 11)
         for i in range(-5, 6):
@@ -368,11 +364,11 @@ class BackendTestCase(TransactionTestCase):
 
     @skipUnlessDBFeature("supports_paramstyle_pyformat")
     def test_cursor_executemany_with_pyformat_iterator(self):
-        args = ({"root": i, "square": i**2} for i in range(-3, 2))
+        args = ({'id': i + 5, 'root': i, 'square': i ** 2} for i in range(-3, 2))
         self.create_squares(args, "pyformat", multiple=True)
         self.assertEqual(Square.objects.count(), 5)
 
-        args = ({"root": i, "square": i**2} for i in range(3, 7))
+        args = ({'id': i, 'root': i, 'square': i ** 2} for i in range(3, 7))
         with override_settings(DEBUG=True):
             # same test for DebugCursorWrapper
             self.create_squares(args, "pyformat", multiple=True)
@@ -440,7 +436,7 @@ class BackendTestCase(TransactionTestCase):
 
     def test_duplicate_table_error(self):
         """Creating an existing table returns a DatabaseError"""
-        query = "CREATE TABLE %s (id INTEGER);" % Article._meta.db_table
+        query = 'CREATE TABLE %s (id INT64) PRIMARY KEY(id)' % Article._meta.db_table
         with connection.cursor() as cursor:
             with self.assertRaises(DatabaseError):
                 cursor.execute(query)

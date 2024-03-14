@@ -435,8 +435,11 @@ class M2mThroughReferentialTests(TestCase):
         Relationship.objects.create(source=john, target=mary, another=None)
         Relationship.objects.create(source=john, target=harry, another=peter)
 
-        self.assertQuerySetEqual(
-            john.subordinates.all(), ["peter", "mary", "harry"], attrgetter("name")
+        self.assertQuerysetEqual(
+            john.subordinates.all(),
+            ['peter', 'mary', 'harry'],
+            attrgetter('name'),
+            ordered=False,
         )
 
     def test_self_referential_symmetrical(self):

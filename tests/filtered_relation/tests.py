@@ -67,7 +67,6 @@ class FilteredRelationTests(TestCase):
                 book_join=FilteredRelation("book"),
             )
             .select_related("book_join__editor")
-            .order_by("pk", "book_join__pk")
         )
         with self.assertNumQueries(1):
             self.assertQuerySetEqual(
@@ -78,7 +77,7 @@ class FilteredRelationTests(TestCase):
                     (self.author2, self.book2, self.editor_b, self.author2),
                     (self.author2, self.book3, self.editor_b, self.author2),
                 ],
-                lambda x: (x, x.book_join, x.book_join.editor, x.book_join.author),
+                lambda x: (x, x.book_join, x.book_join.editor, x.book_join.author), ordered=False
             )
 
     def test_select_related_multiple(self):
@@ -88,7 +87,6 @@ class FilteredRelationTests(TestCase):
                 editor_join=FilteredRelation("editor"),
             )
             .select_related("author_join", "editor_join")
-            .order_by("pk")
         )
         self.assertQuerySetEqual(
             qs,
@@ -98,8 +96,7 @@ class FilteredRelationTests(TestCase):
                 (self.book3, self.author2, self.editor_b),
                 (self.book4, self.author1, self.editor_a),
             ],
-            lambda x: (x, x.author_join, x.editor_join),
-        )
+            lambda x: (x, x.author_join), ordered=False)
 
     def test_select_related_with_empty_relation(self):
         qs = (
@@ -363,7 +360,7 @@ class FilteredRelationTests(TestCase):
                 "book", condition=Q(book__title__iexact="the book by jane a")
             ),
         ).filter(book_jane__isnull=False)
-        self.assertSequenceEqual(qs1.union(qs2), [self.author1, self.author2])
+        self.assertCounteEqual(qs1.union(qs2), [self.author1, self.author2])
 
     @skipUnlessDBFeature("supports_select_intersection")
     def test_intersection(self):

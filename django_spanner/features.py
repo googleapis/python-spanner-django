@@ -158,7 +158,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "aggregation.tests.AggregateTestCase.test_filtering",
         "aggregation_regress.tests.AggregationTests.test_more_more",
         "aggregation_regress.tests.AggregationTests.test_more_more_more",
-        "aggregation_regress.tests.AggregationTests.test_ticket_11293",
         "defer_regress.tests.DeferRegressionTest.test_ticket_12163",
         "defer_regress.tests.DeferRegressionTest.test_ticket_23270",
         "distinct_on_fields.tests.DistinctOnTests.test_basic_distinct_on",
@@ -1579,7 +1578,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.Queries1Tests.test_ticket6981",  # noqa
             "queries.tests.Queries1Tests.test_ticket7076",  # noqa
             "queries.tests.Queries1Tests.test_ticket7096",  # noqa
-            "queries.tests.Queries1Tests.test_ticket7098",  # noqa
             "queries.tests.Queries1Tests.test_ticket7155",  # noqa
             "queries.tests.Queries1Tests.test_ticket7181",  # noqa
             "queries.tests.Queries1Tests.test_ticket7235",  # noqa

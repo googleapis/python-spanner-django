@@ -346,7 +346,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             value = UUID(value)
         return value
 
-    def date_extract_sql(self, lookup_type, field_name):
+    def date_extract_sql(self, lookup_type, field_name, params):
         """Extract date from the lookup.
 
         :type lookup_type: str
@@ -359,9 +359,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         :returns: A SQL statement for extracting.
         """
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
-        return "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
+        return "EXTRACT(%s FROM %s)" % (lookup_type, field_name), params
 
-    def datetime_extract_sql(self, lookup_type, field_name, tzname):
+    def datetime_extract_sql(self, lookup_type, field_name, tzname, params):
         """Extract datetime from the lookup.
 
         :type lookup_type: str
@@ -383,9 +383,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             lookup_type,
             field_name,
             tzname,
-        )
+        ), params
 
-    def time_extract_sql(self, lookup_type, field_name):
+    def time_extract_sql(self, lookup_type, field_name, params):
         """Extract time from the lookup.
 
         :type lookup_type: str
@@ -401,9 +401,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         return 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (
             lookup_type,
             field_name,
-        )
+        ), params
 
-    def date_trunc_sql(self, lookup_type, field_name, tzname=None):
+    def date_trunc_sql(self, lookup_type, field_name, params, tzname=None):
         """Truncate date in the lookup.
 
         :type lookup_type: str
@@ -431,9 +431,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == "week":
             # ...then add a day to get from Sunday to Monday.
             sql = "DATE_ADD(CAST(" + sql + " AS DATE), INTERVAL 1 DAY)"
-        return sql
+        return sql, params
 
-    def datetime_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
+    def datetime_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
         """Truncate datetime in the lookup.
 
         :type lookup_type: str
@@ -463,9 +463,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if lookup_type == "week":
             # ...then add a day to get from Sunday to Monday.
             sql = "TIMESTAMP_ADD(" + sql + ", INTERVAL 1 DAY)"
-        return sql
+        return sql, params
 
-    def time_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
+    def time_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
         """Truncate time in the lookup.
 
         :type lookup_type: str
@@ -486,9 +486,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             field_name,
             lookup_type,
             tzname,
-        )
+        ), params
 
-    def datetime_cast_date_sql(self, field_name, tzname):
+    def datetime_cast_date_sql(self, field_name, params, tzname):
         """Cast date in the lookup.
 
         :type field_name: str
@@ -503,9 +503,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         """
         # https://cloud.google.com/spanner/docs/functions-and-operators#date
         tzname = tzname if settings.USE_TZ and tzname else "UTC"
-        return 'DATE(%s, "%s")' % (field_name, tzname)
+        return 'DATE(%s, "%s")' % (field_name, tzname), params
 
-    def datetime_cast_time_sql(self, field_name, tzname):
+    def datetime_cast_time_sql(self, field_name, params, tzname):
         """Cast time in the lookup.
 
         :type field_name: str
@@ -524,7 +524,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return (
             "TIMESTAMP(FORMAT_TIMESTAMP("
             "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))" % (field_name, tzname)
-        )
+        ), params
 
     def date_interval_sql(self, timedelta):
         """Get a date interval in microseconds.

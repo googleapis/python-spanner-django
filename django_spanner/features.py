@@ -2081,7 +2081,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "queries.tests.Queries1Tests.test_excluded_intermediary_m2m_table_joined",  # noqa
                 "queries.tests.Queries1Tests.test_field_with_filterable",  # noqa
                 "queries.tests.Queries1Tests.test_negate_field",  # noqa
-                "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning",  # noqa
                 "queries.tests.Queries1Tests.test_order_by_rawsql",  # noqa
                 "queries.tests.Queries4Tests.test_combine_or_filter_reuse",  # noqa
                 "queries.tests.Queries4Tests.test_filter_reverse_non_integer_pk",  # noqa

@@ -166,7 +166,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.UNIQUE_CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_SCHEMA='@schema_name' AND tc.TABLE_NAME='@view_name'
+                tc.TABLE_SCHEMA=@schema_name AND tc.TABLE_NAME=@view_name
             """, params=[
                 {"schema_name": schema_name},
                 {"view_name": self.connection.ops.quote_name(table_name)}

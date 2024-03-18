@@ -29,26 +29,14 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         TypeCode.NUMERIC: "DecimalField",
         TypeCode.JSON: "JSONField",
     }
-    if USE_EMULATOR:
-        # Emulator does not support table_type yet.
-        # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator/issues/43
-        LIST_TABLE_SQL = """
-            SELECT
-                t.table_name, t.table_name
-            FROM
-                information_schema.tables AS t
-            WHERE
-                t.table_catalog = '' and t.table_schema = '{schema_name}'
-        """
-    else:
-        LIST_TABLE_SQL = """
-            SELECT
-                t.table_name, t.table_type
-            FROM
-                information_schema.tables AS t
-            WHERE
-                t.table_catalog = '' and t.table_schema = '{schema_name}'
-        """
+    LIST_TABLE_SQL = """
+        SELECT
+            t.table_name, t.table_type
+        FROM
+            information_schema.tables AS t
+        WHERE
+            t.table_catalog = '' and t.table_schema = '@schema_name'
+    """
 
     def get_field_type(self, data_type, description):
         """A hook for a Spanner database to use the cursor description to
@@ -78,7 +66,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         schema_name = self._get_schema_name(cursor)
         results = cursor.run_sql_in_snapshot(
-            self.LIST_TABLE_SQL.format(schema_name=schema_name)
+            self.LIST_TABLE_SQL, params=({"schema_name": schema_name})
         )
         tables = []
         # The second TableInfo field is 't' for table or 'v' for view.

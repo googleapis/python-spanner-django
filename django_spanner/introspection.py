@@ -35,7 +35,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         FROM
             information_schema.tables AS t
         WHERE
-            t.table_catalog = '' and t.table_schema = '@schema_name'
+            t.table_catalog = '' and t.table_schema = @schema_name
     """
 
     def get_field_type(self, data_type, description):
@@ -66,7 +66,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         """
         schema_name = self._get_schema_name(cursor)
         results = cursor.run_sql_in_snapshot(
-            self.LIST_TABLE_SQL, params=({"schema_name": schema_name})
+            self.LIST_TABLE_SQL, params={"schema_name": schema_name}
         )
         tables = []
         # The second TableInfo field is 't' for table or 'v' for view.
@@ -166,11 +166,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.UNIQUE_CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_SCHEMA='{schema_name}' AND tc.TABLE_NAME='{view_name}'
-            """.format(
-                schema_name=schema_name,
-                view_name=self.connection.ops.quote_name(table_name),
-            )
+                tc.TABLE_SCHEMA='@schema_name' AND tc.TABLE_NAME='@view_name'
+            """, params=[
+                {"schema_name": schema_name},
+                {"view_name": self.connection.ops.quote_name(table_name)}
+            ]
         )
         return {
             column: (referred_column, referred_table)
@@ -201,11 +201,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             AS
                 ccu ON tc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_NAME='{table_name}' AND tc.CONSTRAINT_TYPE='PRIMARY KEY' AND tc.TABLE_SCHEMA='{schema_name}'
-            """.format(
-                schema_name=schema_name,
-                table_name=self.connection.ops.quote_name(table_name),
-            )
+                tc.TABLE_NAME=@table_name AND tc.CONSTRAINT_TYPE='PRIMARY KEY' AND tc.TABLE_SCHEMA=@schema_name
+            """, params=[
+                {"schema_name": schema_name},
+                {"table_name": self.connection.ops.quote_name(table_name)}
+            ]
         )
         return results[0][0] if results else None
 
@@ -232,9 +232,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 CONSTRAINT_NAME, COLUMN_NAME
             FROM
                 INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE
-               WHERE TABLE_NAME="{table}" AND TABLE_SCHEMA="{schema_name}"'''.format(
-                table=quoted_table_name, schema_name=schema_name
-            )
+               WHERE TABLE_NAME=@table AND TABLE_SCHEMA=@schema_name''',
+            params=[
+                {"table": quoted_table_name},
+                {"schema_name": schema_name}
+            ]
         )
         for constraint, column_name in constraint_columns:
             if constraint not in constraints:
@@ -259,9 +261,10 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             FROM
                 INFORMATION_SCHEMA.TABLE_CONSTRAINTS
             WHERE
-                TABLE_NAME="{table}" AND TABLE_SCHEMA="{schema_name}"'''.format(
-                table=quoted_table_name, schema_name=schema_name
-            )
+                TABLE_NAME=@table AND TABLE_SCHEMA=@schema_name''', params=[
+                {"table": quoted_table_name},
+                {"schema_name": schema_name}
+            ]
         )
         for constraint, constraint_type in constraint_types:
             already_added = constraint in constraints
@@ -302,14 +305,15 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             RIGHT JOIN
                 INFORMATION_SCHEMA.INDEX_COLUMNS AS idx_col
             ON
-                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME="{table}"
+                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME=@table
             WHERE
-                idx.TABLE_NAME="{table}" AND idx.TABLE_SCHEMA="{schema_name}"
+                idx.TABLE_NAME=@table AND idx.TABLE_SCHEMA=@schema_name
             ORDER BY
                 idx_col.ORDINAL_POSITION
-            """.format(
-                table=quoted_table_name, schema_name=schema_name
-            )
+            """, params=[
+                {"table": quoted_table_name},
+                {"schema_name": schema_name}
+            ]
         )
         for (
             index_name,
@@ -366,11 +370,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_NAME="{table}" AND tc.TABLE_SCHEMA="{schema_name}"
-            """.format(
-                table=self.connection.ops.quote_name(table_name),
-                schema_name=schema_name,
-            )
+                tc.TABLE_NAME=@table AND tc.TABLE_SCHEMA=@schema_name
+            """, params=[
+                {"table": self.connection.ops.quote_name(table_name)},
+                {"schema_name": schema_name}
+            ]
         )
         key_columns.extend(cursor.fetchall())
         return key_columns

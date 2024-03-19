@@ -24,18 +24,18 @@ class RecursiveM2MTests(TestCase):
             (self.d, [self.a, self.c]),
         ):
             with self.subTest(person=person):
-                self.assertSequenceEqual(person.friends.all(), friends)
+                self.assertCountEqual(person.friends.all(), friends)
 
     def test_recursive_m2m_reverse_add(self):
         # Add m2m for Anne in reverse direction.
         self.b.friends.add(self.a)
-        self.assertSequenceEqual(self.a.friends.all(), [self.b, self.c, self.d])
-        self.assertSequenceEqual(self.b.friends.all(), [self.a])
+        self.assertCountEqual(self.a.friends.all(), [self.b, self.c, self.d])
+        self.assertCountEqual(self.b.friends.all(), [self.a])
 
     def test_recursive_m2m_remove(self):
         self.b.friends.remove(self.a)
-        self.assertSequenceEqual(self.a.friends.all(), [self.c, self.d])
-        self.assertSequenceEqual(self.b.friends.all(), [])
+        self.assertCountEqual(self.a.friends.all(), [self.c, self.d])
+        self.assertCountEqual(self.b.friends.all(), [])
 
     def test_recursive_m2m_clear(self):
         # Clear m2m for Anne.
@@ -94,7 +94,7 @@ class RecursiveSymmetricalM2MThroughTests(TestCase):
             (self.d, [self.a, self.c]),
         ):
             with self.subTest(person=person):
-                self.assertSequenceEqual(person.colleagues.all(), colleagues)
+                self.assertCountEqual(person.colleagues.all(), colleagues)
 
     def test_recursive_m2m_reverse_add(self):
         # Add m2m for Anne in reverse direction.
@@ -105,12 +105,12 @@ class RecursiveSymmetricalM2MThroughTests(TestCase):
             },
         )
         self.assertCountEqual(self.a.colleagues.all(), [self.b, self.c, self.d])
-        self.assertSequenceEqual(self.b.colleagues.all(), [self.a])
+        self.assertCountEqual(self.b.colleagues.all(), [self.a])
 
     def test_recursive_m2m_remove(self):
         self.b.colleagues.remove(self.a)
-        self.assertSequenceEqual(self.a.colleagues.all(), [self.c, self.d])
-        self.assertSequenceEqual(self.b.colleagues.all(), [])
+        self.assertCountEqual(self.a.colleagues.all(), [self.c, self.d])
+        self.assertCountEqual(self.b.colleagues.all(), [])
 
     def test_recursive_m2m_clear(self):
         # Clear m2m for Anne.

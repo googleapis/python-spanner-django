@@ -762,6 +762,7 @@ class QuerySet(AltersData):
         if not objs:
             return objs
         opts = self.model._meta
+        batch_size = 900
         if unique_fields:
             # Primary key is allowed in unique_fields.
             unique_fields = [
@@ -1825,7 +1826,7 @@ class QuerySet(AltersData):
         batch_size = min(batch_size, max_batch_size) if batch_size else max_batch_size
         inserted_rows = []
         bulk_return = connection.features.can_return_rows_from_bulk_insert
-        for item in [objs[i : i + batch_size] for i in range(0, len(objs), batch_size)]:
+        for item in [objs[i : i + 100] for i in range(0, len(objs), 100)]:
             if bulk_return and on_conflict is None:
                 inserted_rows.extend(
                     self._insert(

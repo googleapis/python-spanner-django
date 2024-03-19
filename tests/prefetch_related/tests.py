@@ -1857,7 +1857,7 @@ class ReadPrefetchedObjectsCacheTests(TestCase):
         )
         with self.assertNumQueries(4):
             # AuthorWithAge -> Author -> FavoriteAuthors, Book
-            self.assertSequenceEqual(authors, [self.author1, self.author2], ordered=False)
+            self.assertQuerySetEqual(authors, [self.author1, self.author2], ordered=False)
 
 
 class NestedPrefetchTests(TestCase):

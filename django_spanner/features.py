@@ -80,8 +80,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
         "generic_relations.tests.GenericRelationsTests.test_generic_update_or_create_when_updated",
         "generic_relations.tests.GenericRelationsTests.test_update_or_create_defaults",
-        "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
-        "generic_relations_regress.tests.GenericRelationTests.test_target_model_is_unsaved",
         "m2m_through_regress.tests.ToFieldThroughTests.test_m2m_relations_unusable_on_null_pk_obj",
         "many_to_many.tests.ManyToManyTests.test_add",
         "many_to_one.tests.ManyToOneTests.test_fk_assignment_and_related_object_cache",
@@ -1201,7 +1199,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.text.test_trim.TrimTests.test_trim_transform",  # noqa
             "db_functions.text.test_upper.UpperTests.test_basic",  # noqa
             "db_functions.text.test_upper.UpperTests.test_transform",  # noqa
-            "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related",  # noqa
             "delete_regress.tests.DeleteCascadeTransactionTests.test_inheritance",  # noqa
             "delete_regress.tests.DeleteLockingTest.test_concurrent_delete",  # noqa
             "expressions.test_queryset_values.ValuesExpressionsTests.test_chained_values_with_expression",  # noqa
@@ -1976,7 +1973,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             skip_tests += (
                 # Check constraints are not supported by Spanner emulator.
                 "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
-                "constraints.tests.CheckConstraintTests.test_database_constraint_expression",  # noqa
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
                 "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
                 # Untyped parameters are not supported:

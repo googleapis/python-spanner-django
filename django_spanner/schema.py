@@ -538,6 +538,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         deferrable=None,  # Spanner does not require this parameter
         include=None,
         opclasses=None,
+        expressions=None,
     ):
         # Inline constraints aren't supported, so create the index separately.
         if USING_DJANGO_3:
@@ -548,6 +549,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 condition=condition,
                 include=include,
                 opclasses=opclasses,
+                expressions=expressions,
             )
         else:
             sql = self._create_unique_sql(

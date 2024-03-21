@@ -216,4 +216,4 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         Staying in autocommit mode works around a bug that breaks
         save points when autocommit is disabled by django.
         """
-        self.connection.cursor().execute("SELECT 1")
+        self.connection.cursor().execute("BEGIN")

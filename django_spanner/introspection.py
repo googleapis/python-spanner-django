@@ -252,7 +252,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 INFORMATION_SCHEMA.TABLE_CONSTRAINTS
             WHERE
                 TABLE_NAME=@table AND TABLE_SCHEMA=@schema_name''',
-            params={"table": quoted_table_name, "schema_name": schema_name}
+            params={"table": table_name, "schema_name": schema_name}
         )
         for constraint, constraint_type in constraint_types:
             already_added = constraint in constraints
@@ -298,7 +298,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 idx.TABLE_NAME=@table AND idx.TABLE_SCHEMA=@schema_name
             ORDER BY
                 idx_col.ORDINAL_POSITION
-            """, params={"table": quoted_table_name, "schema_name": schema_name}
+            """, params={"table": table_name, "schema_name": schema_name}
         )
         for (
             index_name,

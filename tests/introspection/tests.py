@@ -113,14 +113,9 @@ class IntrospectionTests(TransactionTestCase):
             [
                 connection.features.introspected_field_types[field]
                 for field in (
-                    "AutoField",
-                    "CharField",
-                    "CharField",
-                    "CharField",
-                    "BigIntegerField",
-                    "BinaryField",
-                    "SmallIntegerField",
-                    "DurationField",
+                'IntegerField', 'CharField', 'CharField', 'CharField',
+                'IntegerField', 'BinaryField', 'IntegerField',
+                'IntegerField',
                 )
             ],
         )
@@ -165,7 +160,7 @@ class IntrospectionTests(TransactionTestCase):
                 cursor, City._meta.db_table
             )
         self.assertIn(
-            connection.features.introspected_field_types["BigAutoField"],
+            connection.features.introspected_field_types["IntegerField"],
             [connection.introspection.get_field_type(r[1], r) for r in desc],
         )
 
@@ -175,7 +170,7 @@ class IntrospectionTests(TransactionTestCase):
                 cursor, Country._meta.db_table
             )
         self.assertIn(
-            connection.features.introspected_field_types["SmallAutoField"],
+            connection.features.introspected_field_types["IntegerField"],
             [connection.introspection.get_field_type(r[1], r) for r in desc],
         )
 

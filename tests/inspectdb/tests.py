@@ -336,7 +336,7 @@ class InspectDBTestCase(TestCase):
             % (integer_field_type, base_name),
             output,
         )
-        self.assertIn("x_field = models.%s(db_column='x__field)" % integer_field_type, output)
+        self.assertIn("x_field = models.%s(db_column='x__field')" % integer_field_type, output)
         self.assertIn("prcx = models.{}()".format(integer_field_type), output)
         self.assertIn("tamano = models.%s()" % integer_field_type, output)
 

@@ -295,7 +295,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             RIGHT JOIN
                 INFORMATION_SCHEMA.INDEX_COLUMNS AS idx_col
             ON
-                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME=@table
+                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME=@table AND idx_col.TABLE_SCHEMA=idx.TABLE_SCHEMA
             WHERE
                 idx.TABLE_NAME=@table AND idx.TABLE_SCHEMA=@schema_name
             ORDER BY

@@ -435,9 +435,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # Spanner does not support SELECTing an arbitrary expression that also
         # appears in the GROUP BY clause.
         "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
-        # No Django transaction management in Spanner.
-        "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
-        "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
         # Tests that expect it to be empty untill saved in db.
         "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
         "model_fields.test_jsonfield.TestSerialization.test_dumping",
@@ -470,14 +467,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "schema.tests.SchemaTests.test_ci_cs_db_collation",
         # Spanner limitation: Cannot rename tables and columns.
         "migrations.test_operations.OperationTests.test_rename_field_case",
-        # Warning is not raised, not related to spanner.
-        "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
     )
     if USING_DJANGO_3:
         skip_tests += (
+            # No Django transaction management in Spanner.
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_both_durable",
+            "transactions.tests.DisableDurabiltityCheckTests.test_nested_inner_durable",
             "generic_relations.tests.GenericRelationsTests.test_unsaved_instance_on_generic_foreign_key",
             "generic_relations_regress.tests.GenericRelationTests.test_target_model_is_unsaved",
             "aggregation_regress.tests.AggregationTests.test_ticket_11293",
+            # Warning is not raised, not related to spanner.
+            "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
         )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
@@ -814,21 +814,21 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.UserChangeFormTest.test_password_excluded",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_unusable_password",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_username_validity",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_both_passwords",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_custom_form",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_invalid_data",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_normalize_username",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_password_help_text",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_password_verification",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_success",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_unicode_username",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_user_already_exists",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_validates_password",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_both_passwords",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_invalid_data",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_normalize_username",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_help_text",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_verification",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_success",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_unicode_username",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_already_exists",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_validates_password",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password_custom_user",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_groups_for_user",  # noqa
@@ -1957,7 +1957,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "validation.tests.GenericIPAddressFieldTests.test_v6_uniqueness_detection",  # noqa
             # Check constraints are not supported by Spanner emulator.
             "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
-            "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
             "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
@@ -2076,6 +2075,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         )
         if USING_DJANGO_3:
             skip_tests += (
+                "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
                 "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related", # noqa
                 "queries.tests.Queries1Tests.test_ticket7098", # noqa
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expression", # noqa

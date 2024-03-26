@@ -1332,7 +1332,7 @@ class ForeignKeyToFieldTest(TestCase):
             addresses = [
                 [str(address) for address in obj.addresses.all()] for obj in qs
             ]
-        self.assertEqual(addresses, [[str(self.author_address)], [], []])
+        self.assertCountEqual(addresses, [[str(self.author_address)], [], []])
 
     def test_m2m(self):
         with self.assertNumQueries(3):

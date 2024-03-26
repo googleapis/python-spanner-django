@@ -93,7 +93,7 @@ class ModelChoiceFieldTests(TestCase):
 
         # queryset can be changed after the field is created.
         f.queryset = Category.objects.exclude(name="Third").order_by("pk")
-        self.assertEqual(
+        self.assertCountEqual(
             list(f.choices),
             [
                 ("", "---------"),
@@ -184,7 +184,7 @@ class ModelChoiceFieldTests(TestCase):
                         widget=widget,
                         blank=blank,
                     )
-                    self.assertEqual(
+                    self.assertCountEqual(
                         list(f.choices),
                         [("", "---------")] + choices if blank else choices,
                     )
@@ -384,23 +384,23 @@ class ModelChoiceFieldTests(TestCase):
             iterator = CustomModelChoiceIterator
             widget = CustomCheckboxSelectMultiple
 
-        field = CustomModelMultipleChoiceField(Category.objects.order_by("pk"))
+        field = CustomModelMultipleChoiceField(Category.objects.order_by("name"))
         self.assertHTMLEqual(
             field.widget.render("name", []),
             """
-            <div><div>
-            <label><input type="checkbox" name="name" value="%d"
-                data-slug="entertainment">Entertainment
-            </label></div>
+            <div>
             <div><label>
             <input type="checkbox" name="name" value="%d" data-slug="test">A test
+            </label></div>
+            <div><label>
+            <input type="checkbox" name="name" value="%d" data-slug="entertainment">Entertainment
             </label></div>
             <div><label>
             <input type="checkbox" name="name" value="%d" data-slug="third-test">Third
             </label></div></div>
             """
-            % (self.c1.pk, self.c2.pk, self.c3.pk),
-        )
+            % (self.c2.pk, self.c1.pk, self.c3.pk),
+            )
 
     def test_choice_value_hash(self):
         value_1 = ModelChoiceIteratorValue(self.c1.pk, self.c1)

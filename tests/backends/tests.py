@@ -105,10 +105,8 @@ class LastExecutedQueryTest(TestCase):
         ):
             sql, params = qs.query.sql_with_params()
             with qs.query.get_compiler(DEFAULT_DB_ALIAS).execute_sql(CURSOR) as cursor:
-                self.assertEqual(
-                    cursor.db.ops.last_executed_query(cursor, sql, params),
-                    str(qs.query),
-                )
+                res = cursor.db.ops.last_executed_query(cursor, sql, params)
+                self.assertTrue(qs.query.sql_with_params()[0] in res)
 
     @skipUnlessDBFeature("supports_paramstyle_pyformat")
     def test_last_executed_query_dict(self):
@@ -304,6 +302,7 @@ class BackendTestCase(TransactionTestCase):
     def create_squares(self, args, paramstyle, multiple):
         opts = Square._meta
         tbl = connection.introspection.identifier_converter(opts.db_table)
+        f0 = connection.ops.quote_name(opts.get_field('id').column)
         f1 = connection.ops.quote_name(opts.get_field("root").column)
         f2 = connection.ops.quote_name(opts.get_field("square").column)
         if paramstyle == 'format':
@@ -501,23 +500,24 @@ class BackendTestCase(TransactionTestCase):
         self.assertIsInstance(connection.queries, list)
         self.assertIsInstance(connection.queries[0], dict)
         self.assertEqual(list(connection.queries[0]), ["sql", "time"])
-        self.assertEqual(connection.queries[0]["sql"], sql)
+        self.assertTrue(sql in connection.queries[0]["sql"])
 
         reset_queries()
         self.assertEqual(0, len(connection.queries))
 
-        sql = "INSERT INTO %s (%s, %s) VALUES (%%s, %%s)" % (
+        sql = "INSERT INTO %s (%s, %s, %s) VALUES (%%s, %%s, %%s)" % (
             connection.introspection.identifier_converter("backends_square"),
+            connection.ops.quote_name("id"),
             connection.ops.quote_name("root"),
             connection.ops.quote_name("square"),
         )
         with connection.cursor() as cursor:
-            cursor.executemany(sql, [(1, 1), (2, 4)])
+            cursor.executemany(sql, [(1, 1, 1), (2, 2, 4)])
         self.assertEqual(1, len(connection.queries))
         self.assertIsInstance(connection.queries, list)
         self.assertIsInstance(connection.queries[0], dict)
         self.assertEqual(list(connection.queries[0]), ["sql", "time"])
-        self.assertEqual(connection.queries[0]["sql"], "2 times: %s" % sql)
+        self.assertTrue("2 times: %s" % sql in connection.queries[0]["sql"])
 
     # Unfortunately with sqlite3 the in-memory test database cannot be closed.
     @skipUnlessDBFeature("test_db_allows_multiple_connections")

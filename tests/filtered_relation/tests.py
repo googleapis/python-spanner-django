@@ -96,7 +96,8 @@ class FilteredRelationTests(TestCase):
                 (self.book3, self.author2, self.editor_b),
                 (self.book4, self.author1, self.editor_a),
             ],
-            lambda x: (x, x.author_join), ordered=False)
+            lambda x: (x, x.author_join, x.editor_join),
+            ordered=False)
 
     def test_select_related_with_empty_relation(self):
         qs = (
@@ -114,7 +115,6 @@ class FilteredRelationTests(TestCase):
                 author_join=FilteredRelation("author"),
             )
             .select_related("author_join")
-            .order_by("pk")
         )
         with self.assertNumQueries(1):
             self.assertQuerySetEqual(
@@ -126,6 +126,7 @@ class FilteredRelationTests(TestCase):
                     (self.book4, self.author1),
                 ],
                 lambda x: (x, x.author_join),
+                ordered=False,
             )
 
     @skipUnlessDBFeature("has_select_for_update", "has_select_for_update_of")

@@ -417,7 +417,7 @@ class ModelChoiceFieldTests(TestCase):
 
     def test_queryset_manager(self):
         f = forms.ModelChoiceField(Category.objects)
-        self.assertCountEqual(len(f.choices), 4)
+        self.assertEqual(len(f.choices), 4)
         self.assertCountEqual(
             list(f.choices),
             [

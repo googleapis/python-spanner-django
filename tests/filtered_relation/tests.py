@@ -599,6 +599,7 @@ class FilteredRelationTests(TestCase):
                     (self.book4, self.editor_b),
                 ],
                 lambda x: (x, x.author_favorite_book_editor),
+                ordered=False,
             )
 
     def test_relation_name_lookup(self):

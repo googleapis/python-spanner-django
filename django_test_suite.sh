@@ -56,6 +56,7 @@ DATABASES = {
        'NAME': "$TEST_DBNAME_OTHER",
    },
 }
+USE_TZ = True
 SECRET_KEY = 'spanner_tests_secret_key'
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',

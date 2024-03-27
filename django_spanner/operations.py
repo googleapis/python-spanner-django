@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.utils import DatabaseError
 from django.utils import timezone
+from django_spanner import USING_DJANGO_3
 from django.utils.duration import duration_microseconds
 from google.cloud.spanner_dbapi.parse_utils import (
     DateStr,
@@ -346,7 +347,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             value = UUID(value)
         return value
 
-    def date_extract_sql(self, lookup_type, field_name, params):
+    def date_extract_sql(self, lookup_type, field_name, params=None):
         """Extract date from the lookup.
 
         :type lookup_type: str
@@ -355,13 +356,23 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type field_name: str
         :param field_name: The name of the field.
 
+        :type params: list(str)
+        :param params: list of query params.
+
         :rtype: str
         :returns: A SQL statement for extracting.
         """
         lookup_type = self.extract_names.get(lookup_type, lookup_type)
-        return "EXTRACT(%s FROM %s)" % (lookup_type, field_name), params
+        sql = "EXTRACT(%s FROM %s)" % (lookup_type, field_name)
+        if USING_DJANGO_3:
+            return sql
+        return sql, params
 
-    def datetime_extract_sql(self, lookup_type, field_name, tzname, params):
+    def datetime_extract_sql(self, lookup_type, field_name, tzname):
+        sql, params = self.datetime_extract_sql(lookup_type, field_name, None, tzname)
+        return sql
+
+    def datetime_extract_sql(self, lookup_type, field_name, params, tzname):
         """Extract datetime from the lookup.
 
         :type lookup_type: str
@@ -385,7 +396,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             tzname,
         ), params
 
-    def time_extract_sql(self, lookup_type, field_name, params):
+    def time_extract_sql(self, lookup_type, field_name, params=None):
         """Extract time from the lookup.
 
         :type lookup_type: str
@@ -394,14 +405,24 @@ class DatabaseOperations(BaseDatabaseOperations):
         :type field_name: str
         :param field_name: The name of the field.
 
+        :type params: list(str)
+        :param params: list of query params.
+
         :rtype: str
         :returns: A SQL statement for extracting.
         """
         # Time is stored as TIMESTAMP with UTC time zone.
-        return 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (
+        sql = 'EXTRACT(%s FROM %s AT TIME ZONE "UTC")' % (
             lookup_type,
             field_name,
-        ), params
+        )
+        if USING_DJANGO_3:
+            return sql
+        return sql, params
+
+    def date_trunc_sql(self, lookup_type, field_name, tzname=None):
+        sql, params = self.date_trunc_sql(lookup_type, field_name, None, tzname)
+        return sql
 
     def date_trunc_sql(self, lookup_type, field_name, params, tzname=None):
         """Truncate date in the lookup.
@@ -411,6 +432,9 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type field_name: str
         :param field_name: The name of the field.
+
+        :type params: list(str)
+        :param params: list of query params.
 
         :type tzname: str
         :param tzname: The name of the timezone. This is ignored because
@@ -433,6 +457,10 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "DATE_ADD(CAST(" + sql + " AS DATE), INTERVAL 1 DAY)"
         return sql, params
 
+    def datetime_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
+        sql, params = self.datetime_trunc_sql(lookup_type, field_name, None, tzname)
+        return sql
+
     def datetime_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
         """Truncate datetime in the lookup.
 
@@ -441,6 +469,9 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type field_name: str
         :param field_name: The name of the field.
+
+        :type params: list(str)
+        :param params: list of query params.
 
         :type tzname: str
         :param tzname: The name of the timezone.
@@ -465,6 +496,10 @@ class DatabaseOperations(BaseDatabaseOperations):
             sql = "TIMESTAMP_ADD(" + sql + ", INTERVAL 1 DAY)"
         return sql, params
 
+    def time_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
+        sql, params = self.time_trunc_sql(lookup_type, field_name, None, tzname)
+        return sql
+
     def time_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
         """Truncate time in the lookup.
 
@@ -473,6 +508,9 @@ class DatabaseOperations(BaseDatabaseOperations):
 
         :type field_name: str
         :param field_name: The name of the field.
+
+        :type params: list(str)
+        :param params: list of query params.
 
         :type tzname: str
         :param tzname: The name of the timezone. Defaults to 'UTC' For backward compatability.
@@ -488,11 +526,18 @@ class DatabaseOperations(BaseDatabaseOperations):
             tzname,
         ), params
 
+    def datetime_cast_date_sql(self, field_name, tzname):
+        sql, params = self.datetime_cast_date_sql(field_name, None, tzname)
+        return sql
+
     def datetime_cast_date_sql(self, field_name, params, tzname):
         """Cast date in the lookup.
 
         :type field_name: str
         :param field_name: The name of the field.
+
+        :type params: list(str)
+        :param params: list of query params.
 
         :type tzname: str
         :param tzname: The time zone name. If using of time zone is not
@@ -505,11 +550,18 @@ class DatabaseOperations(BaseDatabaseOperations):
         tzname = tzname if settings.USE_TZ and tzname else "UTC"
         return 'DATE(%s, "%s")' % (field_name, tzname), params
 
+    def datetime_cast_time_sql(self, field_name, tzname):
+        sql, params = self.datetime_cast_time_sql(field_name, None, tzname)
+        return sql
+
     def datetime_cast_time_sql(self, field_name, params, tzname):
         """Cast time in the lookup.
 
         :type field_name: str
         :param field_name: The name of the field.
+
+        :type params: list(str)
+        :param params: list of query params.
 
         :type tzname: str
         :param tzname: The time zone name. If using of time zone is not

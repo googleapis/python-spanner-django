@@ -829,6 +829,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.BaseUserCreationFormTest.test_user_already_exists",  # noqa
             "auth_tests.test_forms.BaseUserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
             "auth_tests.test_forms.BaseUserCreationFormTest.test_validates_password",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_html_autocomplete_attributes",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password_custom_user",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_groups_for_user",  # noqa
@@ -2006,8 +2008,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.PasswordResetFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.SetPasswordFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_username_field_autocapitalize_none",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.UserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_environment_variable_non_interactive",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m_interactive",  # noqa

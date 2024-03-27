@@ -9,7 +9,7 @@ import uuid
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django_spanner._opentelemetry_tracing import trace_call
-from django_spanner import USE_EMULATOR, USING_DJANGO_3
+from django_spanner import USE_EMULATOR, USING_DJANGO_4
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -117,14 +117,22 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             # Create a unique constraint separately because Spanner doesn't
             # allow them inline on a column.
             if field.unique and not field.primary_key:
-                self.deferred_sql.append(
-                    self._create_unique_sql(model, [field.column])
-                )
+                if USING_DJANGO_4:
+                    self.deferred_sql.append(
+                        self._create_unique_sql(model, [field])
+                    )
+                else:
+                    self.deferred_sql.append(
+                        self._create_unique_sql(model, [field.column])
+                    )
 
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:
-            columns = [model._meta.get_field(field).column for field in fields]
+            if USING_DJANGO_4:
+                columns = [model._meta.get_field(field) for field in fields]
+            else:
+                columns = [model._meta.get_field(field).column for field in fields]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
         constraints = [
             constraint.constraint_sql(model, self)
@@ -530,9 +538,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         deferrable=None,  # Spanner does not require this parameter
         include=None,
         opclasses=None,
+        expressions=None,
     ):
         # Inline constraints aren't supported, so create the index separately.
-        if USING_DJANGO_3:
+        if USING_DJANGO_4:
             sql = self._create_unique_sql(
                 model,
                 fields,
@@ -540,10 +549,16 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 condition=condition,
                 include=include,
                 opclasses=opclasses,
+                expressions=expressions,
             )
         else:
             sql = self._create_unique_sql(
-                model, fields, name=name, condition=condition
+                model,
+                fields,
+                name=name,
+                condition=condition,
+                include=include,
+                opclasses=opclasses,
             )
         if sql:
             self.deferred_sql.append(sql)

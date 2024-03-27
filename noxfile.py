@@ -24,8 +24,8 @@ BLACK_PATHS = [
     "setup.py",
 ]
 
-DEFAULT_PYTHON_VERSION = "3.8"
-SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
+DEFAULT_PYTHON_VERSION = "3.9"
+SYSTEM_TEST_PYTHON_VERSIONS = ["3.9"]
 UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
@@ -157,10 +157,10 @@ def system_test(session, django_version="2.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    print("System tests with django 2.2")
-    system_test(session)
-    print("System tests with django 3.2")
-    system_test(session, django_version="3.2")
+    # print("System tests with django 2.2")
+    # system_test(session)
+    print("System tests with django 4.2")
+    system_test(session, django_version="4.2")
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)

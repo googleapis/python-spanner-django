@@ -14,11 +14,7 @@ from uuid import uuid4
 
 import pkg_resources
 from google.cloud.spanner_v1 import JsonObject
-from django.db.models.fields import (
-    NOT_PROVIDED,
-    AutoField,
-    Field,
-)
+from django.db.models import fields
 
 from .expressions import register_expressions
 from .functions import register_functions
@@ -35,10 +31,6 @@ if django.VERSION[:2] == (3, 2):
     USING_DJANGO_3 = True
 
 if USING_DJANGO_3:
-    from django.db.models.fields import (
-        SmallAutoField,
-        BigAutoField,
-    )
     from django.db.models import JSONField
 
 __version__ = pkg_resources.get_distribution("django-google-spanner").version
@@ -53,34 +45,31 @@ register_expressions(USING_DJANGO_3)
 register_functions()
 register_lookups()
 
-
 def gen_rand_int64():
     # Credit to https://stackoverflow.com/a/3530326.
     return uuid4().int & 0x7FFFFFFFFFFFFFFF
 
+def _fix_id_generator(cls):
+    old_contribute_to_class = cls.contribute_to_class
+    
+    def spanner_autofield_contribute_to_class(self, cls, name, **kwargs):
+        if self.default == fields.NOT_PROVIDED:
+            using = django.db.router.db_for_write(cls)
+            if django.db.connections[using].settings_dict["ENGINE"] == "django_spanner":
+                self.default = gen_rand_int64
 
-def autofield_init(self, *args, **kwargs):
-    kwargs["blank"] = True
-    Field.__init__(self, *args, **kwargs)
+        return old_contribute_to_class(self, cls, name, **kwargs)
 
-    if (
-        django.db.connection.settings_dict["ENGINE"] == "django_spanner"
-        and self.default == NOT_PROVIDED
-    ):
-        self.default = gen_rand_int64
+    cls.contribute_to_class = spanner_autofield_contribute_to_class
 
+    cls.db_returning = False
+    cls.validators = []
 
-AutoField.__init__ = autofield_init
-AutoField.db_returning = False
-AutoField.validators = []
+for field_cls_name in ("AutoField", "BigAutoField", "SmallAutoField"):
+    if hasattr(fields, field_cls_name):
+        _fix_id_generator(getattr(fields, field_cls_name))
+
 if USING_DJANGO_3:
-    SmallAutoField.__init__ = autofield_init
-    BigAutoField.__init__ = autofield_init
-    SmallAutoField.db_returning = False
-    BigAutoField.db_returning = False
-    SmallAutoField.validators = []
-    BigAutoField.validators = []
-
     def get_prep_value(self, value):
         # Json encoding and decoding for spanner is done in python-spanner.
         if not isinstance(value, JsonObject) and isinstance(value, dict):

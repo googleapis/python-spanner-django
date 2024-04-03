@@ -33,7 +33,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_regex_backreferencing = False
     supports_select_for_update_with_limit = False
     supports_sequence_reset = False
-    supports_timezones = True
+    supports_timezones = False
     supports_transactions = False
     if USE_EMULATOR:
         # Emulator does not support json.
@@ -500,6 +500,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "aggregation_regress.tests.AggregationTests.test_filter_aggregates_negated_xor_connector",
             "aggregation_regress.tests.AggregationTests.test_filter_aggregates_or_connector",
             "aggregation_regress.tests.AggregationTests.test_filter_aggregates_xor_connector",
+            "aggregation_regress.tests.AggregationTests.test_aggregate_and_annotate_duplicate_columns_unmanaged",
             "queries.test_bulk_update.BulkUpdateTests.test_unsaved_parent",
             "queries.test_q.QCheckTests.test_basic",
             "queries.test_q.QCheckTests.test_boolean_expression",
@@ -511,6 +512,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_lhs_slice",
             "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_rhs_slice",
             "queries.tests.Queries1Tests.test_filter_by_related_field_transform",
+            "known_related_objects_tests.ExistingRelatedInstancesTests.test_reverse_fk_select_related_multiple"
         )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):

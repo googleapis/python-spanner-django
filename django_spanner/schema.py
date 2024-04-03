@@ -288,9 +288,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Create a unique constraint separately because Spanner doesn't allow
         # them inline on a column.
         if field.unique and not field.primary_key:
-            self.deferred_sql.append(
-                self._create_unique_sql(model, [field.column])
-            )
+            if USING_DJANGO_4:
+                self.deferred_sql.append(
+                    self._create_unique_sql(model, [field])
+                )
+            else:
+                self.deferred_sql.append(
+                    self._create_unique_sql(model, [field.column])
+                )
         # Add any FK constraints later
         if (
             field.remote_field

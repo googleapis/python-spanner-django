@@ -8,7 +8,7 @@ import os
 
 from django.db.backends.base.features import BaseDatabaseFeatures
 from django.db.utils import InterfaceError
-from django_spanner import USE_EMULATOR, USING_DJANGO_3
+from django_spanner import USE_EMULATOR, USING_DJANGO_3, USING_DJANGO_4
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):
@@ -33,7 +33,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_regex_backreferencing = False
     supports_select_for_update_with_limit = False
     supports_sequence_reset = False
-    supports_timezones = False
+    supports_timezones = True
     supports_transactions = False
     if USE_EMULATOR:
         # Emulator does not support json.
@@ -479,6 +479,39 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             # Warning is not raised, not related to spanner.
             "test_utils.test_testcase.TestDataTests.test_undeepcopyable_warning",
         )
+    if USING_DJANGO_4:
+        skip_tests += (
+            "aggregation.tests.AggregateTestCase.test_aggregation_default_expression",
+            "aggregation.tests.AggregateTestCase.test_aggregation_default_integer",
+            "aggregation.tests.AggregateTestCase.test_aggregation_default_unset",
+            "aggregation.tests.AggregateTestCase.test_aggregation_default_using_duration_from_database",
+            "aggregation.tests.AggregateTestCase.test_aggregation_default_zero",
+            "aggregation.tests.AggregateTestCase.test_group_by_nested_expression_with_params",
+            "many_to_one_null.tests.ManyToOneNullTests.test_unsaved",
+            "model_formsets.tests.ModelFormsetTest.test_edit_only_object_outside_of_queryset",
+            "ordering.tests.OrderingTests.test_order_by_expression_ref",
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_language_for_item_i18n_sitemap",
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_language_for_item_i18n_sitemap",
+            "null_queries.tests.NullQueriesTests.test_unsaved",
+            "prefetch_related.tests.GenericRelationTests.test_deleted_GFK",
+            "aggregation_regress.tests.AggregationTests.test_aggregate_and_annotate_duplicate_columns_proxy",
+            "aggregation_regress.tests.AggregationTests.test_annotation_disjunction",
+            "aggregation_regress.tests.AggregationTests.test_filter_aggregates_negated_and_connector",
+            "aggregation_regress.tests.AggregationTests.test_filter_aggregates_negated_xor_connector",
+            "aggregation_regress.tests.AggregationTests.test_filter_aggregates_or_connector",
+            "aggregation_regress.tests.AggregationTests.test_filter_aggregates_xor_connector",
+            "queries.test_bulk_update.BulkUpdateTests.test_unsaved_parent",
+            "queries.test_q.QCheckTests.test_basic",
+            "queries.test_q.QCheckTests.test_boolean_expression",
+            "queries.test_q.QCheckTests.test_expression",
+            "queries.tests.ExcludeTests.test_exclude_unsaved_o2o_object",
+            "queries.tests.ExcludeTests.test_exclude_unsaved_object",
+            "queries.tests.Queries5Tests.test_filter_unsaved_object",
+            "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_both_slice",
+            "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_lhs_slice",
+            "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_rhs_slice",
+            "queries.tests.Queries1Tests.test_filter_by_related_field_transform",
+        )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.
@@ -814,23 +847,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.UserChangeFormTest.test_password_excluded",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_unusable_password",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_username_validity",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_both_passwords",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_invalid_data",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_normalize_username",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_help_text",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_verification",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_success",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_unicode_username",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_already_exists",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_validates_password",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.BaseUserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password_custom_user",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_groups_for_user",  # noqa
@@ -2081,4 +2097,41 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expression", # noqa
                 "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning", # noqa
                 "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap_custom_index",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_both_passwords",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_custom_form",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_invalid_data",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_normalize_username",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_password_help_text",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_password_verification",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_success",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_unicode_username",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_user_already_exists",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_validates_password",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_html_autocomplete_attributes",  # noqa
+                "auth_tests.test_forms.UserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
+            )
+        if USING_DJANGO_4:
+            skip_tests += (
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_both_passwords",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_invalid_data",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_normalize_username",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_password_help_text",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_password_verification",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_success",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_unicode_username",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_user_already_exists",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_validates_password",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_html_autocomplete_attributes",  # noqa
+                "auth_tests.test_forms.BaseUserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
             )

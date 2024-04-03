@@ -464,6 +464,7 @@ class FilteredRelationTests(TestCase):
                     (self.author2, self.editor_b),
                 ],
                 lambda x: (x, x.book_editor_worked_with),
+                ordered=False,
             )
 
     def test_nested_foreign_key_nested_field(self):

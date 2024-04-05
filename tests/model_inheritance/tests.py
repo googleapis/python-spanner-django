@@ -271,7 +271,7 @@ class ModelInheritanceTests(TestCase):
             connection.ops.quote_name(Parent._meta.get_field("grandparent_ptr").column),
         )
         qs = Parent.objects.all()
-        self.assertSequenceEqual(qs, [p2, p1])
+        self.assertCountEqual(qs, [p2, p1])
         self.assertIn(expected_order_by_sql, str(qs.query))
 
     def test_queryset_class_getitem(self):

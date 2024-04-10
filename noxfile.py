@@ -66,7 +66,7 @@ def lint_setup_py(session):
     )
 
 
-def default(session, django_version="2.2"):
+def default(session, django_version="3.2"):
     # Install all test dependencies, then install this package in-place.
     session.install(
         "django~={}".format(django_version),
@@ -75,7 +75,7 @@ def default(session, django_version="2.2"):
         "pytest",
         "pytest-cov",
         "coverage",
-        "sqlparse==0.3.0",
+        "sqlparse==0.3.1",
         "google-cloud-spanner>=3.13.0",
         "opentelemetry-api==1.1.0",
         "opentelemetry-sdk==1.1.0",
@@ -101,13 +101,13 @@ def default(session, django_version="2.2"):
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 2.2")
-    default(session)
     print("Unit tests with django 3.2")
-    default(session, django_version="3.2")
+    default(session)
+    print("Unit tests with django 4.2")
+    default(session, django_version="4.2")
 
 
-def system_test(session, django_version="2.2"):
+def system_test(session, django_version="3.2"):
     """Run the system test suite."""
     constraints_path = str(
         CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
@@ -157,8 +157,8 @@ def system_test(session, django_version="2.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    # print("System tests with django 2.2")
-    # system_test(session)
+    print("System tests with django 3.2")
+    system_test(session)
     print("System tests with django 4.2")
     system_test(session, django_version="4.2")
 

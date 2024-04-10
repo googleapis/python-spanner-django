@@ -519,8 +519,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "contenttypes_tests.test_models.ContentTypesTests.test_app_labeled_name",
             "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_lookup_name_sql_injection",
             "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_lookup_name_sql_injection",
-            #"db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_time_comparison",
-            #"db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_time_comparison",
             "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_lookup_name_sql_injection",
             "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_lookup_name_sql_injection",
             "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_ambiguous_and_invalid_times",
@@ -531,16 +529,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "schema.tests.SchemaTests.test_add_auto_field",
             "schema.tests.SchemaTests.test_alter_null_with_default_value_deferred_constraints",
             "schema.tests.SchemaTests.test_autofield_to_o2o",
-            #"schema.tests.SchemaTests.test_add_field_durationfield_with_default",
-            #"backends.tests.LastExecutedQueryTest.test_last_executed_query_dict_overlap_keys",
-            #"backends.tests.LastExecutedQueryTest.test_last_executed_query_with_duplicate_params",
-            #"backends.tests.BackendTestCase.test_queries_logger",
             "backends.tests.BackendTestCase.test_queries_bare_where",
             "expressions.tests.ExpressionOperatorTests.test_lefthand_bitwise_xor_right_null",
             "expressions.tests.FTimeDeltaTests.test_durationfield_multiply_divide",
-            #"generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_bulk_create",
-            #"generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_save",
-            #"get_or_create.tests.UpdateOrCreateTests.test_update_only_defaults_and_pre_save_fields_when_local_fields",
             "inspectdb.tests.InspectDBTestCase.test_same_relations",
             "migrations.test_operations.OperationTests.test_alter_field_pk_fk_char_to_int",
             "migrations.test_operations.OperationTests.test_alter_field_with_func_unique_constraint",
@@ -550,6 +541,18 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "migrations.test_operations.OperationTests.test_rename_field_unique_together",
             "migrations.test_operations.OperationTests.test_rename_model_with_db_table_rename_m2m",
             "migrations.test_operations.OperationTests.test_rename_model_with_m2m_models_in_different_apps_with_same_name",
+            "delete.tests.DeletionTests.test_pk_none",
+            "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_time_comparison",
+            "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_time_comparison",
+            "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict_overlap_keys",
+            "backends.tests.LastExecutedQueryTest.test_last_executed_query_with_duplicate_params",
+            "backends.tests.BackendTestCase.test_queries_logger",
+            "generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_bulk_create",
+            "generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_save",
+            "schema.tests.SchemaTests.test_add_field_durationfield_with_default",
+            "delete.tests.DeletionTests.test_only_referenced_fields_selected",
+            "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
+            "get_or_create.tests.UpdateOrCreateTests.test_update_only_defaults_and_pre_save_fields_when_local_fields",
         )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
@@ -2071,7 +2074,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_ignore_environment_variable_non_interactive",  # noqa
             "auth_tests.test_management.GetDefaultUsernameTestCase.test_with_database",  # noqa
             "auth_tests.test_management.MultiDBCreatesuperuserTestCase.test_createsuperuser_command_suggested_username_with_database_option",  # noqa
-            "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_password_change_does_not_invalidate_legacy_session",  # noqa
             "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_session",  # noqa
             "auth_tests.test_middleware.TestAuthenticationMiddleware.test_session_default_hashing_algorithm",  # noqa
             "auth_tests.test_models.UserManagerTestCase.test_runpython_manager_methods",  # noqa
@@ -2153,6 +2155,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "auth_tests.test_forms.UserCreationFormTest.test_validates_password",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_html_autocomplete_attributes",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
+                "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_password_change_does_not_invalidate_legacy_session",  # noqa
             )
         if USING_DJANGO_4:
             skip_tests += (

@@ -204,3 +204,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return False
 
         return True
+
+    def _start_transaction_under_autocommit(self):
+        """
+        Start a transaction explicitly in autocommit mode.
+        """
+        self.connection.cursor().execute("BEGIN")

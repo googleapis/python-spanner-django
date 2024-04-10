@@ -555,6 +555,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "get_or_create.tests.UpdateOrCreateTests.test_update_only_defaults_and_pre_save_fields_when_local_fields",
             "backends.base.test_base.DatabaseWrapperLoggingTests.test_commit_debug_log",
             "backends.base.test_base.DatabaseWrapperLoggingTests.test_rollback_debug_log",
+            "backends.base.test_base.MultiDatabaseTests.test_multi_database_init_connection_state_called_once",
         )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
@@ -2102,7 +2103,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_templates.AuthTemplateTests.test_password_reset_done_view",  # noqa
             "auth_tests.test_templates.AuthTemplateTests.test_password_reset_view",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
-            "auth_tests.test_views.LoginTest.test_legacy_session_key_flushed_on_login",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token_link_redirects_to_set_password_page",  # noqa
             "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",  # noqa
@@ -2156,6 +2156,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_days_timeout",  # noqa
                 "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_token_validation",  # noqa
                 "auth_tests.test_tokens.TokenGeneratorTest.test_token_default_hashing_algorithm",  # noqa
+                "auth_tests.test_views.LoginTest.test_legacy_session_key_flushed_on_login",  # noqa
             )
         if USING_DJANGO_4:
             skip_tests += (

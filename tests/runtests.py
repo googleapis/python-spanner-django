@@ -300,6 +300,9 @@ def get_apps_to_install(test_modules):
 
 
 def setup_run_tests(verbosity, start_at, start_after, test_labels=None):
+    if settings.DATABASES["default"]["ENGINE"] == "django_spanner":
+        # Monkey-patch AutoField before configuring INSTALLED_APPS
+        import django_spanner  # noqa
     test_modules, state = setup_collect_tests(
         start_at, start_after, test_labels=test_labels
     )
@@ -323,6 +326,10 @@ def setup_run_tests(verbosity, start_at, start_after, test_labels=None):
 
     TransactionTestCase.available_apps = property(no_available_apps)
     TestCase.available_apps = None
+
+    if settings.DATABASES['default']['ENGINE'] == 'django_spanner':
+        # Monkey-patch AutoField before configuring INSTALLED_APPS
+        import django_spanner  # noqa
 
     # Set an environment variable that other code may consult to see if
     # Django's own test suite is running.

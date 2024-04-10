@@ -2978,28 +2978,22 @@ class OperationTests(OperationTestBase):
         )
         # Make sure we can insert duplicate rows
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)")
-            cursor.execute("INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)")
+            cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (1, 1, 1)")
+            cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (2, 1, 1)")
             cursor.execute("DELETE FROM test_alunto_pony")
             # Test the database alteration
             with connection.schema_editor() as editor:
-                operation.database_forwards(
-                    "test_alunto", editor, project_state, new_state
-                )
-            cursor.execute("INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)")
+                operation.database_forwards("test_alunto", editor, project_state, new_state)
+            cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (3, 1, 1)")
             with self.assertRaises(IntegrityError):
                 with atomic():
-                    cursor.execute(
-                        "INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)"
-                    )
+                    cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (4, 1, 1)")
             cursor.execute("DELETE FROM test_alunto_pony")
             # And test reversal
             with connection.schema_editor() as editor:
-                operation.database_backwards(
-                    "test_alunto", editor, new_state, project_state
-                )
-            cursor.execute("INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)")
-            cursor.execute("INSERT INTO test_alunto_pony (pink, weight) VALUES (1, 1)")
+                operation.database_backwards("test_alunto", editor, new_state, project_state)
+            cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (5, 1, 1)")
+            cursor.execute("INSERT INTO test_alunto_pony (id, pink, weight) VALUES (6, 1, 1)")
             cursor.execute("DELETE FROM test_alunto_pony")
         # Test flat unique_together
         operation = migrations.AlterUniqueTogether("Pony", ("pink", "weight"))
@@ -4543,23 +4537,20 @@ class OperationTests(OperationTestBase):
         """
         project_state = self.set_up_test_model("test_runsql")
         # Create the operation
-        operation = migrations.RunSQL(
-            # Use a multi-line string with a comment to test splitting on
-            # SQLite and MySQL respectively.
-            "CREATE TABLE i_love_ponies (id int, special_thing varchar(15));\n"
-            "INSERT INTO i_love_ponies (id, special_thing) "
-            "VALUES (1, 'i love ponies'); -- this is magic!\n"
-            "INSERT INTO i_love_ponies (id, special_thing) "
-            "VALUES (2, 'i love django');\n"
-            "UPDATE i_love_ponies SET special_thing = 'Ponies' "
-            "WHERE special_thing LIKE '%%ponies';"
-            "UPDATE i_love_ponies SET special_thing = 'Django' "
-            "WHERE special_thing LIKE '%django';",
+        operation = migrations.RunSQL([
+            # Use a multi-line string with a comment to test splitting on SQLite and MySQL respectively
+            "CREATE TABLE i_love_ponies (id INT64, special_thing STRING(15)) PRIMARY KEY (id)",
+            "INSERT INTO i_love_ponies (id, special_thing) VALUES (1, 'i love ponies')",
+            "INSERT INTO i_love_ponies (id, special_thing) VALUES (2, 'i love django')",
+            "UPDATE i_love_ponies SET special_thing = 'Ponies' WHERE special_thing LIKE '%%ponies'",
+            "UPDATE i_love_ponies SET special_thing = 'Django' WHERE special_thing LIKE '%django'",
+        ], [
             # Run delete queries to test for parameter substitution failure
             # reported in #23426
-            "DELETE FROM i_love_ponies WHERE special_thing LIKE '%Django%';"
-            "DELETE FROM i_love_ponies WHERE special_thing LIKE '%%Ponies%%';"
+            "DELETE FROM i_love_ponies WHERE special_thing LIKE '%Django%'",
+            "DELETE FROM i_love_ponies WHERE special_thing LIKE '%%Ponies%%'",
             "DROP TABLE i_love_ponies",
+        ],
             state_operations=[
                 migrations.CreateModel(
                     "SomethingElse", [("id", models.AutoField(primary_key=True))]

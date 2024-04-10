@@ -172,13 +172,13 @@ class ModelInstanceCreationTests(TestCase):
 
     def test_save_primary_with_default(self):
         # An UPDATE attempt is skipped when a primary key has default.
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             PrimaryKeyWithDefault().save()
 
     def test_save_parent_primary_with_default(self):
         # An UPDATE attempt is skipped when an inherited primary key has
         # default.
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(3):
             ChildPrimaryKeyWithDefault().save()
 
 

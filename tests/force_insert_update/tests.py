@@ -25,8 +25,9 @@ class ForceTests(TestCase):
         # Try to update something that doesn't have a primary key in the first
         # place.
         c1 = Counter(name="two", value=2)
-        msg = "Cannot force an update in save() with no primary key."
-        with self.assertRaisesMessage(ValueError, msg):
+        # Different error since django-spanner's AutoField has a default value.
+        msg = 'Forced update did not affect any rows.'
+        with self.assertRaisesMessage(DatabaseError, msg):
             with transaction.atomic():
                 c1.save(force_update=True)
         c1.save(force_insert=True)

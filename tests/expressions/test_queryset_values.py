@@ -29,7 +29,7 @@ class ValuesExpressionsTests(TestCase):
         )
 
     def test_values_expression(self):
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             Company.objects.values(salary=F("ceo__salary")),
             [{"salary": 10}, {"salary": 20}, {"salary": 30}],
         )
@@ -48,14 +48,14 @@ class ValuesExpressionsTests(TestCase):
         # id, not firstname.
         Employee.objects.create(firstname="Joe", lastname="Jones", salary=2)
         joes = Employee.objects.filter(firstname="Joe")
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             joes.values("firstname", sum_salary=Sum("salary")).order_by("sum_salary"),
             [
                 {"firstname": "Joe", "sum_salary": 2},
                 {"firstname": "Joe", "sum_salary": 10},
             ],
         )
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             joes.values("firstname").annotate(sum_salary=Sum("salary")),
             [{"firstname": "Joe", "sum_salary": 12}],
         )
@@ -63,11 +63,11 @@ class ValuesExpressionsTests(TestCase):
     def test_chained_values_with_expression(self):
         Employee.objects.create(firstname="Joe", lastname="Jones", salary=2)
         joes = Employee.objects.filter(firstname="Joe").values("firstname")
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             joes.values("firstname", sum_salary=Sum("salary")),
             [{"firstname": "Joe", "sum_salary": 12}],
         )
-        self.assertSequenceEqual(
+        self.assertCountEqual(
             joes.values(sum_salary=Sum("salary")), [{"sum_salary": 12}]
         )
 

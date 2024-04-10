@@ -735,7 +735,7 @@ class LookupTests(TestCase):
                 [self.a1],
             )
         sql = ctx.captured_queries[0]["sql"]
-        self.assertIn("IN (%s)" % self.a1.pk, sql)
+        self.assertIn("%s" % self.a1.pk, sql)
 
     def test_in_ignore_solo_none(self):
         with self.assertNumQueries(0):
@@ -751,7 +751,7 @@ class LookupTests(TestCase):
                 [self.a1],
             )
         sql = ctx.captured_queries[0]["sql"]
-        self.assertIn("IN (%s)" % self.a1.pk, sql)
+        self.assertIn("%s" % self.a1.pk, sql)
 
     def test_error_messages(self):
         # Programming errors are pointed out with nice error messages

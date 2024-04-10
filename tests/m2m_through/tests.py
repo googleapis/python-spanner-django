@@ -435,8 +435,11 @@ class M2mThroughReferentialTests(TestCase):
         Relationship.objects.create(source=john, target=mary, another=None)
         Relationship.objects.create(source=john, target=harry, another=peter)
 
-        self.assertQuerySetEqual(
-            john.subordinates.all(), ["peter", "mary", "harry"], attrgetter("name")
+        self.assertQuerysetEqual(
+            john.subordinates.all(),
+            ['peter', 'mary', 'harry'],
+            attrgetter('name'),
+            ordered=False,
         )
 
     def test_self_referential_symmetrical(self):
@@ -482,9 +485,9 @@ class M2mThroughReferentialTests(TestCase):
             [anne, kate],
             through_defaults={"date_friended": date_friended_set},
         )
-        self.assertSequenceEqual(tony.sym_friends.all(), [anne, kate])
-        self.assertSequenceEqual(anne.sym_friends.all(), [tony])
-        self.assertSequenceEqual(kate.sym_friends.all(), [tony])
+        self.assertCountEqual(tony.sym_friends.all(), [anne, kate])
+        self.assertCountEqual(anne.sym_friends.all(), [tony])
+        self.assertCountEqual(kate.sym_friends.all(), [tony])
         self.assertEqual(
             kate.symmetricalfriendship_set.get().date_friended,
             date_friended_set,

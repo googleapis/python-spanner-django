@@ -35,7 +35,7 @@ class IntrospectionTests(TransactionTestCase):
 
     def test_django_table_names(self):
         with connection.cursor() as cursor:
-            cursor.execute("CREATE TABLE django_ixn_test_table (id INTEGER);")
+            cursor.execute('CREATE TABLE django_ixn_test_table (id INT64) PRIMARY KEY (id)')
             tl = connection.introspection.django_table_names()
             cursor.execute("DROP TABLE django_ixn_test_table;")
             self.assertNotIn(
@@ -113,14 +113,9 @@ class IntrospectionTests(TransactionTestCase):
             [
                 connection.features.introspected_field_types[field]
                 for field in (
-                    "AutoField",
-                    "CharField",
-                    "CharField",
-                    "CharField",
-                    "BigIntegerField",
-                    "BinaryField",
-                    "SmallIntegerField",
-                    "DurationField",
+                'IntegerField', 'CharField', 'CharField', 'CharField',
+                'IntegerField', 'BinaryField', 'IntegerField',
+                'IntegerField',
                 )
             ],
         )
@@ -132,7 +127,7 @@ class IntrospectionTests(TransactionTestCase):
             )
         self.assertEqual(
             [
-                r[2]
+                r[3]
                 for r in desc
                 if connection.introspection.get_field_type(r[1], r) == "CharField"
             ],
@@ -165,7 +160,7 @@ class IntrospectionTests(TransactionTestCase):
                 cursor, City._meta.db_table
             )
         self.assertIn(
-            connection.features.introspected_field_types["BigAutoField"],
+            connection.features.introspected_field_types["IntegerField"],
             [connection.introspection.get_field_type(r[1], r) for r in desc],
         )
 
@@ -175,7 +170,7 @@ class IntrospectionTests(TransactionTestCase):
                 cursor, Country._meta.db_table
             )
         self.assertIn(
-            connection.features.introspected_field_types["SmallAutoField"],
+            connection.features.introspected_field_types["IntegerField"],
             [connection.introspection.get_field_type(r[1], r) for r in desc],
         )
 

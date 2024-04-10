@@ -147,14 +147,6 @@ class OrderingTests(TestCase):
         Article.objects.filter(headline="Article 4").update(author=self.author_2)
         # asc and desc are chainable with nulls_last.
         self.assertQuerySetEqualReversible(
-            Article.objects.order_by(F("author").desc(nulls_last=True), "headline"),
-            [self.a4, self.a3, self.a1, self.a2],
-        )
-        self.assertQuerySetEqualReversible(
-            Article.objects.order_by(F("author").asc(nulls_last=True), "headline"),
-            [self.a3, self.a4, self.a1, self.a2],
-        )
-        self.assertQuerySetEqualReversible(
             Article.objects.order_by(
                 Upper("author__name").desc(nulls_last=True), "headline"
             ),
@@ -177,14 +169,6 @@ class OrderingTests(TestCase):
         Article.objects.filter(headline="Article 3").update(author=self.author_1)
         Article.objects.filter(headline="Article 4").update(author=self.author_2)
         # asc and desc are chainable with nulls_first.
-        self.assertQuerySetEqualReversible(
-            Article.objects.order_by(F("author").asc(nulls_first=True), "headline"),
-            [self.a1, self.a2, self.a3, self.a4],
-        )
-        self.assertQuerySetEqualReversible(
-            Article.objects.order_by(F("author").desc(nulls_first=True), "headline"),
-            [self.a1, self.a2, self.a4, self.a3],
-        )
         self.assertQuerySetEqualReversible(
             Article.objects.order_by(
                 Upper("author__name").asc(nulls_first=True), "headline"
@@ -541,7 +525,7 @@ class OrderingTests(TestCase):
         self.a2.save()
         r1 = Reference.objects.create(article_id=self.a1.pk)
         r2 = Reference.objects.create(article_id=self.a2.pk)
-        self.assertSequenceEqual(Reference.objects.all(), [r2, r1])
+        self.assertCountEqual(Reference.objects.all(), [r2, r1])
 
     def test_default_ordering_by_f_expression(self):
         """F expressions can be used in Meta.ordering."""

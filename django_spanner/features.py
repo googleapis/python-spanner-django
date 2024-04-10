@@ -2101,11 +2101,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_valid_token",  # noqa
             "auth_tests.test_templates.AuthTemplateTests.test_password_reset_done_view",  # noqa
             "auth_tests.test_templates.AuthTemplateTests.test_password_reset_view",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_days_timeout",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_token_validation",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_token_default_hashing_algorithm",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
             "auth_tests.test_views.LoginTest.test_legacy_session_key_flushed_on_login",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token",  # noqa
@@ -2158,6 +2153,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "auth_tests.test_forms.UserCreationFormTest.test_html_autocomplete_attributes",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
                 "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_password_change_does_not_invalidate_legacy_session",  # noqa
+                "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_days_timeout",  # noqa
+                "auth_tests.test_tokens.TokenGeneratorTest.test_legacy_token_validation",  # noqa
+                "auth_tests.test_tokens.TokenGeneratorTest.test_token_default_hashing_algorithm",  # noqa
             )
         if USING_DJANGO_4:
             skip_tests += (

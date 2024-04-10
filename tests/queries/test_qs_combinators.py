@@ -321,7 +321,7 @@ class QuerySetSetOperationTests(TestCase):
         base_qs = Author.objects.select_related("extra").order_by()
         qs1 = base_qs.filter(name="a1")
         qs2 = base_qs.filter(name="a2")
-        self.assertSequenceEqual(qs1.union(qs2).order_by("pk"), [a1, a2])
+        self.assertCountEqual(qs1.union(qs2).order_by("pk"), [a1, a2])
 
     @skipUnlessDBFeature("supports_slicing_ordering_in_compound")
     def test_union_with_select_related_and_first(self):

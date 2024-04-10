@@ -1,5 +1,6 @@
 from math import ceil
 from operator import attrgetter
+from unittest import skipIf
 
 from django.core.exceptions import FieldDoesNotExist
 from django.db import (
@@ -210,7 +211,7 @@ class BulkCreateTests(TestCase):
         # query.
         Restaurant.objects.bulk_create([Restaurant() for i in range(0, 501)])
 
-    @skipUnlessDBFeature("has_bulk_insert")
+    @skipIf(True, "Spanner doesn't support more than 950 params in single query")
     def test_large_batch_efficiency(self):
         with override_settings(DEBUG=True):
             connection.queries_log.clear()
@@ -237,7 +238,7 @@ class BulkCreateTests(TestCase):
         self.assertEqual(TwoFields.objects.filter(id__in=id_range).count(), 500)
         self.assertEqual(TwoFields.objects.exclude(id__in=id_range).count(), 500)
 
-    @skipUnlessDBFeature("has_bulk_insert")
+    @skipIf(True, "Spanner doesn't support more than 950 params in single query")
     def test_large_batch_mixed_efficiency(self):
         """
         Test inserting a large batch with objects having primary key set
@@ -281,7 +282,7 @@ class BulkCreateTests(TestCase):
         with self.assertNumQueries(1):
             TwoFields.objects.bulk_create(objs, len(objs))
 
-    @skipUnlessDBFeature("has_bulk_insert")
+    @skipIf(True, "Spanner doesn't support more than 950 params in single query")
     def test_explicit_batch_size_respects_max_batch_size(self):
         objs = [Country(name=f"Country {i}") for i in range(1000)]
         fields = ["name", "iso_two_letter", "description"]

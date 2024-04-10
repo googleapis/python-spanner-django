@@ -2088,7 +2088,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_models.UserWithPermTestCase.test_multiple_backends",  # noqa
             "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_backend",  # noqa
             "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_permission",  # noqa
-            "auth_tests.test_password_reset_timeout_days.DeprecationTests.test_timeout",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
@@ -2136,6 +2135,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
                 "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related", # noqa
                 "queries.tests.Queries1Tests.test_ticket7098", # noqa
+                "auth_tests.test_password_reset_timeout_days.DeprecationTests.test_timeout",  # noqa
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expression", # noqa
                 "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning", # noqa
                 "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap_custom_index",  # noqa

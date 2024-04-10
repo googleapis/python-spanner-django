@@ -26,7 +26,7 @@ BLACK_PATHS = [
 
 DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -194,7 +194,7 @@ def docs(session):
         "sphinx==4.5.0",
         "alabaster",
         "recommonmark",
-        "django==2.2",
+        "django==3.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
@@ -231,7 +231,7 @@ def docfx(session):
         "gcp-sphinx-docfx-yaml",
         "alabaster",
         "recommonmark",
-        "django==2.2",
+        "django==3.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

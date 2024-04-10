@@ -106,7 +106,7 @@ class FilteredRelationTests(TestCase):
             )
             .select_related("book_join")
         )
-        self.assertSequenceEqual(qs, [self.author1, self.author2])
+        self.assertQuerySetEqual(qs, [self.author1, self.author2], ordered=False)
 
     def test_select_related_foreign_key(self):
         qs = (

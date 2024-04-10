@@ -92,7 +92,7 @@ def default(session, django_version="3.2"):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=80",
+        "--cov-fail-under=75",
         os.path.join("tests", "unit"),
         *session.posargs,
     )

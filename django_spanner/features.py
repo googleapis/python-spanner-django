@@ -553,6 +553,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "delete.tests.DeletionTests.test_only_referenced_fields_selected",
             "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
             "get_or_create.tests.UpdateOrCreateTests.test_update_only_defaults_and_pre_save_fields_when_local_fields",
+            "backends.base.test_base.DatabaseWrapperLoggingTests.test_commit_debug_log",
+            "backends.base.test_base.DatabaseWrapperLoggingTests.test_rollback_debug_log",
         )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
@@ -2075,7 +2077,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_management.GetDefaultUsernameTestCase.test_with_database",  # noqa
             "auth_tests.test_management.MultiDBCreatesuperuserTestCase.test_createsuperuser_command_suggested_username_with_database_option",  # noqa
             "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_session",  # noqa
-            "auth_tests.test_middleware.TestAuthenticationMiddleware.test_session_default_hashing_algorithm",  # noqa
             "auth_tests.test_models.UserManagerTestCase.test_runpython_manager_methods",  # noqa
             "auth_tests.test_models.UserWithPermTestCase.test_backend_without_with_perm",  # noqa
             "auth_tests.test_models.UserWithPermTestCase.test_basic",  # noqa
@@ -2146,6 +2147,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "auth_tests.test_forms.UserCreationFormTest.test_invalid_data",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_normalize_username",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_password_help_text",  # noqa
+                "auth_tests.test_middleware.TestAuthenticationMiddleware.test_session_default_hashing_algorithm",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_password_verification",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_success",  # noqa

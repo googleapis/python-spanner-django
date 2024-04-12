@@ -82,12 +82,14 @@ BigAutoField.db_returning = False
 SmallAutoField.validators = []
 BigAutoField.validators = []
 
+
 def get_prep_value(self, value):
     # Json encoding and decoding for spanner is done in python-spanner.
     if not isinstance(value, JsonObject) and isinstance(value, dict):
         return JsonObject(value)
 
     return value
+
 
 JSONField.get_prep_value = get_prep_value
 

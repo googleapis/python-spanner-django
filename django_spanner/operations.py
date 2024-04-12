@@ -368,8 +368,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             return sql
         return sql, params
 
-
     if USING_DJANGO_3:
+
         def datetime_extract_sql(self, lookup_type, field_name, tzname):
             """Extract datetime from the lookup.
 
@@ -393,8 +393,12 @@ class DatabaseOperations(BaseDatabaseOperations):
                 field_name,
                 tzname,
             )
+
     else:
-        def datetime_extract_sql(self, lookup_type, field_name, params, tzname):
+
+        def datetime_extract_sql(
+            self, lookup_type, field_name, params, tzname
+        ):
             """Extract datetime from the lookup.
 
             :type lookup_type: str
@@ -412,11 +416,15 @@ class DatabaseOperations(BaseDatabaseOperations):
             """
             tzname = tzname if settings.USE_TZ and tzname else "UTC"
             lookup_type = self.extract_names.get(lookup_type, lookup_type)
-            return 'EXTRACT(%s FROM %s AT TIME ZONE "%s")' % (
-                lookup_type,
-                field_name,
-                tzname,
-            ), params
+            return (
+                'EXTRACT(%s FROM %s AT TIME ZONE "%s")'
+                % (
+                    lookup_type,
+                    field_name,
+                    tzname,
+                ),
+                params,
+            )
 
     def time_extract_sql(self, lookup_type, field_name, params=None):
         """Extract time from the lookup.
@@ -443,6 +451,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return sql, params
 
     if USING_DJANGO_3:
+
         def date_trunc_sql(self, lookup_type, field_name, tzname=None):
             """Truncate date in the lookup.
 
@@ -465,14 +474,21 @@ class DatabaseOperations(BaseDatabaseOperations):
                 # subtract a day so that a Sunday will be truncated to the previous
                 # week...
                 field_name = (
-                    "DATE_SUB(CAST(" + field_name + " AS DATE), INTERVAL 1 DAY)"
+                    "DATE_SUB(CAST("
+                    + field_name
+                    + " AS DATE), INTERVAL 1 DAY)"
                 )
-            sql = "DATE_TRUNC(CAST(%s AS DATE), %s)" % (field_name, lookup_type)
+            sql = "DATE_TRUNC(CAST(%s AS DATE), %s)" % (
+                field_name,
+                lookup_type,
+            )
             if lookup_type == "week":
                 # ...then add a day to get from Sunday to Monday.
                 sql = "DATE_ADD(CAST(" + sql + " AS DATE), INTERVAL 1 DAY)"
             return sql
+
     else:
+
         def date_trunc_sql(self, lookup_type, field_name, params, tzname=None):
             """Truncate date in the lookup.
 
@@ -498,15 +514,21 @@ class DatabaseOperations(BaseDatabaseOperations):
                 # subtract a day so that a Sunday will be truncated to the previous
                 # week...
                 field_name = (
-                    "DATE_SUB(CAST(" + field_name + " AS DATE), INTERVAL 1 DAY)"
+                    "DATE_SUB(CAST("
+                    + field_name
+                    + " AS DATE), INTERVAL 1 DAY)"
                 )
-            sql = "DATE_TRUNC(CAST(%s AS DATE), %s)" % (field_name, lookup_type)
+            sql = "DATE_TRUNC(CAST(%s AS DATE), %s)" % (
+                field_name,
+                lookup_type,
+            )
             if lookup_type == "week":
                 # ...then add a day to get from Sunday to Monday.
                 sql = "DATE_ADD(CAST(" + sql + " AS DATE), INTERVAL 1 DAY)"
             return sql, params
 
     if USING_DJANGO_3:
+
         def datetime_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
             """Truncate datetime in the lookup.
 
@@ -528,7 +550,9 @@ class DatabaseOperations(BaseDatabaseOperations):
                 # Spanner truncates to Sunday but Django expects Monday. First,
                 # subtract a day so that a Sunday will be truncated to the previous
                 # week...
-                field_name = "TIMESTAMP_SUB(" + field_name + ", INTERVAL 1 DAY)"
+                field_name = (
+                    "TIMESTAMP_SUB(" + field_name + ", INTERVAL 1 DAY)"
+                )
             sql = 'TIMESTAMP_TRUNC(%s, %s, "%s")' % (
                 field_name,
                 lookup_type,
@@ -538,8 +562,12 @@ class DatabaseOperations(BaseDatabaseOperations):
                 # ...then add a day to get from Sunday to Monday.
                 sql = "TIMESTAMP_ADD(" + sql + ", INTERVAL 1 DAY)"
             return sql
+
     else:
-        def datetime_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
+
+        def datetime_trunc_sql(
+            self, lookup_type, field_name, params, tzname="UTC"
+        ):
             """Truncate datetime in the lookup.
 
             :type lookup_type: str
@@ -563,7 +591,9 @@ class DatabaseOperations(BaseDatabaseOperations):
                 # Spanner truncates to Sunday but Django expects Monday. First,
                 # subtract a day so that a Sunday will be truncated to the previous
                 # week...
-                field_name = "TIMESTAMP_SUB(" + field_name + ", INTERVAL 1 DAY)"
+                field_name = (
+                    "TIMESTAMP_SUB(" + field_name + ", INTERVAL 1 DAY)"
+                )
             sql = 'TIMESTAMP_TRUNC(%s, %s, "%s")' % (
                 field_name,
                 lookup_type,
@@ -575,6 +605,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             return sql, params
 
     if USING_DJANGO_3:
+
         def time_trunc_sql(self, lookup_type, field_name, tzname="UTC"):
             """Truncate time in the lookup.
 
@@ -597,8 +628,12 @@ class DatabaseOperations(BaseDatabaseOperations):
                 lookup_type,
                 tzname,
             )
+
     else:
-        def time_trunc_sql(self, lookup_type, field_name, params, tzname="UTC"):
+
+        def time_trunc_sql(
+            self, lookup_type, field_name, params, tzname="UTC"
+        ):
             """Truncate time in the lookup.
 
             :type lookup_type: str
@@ -618,13 +653,18 @@ class DatabaseOperations(BaseDatabaseOperations):
             """
             # https://cloud.google.com/spanner/docs/functions-and-operators#timestamp_trunc
             tzname = tzname if settings.USE_TZ and tzname else "UTC"
-            return 'TIMESTAMP_TRUNC(%s, %s, "%s")' % (
-                field_name,
-                lookup_type,
-                tzname,
-            ), params
+            return (
+                'TIMESTAMP_TRUNC(%s, %s, "%s")'
+                % (
+                    field_name,
+                    lookup_type,
+                    tzname,
+                ),
+                params,
+            )
 
     if USING_DJANGO_3:
+
         def datetime_cast_date_sql(self, field_name, tzname):
             """Cast date in the lookup.
 
@@ -641,7 +681,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             # https://cloud.google.com/spanner/docs/functions-and-operators#date
             tzname = tzname if settings.USE_TZ and tzname else "UTC"
             return 'DATE(%s, "%s")' % (field_name, tzname)
+
     else:
+
         def datetime_cast_date_sql(self, field_name, params, tzname):
             """Cast date in the lookup.
 
@@ -663,6 +705,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             return 'DATE(%s, "%s")' % (field_name, tzname), params
 
     if USING_DJANGO_3:
+
         def datetime_cast_time_sql(self, field_name, tzname):
             """Cast time in the lookup.
 
@@ -681,9 +724,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             # TIMESTAMP to another time zone.
             return (
                 "TIMESTAMP(FORMAT_TIMESTAMP("
-                "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))" % (field_name, tzname)
+                "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))"
+                % (field_name, tzname)
             )
+
     else:
+
         def datetime_cast_time_sql(self, field_name, params, tzname):
             """Cast time in the lookup.
 
@@ -705,7 +751,8 @@ class DatabaseOperations(BaseDatabaseOperations):
             # TIMESTAMP to another time zone.
             return (
                 "TIMESTAMP(FORMAT_TIMESTAMP("
-                "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))" % (field_name, tzname)
+                "'%%Y-%%m-%%d %%R:%%E9S %%Z', %s, '%s'))"
+                % (field_name, tzname)
             ), params
 
     def date_interval_sql(self, timedelta):

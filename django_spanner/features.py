@@ -2130,11 +2130,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         if USING_DJANGO_3:
             skip_tests += (
                 "constraints.tests.CheckConstraintTests.test_database_constraint_expressionwrapper",  # noqa
-                "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related", # noqa
-                "queries.tests.Queries1Tests.test_ticket7098", # noqa
+                "defer_regress.tests.DeferAnnotateSelectRelatedTest.test_defer_annotate_select_related",  # noqa
+                "queries.tests.Queries1Tests.test_ticket7098",  # noqa
                 "auth_tests.test_password_reset_timeout_days.DeprecationTests.test_timeout",  # noqa
-                "constraints.tests.CheckConstraintTests.test_database_constraint_expression", # noqa
-                "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning", # noqa
+                "constraints.tests.CheckConstraintTests.test_database_constraint_expression",  # noqa
+                "queries.tests.Queries1Tests.test_order_by_raw_column_alias_warning",  # noqa
                 "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap_custom_index",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_both_passwords",  # noqa
                 "auth_tests.test_forms.UserCreationFormTest.test_custom_form",  # noqa

@@ -132,7 +132,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             if USING_DJANGO_4:
                 columns = [model._meta.get_field(field) for field in fields]
             else:
-                columns = [model._meta.get_field(field).column for field in fields]
+                columns = [
+                    model._meta.get_field(field).column for field in fields
+                ]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
         constraints = [
             constraint.constraint_sql(model, self)
@@ -505,7 +507,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             ):
                 self.execute(self._create_index_sql(model, fields=[new_field]))
 
-    def _alter_column_type_sql(self, model, old_field, new_field, new_type, old_collation=None, new_collation=None):
+    def _alter_column_type_sql(
+        self,
+        model,
+        old_field,
+        new_field,
+        new_type,
+        old_collation=None,
+        new_collation=None,
+    ):
         # Spanner needs to use sql_alter_column_not_null if the field is
         # NOT NULL, otherwise the constraint is dropped.
         sql = (

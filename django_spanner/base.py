@@ -205,15 +205,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         return True
 
-    # The usual way to start a transaction is to turn autocommit off.
-    # Spanner DB API does not properly start a transaction when disabling
-    # autocommit. To avoid this buggy behavior and to actually enter a new
-    # transaction, an explicit SELECT 1 is required.
     def _start_transaction_under_autocommit(self):
         """
         Start a transaction explicitly in autocommit mode.
-
-        Staying in autocommit mode works around a bug that breaks
-        save points when autocommit is disabled by django.
         """
-        self.connection.cursor().execute("SELECT 1")
+        self.connection.cursor().execute("BEGIN")

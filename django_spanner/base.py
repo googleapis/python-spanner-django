@@ -17,6 +17,7 @@ from .features import DatabaseFeatures
 from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
+from django_spanner import USING_DJANGO_3, USING_DJANGO_4
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
@@ -112,6 +113,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     ops_class = DatabaseOperations
     client_class = DatabaseClient
 
+
     @property
     def instance(self):
         """Reference to a Cloud Spanner Instance containing the Database.
@@ -122,6 +124,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return spanner.Client(
             project=os.environ["GOOGLE_CLOUD_PROJECT"]
         ).instance(self.settings_dict["INSTANCE"])
+
+    @property
+    def allow_transactions_in_auto_commit(self):
+        if "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" in self.settings_dict:
+            return self.settings_dict["ALLOW_TRANSACTIONS_IN_AUTO_COMMIT"]
+        if USING_DJANGO_3:
+            return False
+        if USING_DJANGO_4:
+            return True
 
     @property
     def _nodb_connection(self):
@@ -209,4 +220,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """
         Start a transaction explicitly in autocommit mode.
         """
-        self.connection.cursor().execute("BEGIN")
+        if self.allow_transactions_in_auto_commit:
+            self.connection.cursor().execute("BEGIN")
+        else:
+            # This won't start a transaction and was a bug in Spanner Django 3.2 version.
+            self.connection.cursor().execute("SELECT 1")

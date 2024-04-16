@@ -13,7 +13,7 @@ from django.db.models.sql.compiler import (
     SQLUpdateCompiler as BaseSQLUpdateCompiler,
 )
 from django.db.utils import DatabaseError
-from django_spanner import USING_DJANGO_3, USING_DJANGO_4
+from django_spanner import USING_DJANGO_3
 
 
 class SQLCompiler(BaseSQLCompiler):

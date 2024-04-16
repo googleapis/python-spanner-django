@@ -8,7 +8,7 @@ from django.core.exceptions import EmptyResultSet
 from django.db.utils import DatabaseError
 from django_spanner.compiler import SQLCompiler
 from django.db.models.query import QuerySet
-from django_spanner import USING_DJANGO_3, USING_DJANGO_4
+from django_spanner import USING_DJANGO_3
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from .models import Number
 
@@ -48,7 +48,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "FROM tests_number WHERE tests_number.num >= %s"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [
@@ -80,7 +80,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "tests_number.num >= %s"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [
@@ -112,7 +112,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "FROM tests_number WHERE tests_number.num >= %s"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [
@@ -144,7 +144,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "tests_number.num >= %s"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [
@@ -179,7 +179,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "WHERE tests_number.num = %s)"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [
@@ -219,7 +219,7 @@ class TestCompiler(SpannerSimpleTestClass):
                     + "WHERE tests_number.num = %s)"
                 ],
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 sql_compiled,
                 [

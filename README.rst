@@ -140,6 +140,19 @@ configured:
            }
        }
 
+  Transaction support in autocommit mode
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  We have started supporting transactions in autocommit mode by default for V4.2
+  while they are not supported in prior versions (i.e. V3.2).
+
+  - To override supporting transactions in autocommit mode in V3.2 please enable
+  the flag "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" with value True in your
+  settings.py file.
+  - To override disabling transactions in autocommit mode in V4.2 please disable
+  the flag "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" with value False in your
+  settings.py file.
+
 
 Set credentials and project environment variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

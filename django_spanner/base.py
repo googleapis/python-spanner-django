@@ -113,7 +113,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     ops_class = DatabaseOperations
     client_class = DatabaseClient
 
-
     @property
     def instance(self):
         """Reference to a Cloud Spanner Instance containing the Database.

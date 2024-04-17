@@ -151,8 +151,8 @@ configured:
   You can enable transactions in autocommit mode with Spanner with the
   `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` configuration option.
 
-  - To override supporting transactions in autocommit mode in V3.2 please enable
-  the flag "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" with value True in your
+  - To enable transactions in autocommit mode in V3.2, set
+  the flag "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" to True in your
   settings.py file.
   - To override disabling transactions in autocommit mode in V4.2 please disable
   the flag "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" with value False in your

@@ -17,7 +17,7 @@ from .features import DatabaseFeatures
 from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
-from django_spanner import USING_DJANGO_3, USING_DJANGO_4
+from django_spanner import USING_DJANGO_3
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
@@ -130,7 +130,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return self.settings_dict["ALLOW_TRANSACTIONS_IN_AUTO_COMMIT"]
         if USING_DJANGO_3:
             return False
-        if USING_DJANGO_4:
+        else:
             return True
 
     @property

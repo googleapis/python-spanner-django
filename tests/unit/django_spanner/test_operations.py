@@ -12,7 +12,7 @@ from django.core.management.color import no_style
 from django.db.utils import DatabaseError
 from google.cloud.spanner_dbapi.types import DateStr
 
-from django_spanner import USING_DJANGO_3, USING_DJANGO_4
+from django_spanner import USING_DJANGO_3
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 import uuid
 
@@ -118,7 +118,7 @@ class TestOperations(SpannerSimpleTestClass):
                 self.db_operations.date_extract_sql("week", "dummy_field"),
                 "EXTRACT(isoweek FROM dummy_field)",
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.date_extract_sql("week", "dummy_field"),
                 ("EXTRACT(isoweek FROM dummy_field)", None),
@@ -132,7 +132,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 "EXTRACT(dayofweek FROM dummy_field)",
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.date_extract_sql(
                     "dayofweek", "dummy_field"
@@ -149,7 +149,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 'EXTRACT(dayofweek FROM dummy_field AT TIME ZONE "IST")',
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.datetime_extract_sql(
                     "dayofweek", "dummy_field", None, "IST"
@@ -169,7 +169,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 'EXTRACT(dayofweek FROM dummy_field AT TIME ZONE "UTC")',
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.datetime_extract_sql(
                     "dayofweek", "dummy_field", None, "IST"
@@ -189,7 +189,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 'EXTRACT(dayofweek FROM dummy_field AT TIME ZONE "UTC")',
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.time_extract_sql(
                     "dayofweek", "dummy_field"
@@ -206,7 +206,7 @@ class TestOperations(SpannerSimpleTestClass):
                 self.db_operations.time_trunc_sql("dayofweek", "dummy_field"),
                 'TIMESTAMP_TRUNC(dummy_field, dayofweek, "UTC")',
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.time_trunc_sql(
                     "dayofweek", "dummy_field", None
@@ -222,7 +222,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 'DATE(dummy_field, "IST")',
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.datetime_cast_date_sql(
                     "dummy_field", None, "IST"
@@ -239,7 +239,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 "TIMESTAMP(FORMAT_TIMESTAMP('%Y-%m-%d %R:%E9S %Z', dummy_field, 'IST'))",
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.datetime_cast_time_sql(
                     "dummy_field", None, "IST"
@@ -259,7 +259,7 @@ class TestOperations(SpannerSimpleTestClass):
                 ),
                 "TIMESTAMP(FORMAT_TIMESTAMP('%Y-%m-%d %R:%E9S %Z', dummy_field, 'UTC'))",
             )
-        elif USING_DJANGO_4:
+        else:
             self.assertEqual(
                 self.db_operations.datetime_cast_time_sql(
                     "dummy_field", None, "IST"

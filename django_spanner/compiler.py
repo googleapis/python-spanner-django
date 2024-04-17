@@ -39,6 +39,8 @@ class SQLCompiler(BaseSQLCompiler):
         :returns: A tuple containing SQL statement(s) with some additional
                   parameters.
         """
+        # This method copies the complete code of this overridden method from
+        # Django core and modify it for Spanner by adding one line
         if USING_DJANGO_3:
             features = self.connection.features
             compilers = [
@@ -101,6 +103,8 @@ class SQLCompiler(BaseSQLCompiler):
             if not parts:
                 raise EmptyResultSet
             combinator_sql = self.connection.ops.set_operators[combinator]
+            # This is the only line that is changed from the Django core
+            # implementation of this method
             combinator_sql += " ALL" if all else " DISTINCT"
             braces = (
                 "({})"
@@ -116,6 +120,9 @@ class SQLCompiler(BaseSQLCompiler):
                 params.extend(part)
 
             return result, params
+        # As the code of this method has somewhat changed in Django 4.2 core
+        # version, so we are copying the complete code of this overridden method
+        # and modifying it for Spanner
         else:
             features = self.connection.features
             compilers = [
@@ -191,6 +198,8 @@ class SQLCompiler(BaseSQLCompiler):
             if not parts:
                 raise EmptyResultSet
             combinator_sql = self.connection.ops.set_operators[combinator]
+            # This is the only line that is changed from the Django core
+            # implementation of this method
             combinator_sql += " ALL" if all else " DISTINCT"
             braces = "{}"
             if (

@@ -151,8 +151,8 @@ Django version 3.2 and earlier did not support transactions in autocommit mode w
 You can enable transactions in autocommit mode with Spanner with the
 `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` configuration option.
 
- - To enable transactions in autocommit mode in V3.2, set the flag `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` to True in your settings.py file.
- - To disable transactions in autocommit mode in V4.2, set the flag `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` to False in your settings.py file.
+- To enable transactions in autocommit mode in V3.2, set the flag `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` to True in your settings.py file.
+- To disable transactions in autocommit mode in V4.2, set the flag `ALLOW_TRANSACTIONS_IN_AUTO_COMMIT` to False in your settings.py file.
 
 
 Set credentials and project environment variables

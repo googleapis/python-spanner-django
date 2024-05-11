@@ -34,7 +34,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_select_for_update_with_limit = False
     supports_sequence_reset = False
     supports_timezones = False
-    supports_transactions = False
+    supports_transactions = True
     if USE_EMULATOR:
         # Emulator does not support json.
         supports_json_field = False

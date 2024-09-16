@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file or at
@@ -15,7 +15,7 @@ python3 -m releasetool publish-reporter-script > /tmp/publisher-script; source /
 export PYTHONUNBUFFERED=1
 
 # Move into the package, build the distribution and upload.
-TWINE_PASSWORD=$(cat "${KOKORO_KEYSTORE_DIR}/73713_google-cloud-pypi-token-keystore-1")
+TWINE_PASSWORD=$(cat "${KOKORO_KEYSTORE_DIR}/73713_google-cloud-pypi-token-keystore-2")
 cd github/python-spanner-django
 python3 setup.py sdist bdist_wheel
 twine upload --username __token__ --password "${TWINE_PASSWORD}" dist/*

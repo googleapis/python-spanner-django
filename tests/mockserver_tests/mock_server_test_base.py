@@ -181,7 +181,9 @@ class MockServerTestBase(unittest.TestCase):
     def setup_method(self, test_method):
         for db, config in DATABASES.items():
             if config["ENGINE"] == "django_spanner":
-                connections[db].settings_dict["OPTIONS"]["client"] = self.client
+                connections[db].settings_dict["OPTIONS"][
+                    "client"
+                ] = self.client
                 connections[db].settings_dict["OPTIONS"]["pool"] = self.pool
 
     def teardown_method(self, test_method):

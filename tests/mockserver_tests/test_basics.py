@@ -13,12 +13,14 @@
 # limitations under the License.
 from google.cloud.spanner_v1 import (
     BatchCreateSessionsRequest,
-    ExecuteSqlRequest, CommitRequest,
+    ExecuteSqlRequest,
+    CommitRequest,
 )
 from tests.mockserver_tests.mock_server_test_base import (
     MockServerTestBase,
     add_select1_result,
-    add_singer_query_result, add_update_count,
+    add_singer_query_result,
+    add_update_count,
 )
 from django.db import connection, models
 
@@ -77,7 +79,8 @@ class TestBasics(MockServerTestBase):
             "INSERT INTO tests_singer "
             "(id, first_name, last_name) "
             "VALUES (@a0, @a1, @a2)",
-            1)
+            1,
+        )
         singer = Singer(first_name="test", last_name="test")
         singer.save()
         requests = self.spanner_service.requests
@@ -94,7 +97,7 @@ class TestBasics(MockServerTestBase):
     def test_insert_singer_with_disabled_random_primary_key(self):
         for db, config in DATABASES.items():
             if config["ENGINE"] == "django_spanner":
-                config["DISABLE_RANDOM_ID_GENERATION"] = "true"
+                config["RANDOM_ID_GENERATION_ENABLED"] = "false"
 
         # Define a class locally in this test method to ensure that
         # it is initialized after disabling random ID generation.
@@ -107,7 +110,8 @@ class TestBasics(MockServerTestBase):
                 "INSERT INTO tests_localsinger "
                 "(first_name, last_name) "
                 "VALUES (@a0, @a1)",
-                1)
+                1,
+            )
             singer = LocalSinger(first_name="test", last_name="test")
             singer.save()
             requests = self.spanner_service.requests

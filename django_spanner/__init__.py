@@ -13,6 +13,7 @@ import django
 from uuid import uuid4
 
 import pkg_resources
+from django.conf.global_settings import DATABASES
 from google.cloud.spanner_v1 import JsonObject
 from django.db.models.fields import (
     NOT_PROVIDED,
@@ -64,11 +65,15 @@ def autofield_init(self, *args, **kwargs):
     kwargs["blank"] = True
     Field.__init__(self, *args, **kwargs)
 
-    if (
-        django.db.connection.settings_dict["ENGINE"] == "django_spanner"
-        and self.default == NOT_PROVIDED
-    ):
-        self.default = gen_rand_int64
+    databases = django.db.connections.databases
+    for db, config in databases.items():
+        if (
+            config["ENGINE"] == "django_spanner"
+            and self.default == NOT_PROVIDED
+            and not config.get("DISABLE_RANDOM_ID_GENERATION", "false").lower() == "true"
+        ):
+            self.default = gen_rand_int64
+            break
 
 
 AutoField.__init__ = autofield_init

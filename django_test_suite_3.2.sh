@@ -70,6 +70,6 @@ create_settings
 EXIT_STATUS=0
 for DJANGO_TEST_APP in $DJANGO_TEST_APPS
 do
-   python3 runtests.py $DJANGO_TEST_APP --verbosity=3 --noinput --settings $SETTINGS_FILE || EXIT_STATUS=$?
+   python3 runtests.py $DJANGO_TEST_APP --parallel=16 --verbosity=3 --noinput --settings $SETTINGS_FILE || EXIT_STATUS=$?
 done
 exit $EXIT_STATUS

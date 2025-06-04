@@ -1,5 +1,35 @@
 # Changelog
 
+## [4.0.1](https://github.com/googleapis/python-spanner-django/compare/v4.0.0...v4.0.1) (2024-05-07)
+
+
+### Bug Fixes
+
+* Fixing README.rst to fix release failure. ([#885](https://github.com/googleapis/python-spanner-django/issues/885)) ([45a486a](https://github.com/googleapis/python-spanner-django/commit/45a486af392d23224f744b029b1132fed0344be2))
+
+## [4.0.0](https://github.com/googleapis/python-spanner-django/compare/v3.1.0...v4.0.0) (2024-04-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support Django 4.2 ([#865](https://github.com/googleapis/python-spanner-django/issues/865))
+
+### Features
+
+* Support Django 4.2 ([#865](https://github.com/googleapis/python-spanner-django/issues/865)) ([75cd9bc](https://github.com/googleapis/python-spanner-django/commit/75cd9bc25bed283f9e22cf2b4b3a9791f5fc5059))
+
+## [3.1.0](https://github.com/googleapis/python-spanner-django/compare/v3.0.2...v3.1.0) (2024-04-23)
+
+
+### Features
+
+* Add support for named schema ([#858](https://github.com/googleapis/python-spanner-django/issues/858))
+
+
+### Bug Fixes
+
+* Fixing test_clearsessions_unsupported test ([#863](https://github.com/googleapis/python-spanner-django/issues/863))
+
 ## [3.0.2](https://github.com/googleapis/python-spanner-django/compare/v3.0.1...v3.0.2) (2022-08-08)
 
 

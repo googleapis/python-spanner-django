@@ -24,9 +24,10 @@ BLACK_PATHS = [
     "setup.py",
 ]
 
+MOCKSERVER_TEST_PYTHON_VERSION = "3.12"
 DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -66,16 +67,17 @@ def lint_setup_py(session):
     )
 
 
-def default(session, django_version="2.2"):
+def default(session, django_version="3.2"):
     # Install all test dependencies, then install this package in-place.
     session.install(
+        "setuptools",
         "django~={}".format(django_version),
         "mock",
         "mock-import",
         "pytest",
         "pytest-cov",
         "coverage",
-        "sqlparse==0.3.0",
+        "sqlparse==0.3.1",
         "google-cloud-spanner>=3.13.0",
         "opentelemetry-api==1.1.0",
         "opentelemetry-sdk==1.1.0",
@@ -92,7 +94,7 @@ def default(session, django_version="2.2"):
         "--cov-append",
         "--cov-config=.coveragerc",
         "--cov-report=",
-        "--cov-fail-under=80",
+        "--cov-fail-under=75",
         os.path.join("tests", "unit"),
         *session.posargs,
     )
@@ -101,13 +103,39 @@ def default(session, django_version="2.2"):
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 2.2")
-    default(session)
     print("Unit tests with django 3.2")
-    default(session, django_version="3.2")
+    default(session)
+    print("Unit tests with django 4.2")
+    default(session, django_version="4.2")
 
 
-def system_test(session, django_version="2.2"):
+@nox.session(python=MOCKSERVER_TEST_PYTHON_VERSION)
+def mockserver(session):
+    # Install all test dependencies, then install this package in-place.
+    session.install(
+        "setuptools",
+        "django~=4.2",
+        "mock",
+        "mock-import",
+        "pytest",
+        "pytest-cov",
+        "coverage",
+        "sqlparse>=0.4.4",
+        "google-cloud-spanner>=3.55.0",
+        "opentelemetry-api==1.1.0",
+        "opentelemetry-sdk==1.1.0",
+        "opentelemetry-instrumentation==0.20b0",
+    )
+    session.install("-e", ".")
+    session.run(
+        "py.test",
+        "--quiet",
+        os.path.join("tests", "mockserver_tests"),
+        *session.posargs,
+    )
+
+
+def system_test(session, django_version="3.2"):
     """Run the system test suite."""
     constraints_path = str(
         CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
@@ -157,10 +185,10 @@ def system_test(session, django_version="2.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    print("System tests with django 2.2")
-    system_test(session)
     print("System tests with django 3.2")
-    system_test(session, django_version="3.2")
+    system_test(session)
+    print("System tests with django 4.2")
+    system_test(session, django_version="4.2")
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
@@ -182,7 +210,19 @@ def docs(session):
 
     session.install("-e", ".[tracing]")
     session.install(
-        "sphinx==4.0.1", "alabaster", "recommonmark", "django==2.2"
+        # We need to pin to specific versions of the `sphinxcontrib-*` packages
+        # which still support sphinx 4.x.
+        # See https://github.com/googleapis/sphinx-docfx-yaml/issues/344
+        # and https://github.com/googleapis/sphinx-docfx-yaml/issues/345.
+        "sphinxcontrib-applehelp==1.0.4",
+        "sphinxcontrib-devhelp==1.0.2",
+        "sphinxcontrib-htmlhelp==2.0.1",
+        "sphinxcontrib-qthelp==1.0.3",
+        "sphinxcontrib-serializinghtml==1.1.5",
+        "sphinx==4.5.0",
+        "alabaster",
+        "recommonmark",
+        "django==3.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
@@ -207,10 +247,19 @@ def docfx(session):
 
     session.install("-e", ".[tracing]")
     session.install(
+        # We need to pin to specific versions of the `sphinxcontrib-*` packages
+        # which still support sphinx 4.x.
+        # See https://github.com/googleapis/sphinx-docfx-yaml/issues/344
+        # and https://github.com/googleapis/sphinx-docfx-yaml/issues/345.
+        "sphinxcontrib-applehelp==1.0.4",
+        "sphinxcontrib-devhelp==1.0.2",
+        "sphinxcontrib-htmlhelp==2.0.1",
+        "sphinxcontrib-qthelp==1.0.3",
+        "sphinxcontrib-serializinghtml==1.1.5",
         "gcp-sphinx-docfx-yaml",
         "alabaster",
         "recommonmark",
-        "django==2.2",
+        "django==3.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

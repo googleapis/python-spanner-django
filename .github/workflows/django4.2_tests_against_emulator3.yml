@@ -3,7 +3,7 @@ on:
     branches:
       - main
   pull_request:
-name: django-tests3
+name: django4.2-tests3
 jobs:
   system-tests:
     runs-on: ubuntu-latest
@@ -16,13 +16,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
       - name: Run Django tests
-        run: sh django_test_suite.sh
+        run: sh django_test_suite_4.2.sh
         env:
           SPANNER_EMULATOR_HOST: localhost:9010
           GOOGLE_CLOUD_PROJECT: emulator-test-project

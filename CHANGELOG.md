@@ -4,6 +4,13 @@
 
 [1]: https://pypi.org/project/django-google-spanner/#history
 
+## [4.1.0](https://github.com/googleapis/google-cloud-python/compare/django-google-spanner-v4.0.2...django-google-spanner-v4.1.0) (2025-11-13)
+
+
+### Features
+
+* some feature ([762510954a03e99ef9b828eb1bd9858350fbb9a0](https://github.com/googleapis/google-cloud-python/commit/762510954a03e99ef9b828eb1bd9858350fbb9a0))
+
 ## [4.0.2](https://github.com/googleapis/python-spanner-django/compare/v4.0.1...v4.0.2) (2025-06-05)
 
 

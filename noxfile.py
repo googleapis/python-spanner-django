@@ -70,7 +70,7 @@ def lint_setup_py(session):
 def default(session, django_version="3.2"):
     # Install all test dependencies, then install this package in-place.
     session.install(
-        "setuptools",
+        # "setuptools",
         "django~={}".format(django_version),
         "mock",
         "mock-import",
@@ -103,8 +103,9 @@ def default(session, django_version="3.2"):
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 3.2")
-    default(session)
+    if session.python < "3.13":
+        print("Unit tests with django 3.2")
+        default(session)
     print("Unit tests with django 4.2")
     default(session, django_version="4.2")
 

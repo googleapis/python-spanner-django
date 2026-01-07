@@ -8,7 +8,7 @@
 Different models used by system tests in django-spanner code.
 """
 from django.db import models
-from django_spanner import USING_DJANGO_3
+
 
 
 class Author(models.Model):
@@ -36,8 +36,5 @@ class Event(models.Model):
             ),
         ]
 
-
-if USING_DJANGO_3:
-
-    class Detail(models.Model):
-        value = models.JSONField()
+class Detail(models.Model):
+    value = models.JSONField()

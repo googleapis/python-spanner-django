@@ -17,7 +17,7 @@ from .features import DatabaseFeatures
 from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
-from django_spanner import USING_DJANGO_3
+
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
@@ -130,10 +130,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def allow_transactions_in_auto_commit(self):
         if "ALLOW_TRANSACTIONS_IN_AUTO_COMMIT" in self.settings_dict:
             return self.settings_dict["ALLOW_TRANSACTIONS_IN_AUTO_COMMIT"]
-        if USING_DJANGO_3:
-            return False
-        else:
-            return True
+        return True
 
     @property
     def _nodb_connection(self):

@@ -25,9 +25,9 @@ BLACK_PATHS = [
 ]
 
 MOCKSERVER_TEST_PYTHON_VERSION = "3.12"
-DEFAULT_PYTHON_VERSION = "3.8"
-SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10"]
+DEFAULT_PYTHON_VERSION = "3.10"
+SYSTEM_TEST_PYTHON_VERSIONS = ["3.10", "3.11", "3.12"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.10", "3.11", "3.12"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -67,11 +67,11 @@ def lint_setup_py(session):
     )
 
 
-def default(session, django_version="3.2"):
+def default(session, django_version="5.2"):
     # Install all test dependencies, then install this package in-place.
     session.install(
-        "setuptools",
-        "django~={}".format(django_version),
+        "setuptools==80.9.0",
+        "django=={}".format(django_version),
         "mock",
         "mock-import",
         "pytest",
@@ -97,16 +97,18 @@ def default(session, django_version="3.2"):
         "--cov-fail-under=75",
         os.path.join("tests", "unit"),
         *session.posargs,
+        env={
+            "GOOGLE_CLOUD_PROJECT": "db-dev-integration-test-proj",
+            "DJANGO_SETTINGS_MODULE": "tests.settings",
+        },
     )
 
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 3.2")
-    default(session)
-    print("Unit tests with django 4.2")
-    default(session, django_version="4.2")
+    print("Unit tests with django 5.2")
+    default(session, django_version="5.2")
 
 
 @nox.session(python=MOCKSERVER_TEST_PYTHON_VERSION)
@@ -114,7 +116,7 @@ def mockserver(session):
     # Install all test dependencies, then install this package in-place.
     session.install(
         "setuptools",
-        "django~=4.2",
+        "django==5.2",
         "mock",
         "mock-import",
         "pytest",
@@ -135,7 +137,7 @@ def mockserver(session):
     )
 
 
-def system_test(session, django_version="3.2"):
+def system_test(session, django_version="5.2"):
     """Run the system test suite."""
     constraints_path = str(
         CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
@@ -185,10 +187,8 @@ def system_test(session, django_version="3.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    print("System tests with django 3.2")
-    system_test(session)
-    print("System tests with django 4.2")
-    system_test(session, django_version="4.2")
+    print("System tests with django 5.2")
+    system_test(session, django_version="5.2")
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
@@ -204,7 +204,7 @@ def cover(session):
     session.run("coverage", "erase")
 
 
-@nox.session(python="3.9")
+@nox.session(python="3.10")
 def docs(session):
     """Build the docs for this library."""
 
@@ -222,7 +222,7 @@ def docs(session):
         "sphinx==4.5.0",
         "alabaster",
         "recommonmark",
-        "django==3.2",
+        "django==5.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
@@ -259,7 +259,7 @@ def docfx(session):
         "gcp-sphinx-docfx-yaml",
         "alabaster",
         "recommonmark",
-        "django==3.2",
+        "django==5.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

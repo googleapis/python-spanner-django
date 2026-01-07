@@ -56,533 +56,1216 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # example: CREATE INDEX index_name ON table (LOWER(column_name))
     supports_expression_indexes = False
 
-    # Django tests that aren't supported by Spanner.
     skip_tests = (
-        # Spanner does not support very long FK name: 400 Foreign Key name not valid
-        "backends.tests.FkConstraintsTests.test_check_constraints",
-        # No foreign key ON DELETE CASCADE in Spanner.
-        "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
-        # Spanner does not support empty list of DML statement.
-        "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
-        # No Django transaction management in Spanner.
-        "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
-        # django_spanner monkey patches AutoField to have a default value.
-        "basic.tests.ModelTest.test_hash",
-        "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
-        "custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_fk_related_manager",
-        "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
-        "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
-        "generic_relations.tests.GenericRelationsTests.test_generic_update_or_create_when_updated",
-        "generic_relations.tests.GenericRelationsTests.test_update_or_create_defaults",
-        "m2m_through_regress.tests.ToFieldThroughTests.test_m2m_relations_unusable_on_null_pk_obj",
-        "many_to_many.tests.ManyToManyTests.test_add",
-        "many_to_one.tests.ManyToOneTests.test_fk_assignment_and_related_object_cache",
-        "many_to_one.tests.ManyToOneTests.test_relation_unsaved",
-        "model_fields.test_durationfield.TestSerialization.test_dumping",
-        "model_fields.test_uuid.TestSerialization.test_dumping",
-        "model_fields.test_booleanfield.ValidationTest.test_nullbooleanfield_blank",
-        "model_inheritance.tests.ModelInheritanceTests.test_create_child_no_update",
-        "model_regress.tests.ModelTests.test_get_next_prev_by_field_unsaved",
-        "one_to_one.tests.OneToOneTests.test_get_reverse_on_unsaved_object",
-        "one_to_one.tests.OneToOneTests.test_o2o_primary_key_delete",
-        "one_to_one.tests.OneToOneTests.test_set_reverse_on_unsaved_object",
-        "one_to_one.tests.OneToOneTests.test_unsaved_object",
-        "queries.test_bulk_update.BulkUpdateNoteTests.test_unsaved_models",
-        "expressions_case.tests.CaseExpressionTests.test_update_decimal",
-        "serializers.test_json.JsonSerializerTestCase.test_pkless_serialized_strings",
-        "serializers.test_json.JsonSerializerTestCase.test_serialize_with_null_pk",
-        "serializers.test_xml.XmlSerializerTestCase.test_pkless_serialized_strings",
-        "serializers.test_xml.XmlSerializerTestCase.test_serialize_with_null_pk",
-        "serializers.test_yaml.YamlSerializerTestCase.test_pkless_serialized_strings",
-        "serializers.test_yaml.YamlSerializerTestCase.test_serialize_with_null_pk",
-        "serializers.test_data.SerializerDataTests.test_yaml_serializer",
-        "serializers.test_data.SerializerDataTests.test_xml_serializer",
-        "serializers.test_data.SerializerDataTests.test_python_serializer",
-        "serializers.test_data.SerializerDataTests.test_json_serializer",
-        "timezones.tests.LegacyDatabaseTests.test_cursor_execute_accepts_naive_datetime",
-        "timezones.tests.NewDatabaseTests.test_cursor_execute_accepts_naive_datetime",
-        "timezones.tests.AdminTests.test_change_editable",
-        "timezones.tests.AdminTests.test_change_editable_in_other_timezone",
-        "timezones.tests.AdminTests.test_change_readonly",
-        "timezones.tests.AdminTests.test_change_readonly_in_other_timezone",
-        "timezones.tests.AdminTests.test_changelist",
-        "timezones.tests.AdminTests.test_changelist_in_other_timezone",
-        "timezones.tests.LegacyDatabaseTests.test_cursor_execute_returns_naive_datetime",
-        "timezones.tests.NewDatabaseTests.test_cursor_execute_returns_naive_datetime",
-        "validation.test_custom_messages.CustomMessagesTests.test_custom_null_message",
-        "validation.test_custom_messages.CustomMessagesTests.test_custom_simple_validator_message",
-        "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_adding_and_pk_not_specified",  # noqa
-        "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_not_adding",
-        "validation.test_validators.TestModelsWithValidators.test_custom_validator_passes_for_correct_value",
-        "validation.test_validators.TestModelsWithValidators.test_custom_validator_raises_error_for_incorrect_value",
-        "validation.test_validators.TestModelsWithValidators.test_field_validators_can_be_any_iterable",
-        # Tests that assume a serial pk.
-        "servers.tests.LiveServerDatabase.test_fixtures_loaded",
-        "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_nullbooleanfield",
-        "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_tuple",
-        "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter",
-        "admin_filters.tests.ListFiltersTests.test_datefieldlistfilter_with_time_zone_support",
-        "admin_filters.tests.ListFiltersTests.test_datefieldlistfilter",
-        "admin_filters.tests.ListFiltersTests.test_fieldlistfilter_underscorelookup_tuple",
-        "admin_filters.tests.ListFiltersTests.test_fk_with_to_field",
-        "admin_filters.tests.ListFiltersTests.test_listfilter_genericrelation",
-        "admin_filters.tests.ListFiltersTests.test_lookup_with_non_string_value_underscored",
-        "admin_filters.tests.ListFiltersTests.test_lookup_with_non_string_value",
-        "admin_filters.tests.ListFiltersTests.test_relatedfieldlistfilter_manytomany",
-        "admin_filters.tests.ListFiltersTests.test_simplelistfilter",
-        "admin_inlines.tests.TestInline.test_inline_hidden_field_no_column",
-        "proxy_models.tests.ProxyModelAdminTests.test_delete_str_in_model_admin",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_localized_datetime_input",
-        "admin_utils.test_logentry.LogEntryTests.test_proxy_model_content_type_is_used_for_log_entries",
-        "admin_utils.test_logentry.LogEntryTests.test_action_flag_choices",
-        "admin_utils.test_logentry.LogEntryTests.test_log_action",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_formsets",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_not_json",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_get_admin_url",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_get_edited_object",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_repr",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_save",
-        "admin_utils.test_logentry.LogEntryTests.test_logentry_unicode",
-        "admin_utils.test_logentry.LogEntryTests.test_recentactions_without_content_type",
-        "admin_views.tests.AdminViewPermissionsTest.test_history_view",
-        "aggregation.test_filter_argument.FilteredAggregateTests.test_plain_annotate",
-        "aggregation.tests.AggregateTestCase.test_annotate_basic",
-        "aggregation.tests.AggregateTestCase.test_annotation",
-        "aggregation.tests.AggregateTestCase.test_filtering",
-        "aggregation_regress.tests.AggregationTests.test_more_more",
-        "aggregation_regress.tests.AggregationTests.test_more_more_more",
-        "defer_regress.tests.DeferRegressionTest.test_ticket_12163",
-        "defer_regress.tests.DeferRegressionTest.test_ticket_23270",
-        "distinct_on_fields.tests.DistinctOnTests.test_basic_distinct_on",
-        "extra_regress.tests.ExtraRegressTests.test_regression_7314_7372",
-        "generic_relations_regress.tests.GenericRelationTests.test_annotate",
-        "get_earliest_or_latest.tests.TestFirstLast",
-        "known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_multi_prefetch_related",
-        "known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_multi_select_related",
-        "lookup.tests.LookupTests.test_get_next_previous_by",
-        "lookup.tests.LookupTests.test_values_list",
-        "migrations.test_operations.OperationTests.test_alter_order_with_respect_to",
-        "model_fields.tests.GetChoicesOrderingTests.test_get_choices_reverse_related_field",
-        "model_formsets.tests.ModelFormsetTest.test_custom_pk",
-        "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_custom_delete",
-        "multiple_database.tests.RouterTestCase.test_generic_key_cross_database_protection",
-        "ordering.tests.OrderingTests.test_default_ordering_by_f_expression",
-        "ordering.tests.OrderingTests.test_order_by_fk_attname",
-        "ordering.tests.OrderingTests.test_order_by_override",
-        "ordering.tests.OrderingTests.test_order_by_pk",
-        "prefetch_related.test_prefetch_related_objects.PrefetchRelatedObjectsTests.test_m2m_then_m2m",
-        "prefetch_related.tests.CustomPrefetchTests.test_custom_qs",
-        "prefetch_related.tests.CustomPrefetchTests.test_nested_prefetch_related_are_not_overwritten",
-        "prefetch_related.tests.ForeignKeyToFieldTest.test_m2m",
-        "queries.test_bulk_update.BulkUpdateNoteTests.test_multiple_fields",
-        "queries.test_bulk_update.BulkUpdateTests.test_inherited_fields",
-        "queries.tests.Queries4Tests.test_ticket15316_exclude_true",
-        "queries.tests.Queries5Tests.test_ticket7256",
-        "queries.tests.SubqueryTests.test_related_sliced_subquery",
-        "queries.tests.Ticket14056Tests.test_ticket_14056",
-        "queries.tests.RelatedLookupTypeTests.test_values_queryset_lookup",
-        "raw_query.tests.RawQueryTests.test_annotations",
-        "raw_query.tests.RawQueryTests.test_get_item",
-        "select_related.tests.SelectRelatedTests.test_field_traversal",
-        "syndication_tests.tests.SyndicationFeedTest.test_rss2_feed",
-        "syndication_tests.tests.SyndicationFeedTest.test_latest_post_date",
-        "syndication_tests.tests.SyndicationFeedTest.test_rss091_feed",
-        "syndication_tests.tests.SyndicationFeedTest.test_template_feed",
-        # datetimes retrieved from the database with the wrong hour when
-        # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
-        "datetimes.tests.DateTimesTests.test_21432",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_timezone_applied_before_truncation",  # noqa
-        # extract() with timezone not working as expected:
-        # https://github.com/googleapis/python-spanner-django/issues/191
-        "timezones.tests.NewDatabaseTests.test_query_datetimes",
-        # using NULL with + crashes: https://github.com/googleapis/python-spanner-django/issues/201
-        "annotations.tests.NonAggregateAnnotationTestCase.test_combined_annotation_commutative",
-        # Spanner does not support custom precision on DecimalField
-        "db_functions.comparison.test_cast.CastTests.test_cast_to_decimal_field",
-        "model_fields.test_decimalfield.DecimalFieldTests.test_fetch_from_db_without_float_rounding",
-        "model_fields.test_decimalfield.DecimalFieldTests.test_roundtrip_with_trailing_zeros",
-        # Spanner doesn't support the variance the standard deviation database
-        # functions on full population.
-        "aggregation.test_filter_argument.FilteredAggregateTests.test_filtered_numerical_aggregates",
-        "aggregation_regress.tests.AggregationTests.test_stddev",
-        # SELECT list expression references <column> which is neither grouped
-        # nor aggregated: https://github.com/googleapis/python-spanner-django/issues/245
-        "aggregation_regress.tests.AggregationTests.test_annotated_conditional_aggregate",
-        "aggregation_regress.tests.AggregationTests.test_annotation_with_value",
-        "expressions.tests.BasicExpressionsTests.test_filtering_on_annotate_that_uses_q",
-        # "No matching signature for operator" crash when comparing TIMESTAMP
-        # and DATE: https://github.com/googleapis/python-spanner-django/issues/255
-        "expressions.tests.BasicExpressionsTests.test_outerref_mixed_case_table_name",
-        "expressions.tests.FTimeDeltaTests.test_mixed_comparisons1",
-        # duration arithmetic fails with dates: No matching signature for
-        # function TIMESTAMP_ADD: https://github.com/googleapis/python-spanner-django/issues/253
-        "expressions.tests.FTimeDeltaTests.test_date_comparison",
-        "expressions.tests.FTimeDeltaTests.test_date_minus_duration",
-        "expressions.tests.FTimeDeltaTests.test_delta_add",
-        "expressions.tests.FTimeDeltaTests.test_duration_with_datetime",
-        "expressions.tests.FTimeDeltaTests.test_mixed_comparisons2",
-        # This test doesn't raise NotSupportedError because Spanner doesn't
-        # support select for update either (besides the "with limit"
-        # restriction).
-        "select_for_update.tests.SelectForUpdateTests.test_unsupported_select_for_update_with_limit",
-        # integer division produces a float result, which can't be assigned to
-        # an integer column:
-        # https://github.com/googleapis/python-spanner-django/issues/331
-        "expressions.tests.ExpressionOperatorTests.test_lefthand_division",
-        "expressions.tests.ExpressionOperatorTests.test_right_hand_division",
-        # power operator produces a float result, which can't be assigned to
-        # an integer column:
-        # https://github.com/googleapis/python-spanner-django/issues/331
-        "expressions.tests.ExpressionOperatorTests.test_lefthand_power",
-        "expressions.tests.ExpressionOperatorTests.test_righthand_power",
-        # Cloud Spanner's docs: "The rows that are returned by LIMIT and OFFSET
-        # is unspecified unless these operators are used after ORDER BY."
-        "aggregation_regress.tests.AggregationTests.test_sliced_conditional_aggregate",
-        "queries.tests.QuerySetBitwiseOperationTests.test_or_with_both_slice",
-        "queries.tests.QuerySetBitwiseOperationTests.test_or_with_both_slice_and_ordering",
-        "queries.tests.QuerySetBitwiseOperationTests.test_or_with_lhs_slice",
-        "queries.tests.QuerySetBitwiseOperationTests.test_or_with_rhs_slice",
-        "queries.tests.SubqueryTests.test_slice_subquery_and_query",
-        # Cloud Spanner limit: "Number of functions exceeds the maximum
-        # allowed limit of 1000."
-        "queries.test_bulk_update.BulkUpdateTests.test_large_batch",
-        # Spanner doesn't support random ordering.
-        "ordering.tests.OrderingTests.test_random_ordering",
-        # casting DateField to DateTimeField adds an unexpected hour:
-        # https://github.com/googleapis/python-spanner-django/issues/260
-        "db_functions.comparison.test_cast.CastTests.test_cast_from_db_date_to_datetime",
-        # Tests that fail during tear down on databases that don't support
-        # transactions: https://github.com/googleapis/python-spanner-django/issues/271
-        "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
-        # Tests that by-pass using django_spanner and generate
-        # invalid DDL: https://github.com/googleapis/python-spanner-django/issues/298
-        "cache.tests.CreateCacheTableForDBCacheTests",
-        "cache.tests.DBCacheTests",
-        "cache.tests.DBCacheWithTimeZoneTests",
-        "delete.tests.DeletionTests.test_queryset_delete_returns_num_rows",
-        "delete.tests.DeletionTests.test_model_delete_returns_num_rows",
-        "delete.tests.DeletionTests.test_deletion_order",
-        "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
-        # Tests that require transactions.
-        "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_on_reconnect",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_no_hooks_run_from_failed_transaction",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_no_savepoints_atomic_merged_with_outer",
-        # Tests that require savepoints.
-        "get_or_create.tests.UpdateOrCreateTests.test_integrity",
-        "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
-        "get_or_create.tests.UpdateOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",
-        "test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
-        "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
-        # No sequence for AutoField in Spanner.
-        "introspection.tests.IntrospectionTests.test_sequence_list",
-        # pyformat parameters not supported on INSERT:
-        # https://github.com/googleapis/python-spanner-django/issues/343
-        "backends.tests.BackendTestCase.test_cursor_execute_with_pyformat",
-        "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat",
-        "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat_iterator",
-        "migrations.test_commands.MigrateTests.test_migrate_fake_initial",
-        "migrations.test_commands.MigrateTests.test_migrate_initial_false",
-        "migrations.test_executor.ExecutorTests.test_soft_apply",
-        # Spanner limitation: Cannot change type of column.
-        "migrations.test_executor.ExecutorTests.test_alter_id_type_with_fk",
-        "schema.tests.SchemaTests.test_alter_auto_field_to_char_field",
-        "schema.tests.SchemaTests.test_alter_text_field_to_date_field",
-        "schema.tests.SchemaTests.test_alter_text_field_to_datetime_field",
-        "schema.tests.SchemaTests.test_alter_text_field_to_time_field",
-        # Spanner limitation: Cannot rename tables and columns.
-        "contenttypes_tests.test_operations.ContentTypeOperationsTests",
-        "migrations.test_operations.OperationTests.test_alter_fk_non_fk",
-        "migrations.test_operations.OperationTests.test_alter_model_table",
-        "migrations.test_operations.OperationTests.test_alter_model_table_m2m",
-        "migrations.test_operations.OperationTests.test_rename_field",
-        "migrations.test_operations.OperationTests.test_rename_field_reloads_state_on_fk_target_changes",
-        "migrations.test_operations.OperationTests.test_rename_m2m_model_after_rename_field",
-        "migrations.test_operations.OperationTests.test_rename_m2m_target_model",
-        "migrations.test_operations.OperationTests.test_rename_m2m_through_model",
-        "migrations.test_operations.OperationTests.test_rename_model",
-        "migrations.test_operations.OperationTests.test_rename_model_with_m2m",
-        "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_fk",
-        "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_m2m",
-        "migrations.test_operations.OperationTests.test_rename_model_with_superclass_fk",
-        "migrations.test_operations.OperationTests.test_repoint_field_m2m",
-        "schema.tests.SchemaTests.test_alter_db_table_case",
-        "schema.tests.SchemaTests.test_alter_pk_with_self_referential_field",
-        "schema.tests.SchemaTests.test_rename",
-        "schema.tests.SchemaTests.test_db_table",
-        "schema.tests.SchemaTests.test_m2m_rename_field_in_target_model",
-        "schema.tests.SchemaTests.test_m2m_repoint",
-        "schema.tests.SchemaTests.test_m2m_repoint_custom",
-        "schema.tests.SchemaTests.test_m2m_repoint_inherited",
-        "schema.tests.SchemaTests.test_rename_column_renames_deferred_sql_references",
-        "schema.tests.SchemaTests.test_rename_keep_null_status",
-        "schema.tests.SchemaTests.test_rename_referenced_field",
-        "schema.tests.SchemaTests.test_rename_table_renames_deferred_sql_references",
-        "schema.tests.SchemaTests.test_referenced_field_without_constraint_rename_inside_atomic_block",
-        "schema.tests.SchemaTests.test_referenced_table_without_constraint_rename_inside_atomic_block",
-        "schema.tests.SchemaTests.test_unique_name_quoting",
-        # Spanner limitation: Cannot change a field to a primary key.
-        "schema.tests.SchemaTests.test_alter_not_unique_field_to_primary_key",
-        # Spanner limitation: Cannot drop column in primary key.
-        "schema.tests.SchemaTests.test_primary_key",
-        # Spanner limitation:  Cannot remove a column from the primary key.
-        "schema.tests.SchemaTests.test_alter_int_pk_to_int_unique",
-        # Spanner limitation: migrations aren't atomic since Spanner doesn't
-        # support transactions.
-        "migrations.test_executor.ExecutorTests.test_atomic_operation_in_non_atomic_migration",
-        # changing a not null constraint isn't allowed if it affects an index:
-        # https://github.com/googleapis/python-spanner-django/issues/378
-        "migrations.test_operations.OperationTests.test_alter_field_with_index",
-        # parsing INSERT with one inlined value and one placeholder fails:
-        # https://github.com/googleapis/python-spanner-django/issues/393
-        "migrations.test_operations.OperationTests.test_run_sql_params",
-        # This test doesn't flush the database properly:
-        # https://code.djangoproject.com/ticket/31398
-        "multiple_database.tests.AuthTestCase",
-        # This test isn't isolated on databases like Spanner that don't
-        # support transactions: https://code.djangoproject.com/ticket/31413
-        "migrations.test_loader.LoaderTests.test_loading_squashed",
-        # Probably due to django-spanner setting a default on AutoField:
-        # https://github.com/googleapis/python-spanner-django/issues/422
-        "model_inheritance_regress.tests.ModelInheritanceTest.test_issue_6755",
-        # Probably due to django-spanner setting a default on AutoField:
-        # https://github.com/googleapis/python-spanner-django/issues/424
-        "model_forms.tests.ModelFormBasicTests.test_runtime_choicefield_populated",
-        "model_forms.tests.ModelFormBasicTests.test_multi_fields",
-        "model_forms.tests.ModelFormBasicTests.test_m2m_initial_callable",
-        "model_forms.tests.ModelFormBasicTests.test_initial_values",
-        "model_forms.tests.OtherModelFormTests.test_prefetch_related_queryset",
-        "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
-        "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",
-        "model_formsets_regress.tests.FormsetTests.test_extraneous_query_is_not_run",
-        # Numeric field is not supported in primary key/unique key.
-        "model_formsets.tests.ModelFormsetTest.test_inline_formsets_with_custom_pk",
-        "model_forms.tests.ModelFormBaseTest.test_exclude_and_validation",
-        "model_forms.tests.UniqueTest.test_unique_together",
-        "model_forms.tests.UniqueTest.test_override_unique_together_message",
-        # os.chmod() doesn't work on Kokoro?
-        "file_uploads.tests.DirectoryCreationTests.test_readonly_root",
-        # Failing on kokoro but passes locally. Issue: Multiple queries executed expected 1.
-        "contenttypes_tests.test_models.ContentTypesTests.test_cache_not_shared_between_managers",
-        # Spanner does not support UUID field natively
-        "model_fields.test_uuid.TestQuerying.test_iexact",
-        # Spanner does not support very long FK name: 400 Foreign Key name not valid
-        "backends.tests.FkConstraintsTests.test_check_constraints_sql_keywords",
-        # Spanner does not support setting a default value on columns.
-        "schema.tests.SchemaTests.test_alter_text_field_to_not_null_with_default_value",
-        # Direct SQL query test that do not follow spanner syntax.
-        "schema.tests.SchemaTests.test_alter_auto_field_quoted_db_column",
-        "schema.tests.SchemaTests.test_alter_primary_key_quoted_db_table",
-        # Insert sql with param variables using %(name)s parameter style is failing
-        # https://github.com/googleapis/python-spanner/issues/542
-        "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict",
-        # Spanner autofield is replaced with uuid4 so validation is disabled
-        "model_fields.test_autofield.AutoFieldTests.test_backend_range_validation",
-        "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
-        "model_fields.test_autofield.AutoFieldTests.test_redundant_backend_range_validators",
-        "model_fields.test_autofield.BigAutoFieldTests.test_backend_range_validation",
-        "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
-        "model_fields.test_autofield.BigAutoFieldTests.test_redundant_backend_range_validators",
-        "model_fields.test_autofield.SmallAutoFieldTests.test_backend_range_validation",
-        "model_fields.test_autofield.SmallAutoFieldTests.test_redundant_backend_range_validators",
-        "model_fields.test_autofield.SmallAutoFieldTests.test_redundant_backend_range_validators",
-        # Spanner does not support deferred unique constraints
-        "migrations.test_operations.OperationTests.test_create_model_with_deferred_unique_constraint",
-        # Spanner does not support JSON object query on fields.
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_empty",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_basic",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_expressions",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_empty_json_object",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_json_object",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_textfield",
-        # Spanner does not support iso_week_day but week_day is supported.
-        "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
-        "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
-        "timezones.tests.NewDatabaseTests.test_query_datetime_lookups_in_other_timezone",
-        "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_func",
-        "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_weekday_func",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_iso_weekday_func",
-        # Spanner gived SHA encryption output in bytes, django expects it in hex string format.
-        "db_functions.text.test_sha512.SHA512Tests.test_basic",
-        "db_functions.text.test_sha512.SHA512Tests.test_transform",
-        "db_functions.text.test_md5.MD5Tests.test_basic",
-        "db_functions.text.test_md5.MD5Tests.test_transform",
-        "db_functions.text.test_sha1.SHA1Tests.test_basic",
-        "db_functions.text.test_sha1.SHA1Tests.test_transform",
-        "db_functions.text.test_sha224.SHA224Tests.test_basic",
-        "db_functions.text.test_sha224.SHA224Tests.test_transform",
-        "db_functions.text.test_sha256.SHA256Tests.test_basic",
-        "db_functions.text.test_sha256.SHA256Tests.test_transform",
-        "db_functions.text.test_sha384.SHA384Tests.test_basic",
-        "db_functions.text.test_sha384.SHA384Tests.test_transform",
-        # Spanner does not support RANDOM number generation function
-        "db_functions.math.test_random.RandomTests.test",
-        # Spanner supports order by id, but it's does not work the same way as
-        # an auto increment field.
-        "model_forms.test_modelchoicefield.ModelChoiceFieldTests.test_choice_iterator_passes_model_to_widget",
-        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
-        "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
-        "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
-        "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
-        # Spanner does not support empty list of DML statement.
-        "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
-        # Spanner does not support SELECTing an arbitrary expression that also
-        # appears in the GROUP BY clause.
-        "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
-        # Tests that expect it to be empty until saved in db.
-        "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
-        "model_fields.test_jsonfield.TestSerialization.test_dumping",
-        "model_fields.test_jsonfield.TestSerialization.test_dumping",
-        "model_fields.test_jsonfield.TestSerialization.test_dumping",
-        "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
-        "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
-        "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
-        "bulk_create.tests.BulkCreateTests.test_unsaved_parent",
-        # Tests that assume a serial pk.
-        "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
-        "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched",
-        "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
-        # datetimes retrieved from the database with the wrong hour when
-        # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
-        "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
-        # Spanner doesn't support random ordering.
-        "aggregation.tests.AggregateTestCase.test_aggregation_random_ordering",
-        # Tests that require transactions.
-        "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
-        "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
-        "test_utils.tests.CaptureOnCommitCallbacksTests.test_pre_callback",
-        "test_utils.tests.CaptureOnCommitCallbacksTests.test_using",
-        # Field: GenericIPAddressField is mapped to String in Spanner
-        "inspectdb.tests.InspectDBTestCase.test_field_types",
-        # BigIntegerField is mapped to IntegerField in Spanner
-        "inspectdb.tests.InspectDBTestCase.test_number_field_types",
-        # Spanner limitation: Cannot change type of column.
-        "schema.tests.SchemaTests.test_char_field_pk_to_auto_field",
-        "schema.tests.SchemaTests.test_ci_cs_db_collation",
-        # Spanner limitation: Cannot rename tables and columns.
-        "migrations.test_operations.OperationTests.test_rename_field_case",
-        # Django 4 and 3 skips migrated:
-        "queries.tests.Queries1Tests.test_order_by_rawsql",  # noqa
-        "queries.tests.Queries4Tests.test_combine_or_filter_reuse",  # noqa
-        "queries.tests.Queries4Tests.test_filter_reverse_non_integer_pk",  # noqa
-        "schema.tests.SchemaTests.test_alter_field_default_doesnt_perform_queries",  # noqa
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_index",  # noqa
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_limited",  # noqa
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_xdefault",  # noqa
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_i18n_sitemap_index",  # noqa
-        "test_client.tests.ClientTest.test_exc_info",  # noqa
-        "test_client.tests.ClientTest.test_exc_info_none",  # noqa
-        "test_client.tests.ClientTest.test_follow_307_and_308_get_head_query_string",  # noqa
-        "test_client.tests.ClientTest.test_follow_307_and_308_preserves_query_string",  # noqa
-        "aggregation.tests.AggregateTestCase.test_aggregation_default_expression",
-        "aggregation.tests.AggregateTestCase.test_aggregation_default_integer",
-        "aggregation.tests.AggregateTestCase.test_aggregation_default_unset",
-        "aggregation.tests.AggregateTestCase.test_aggregation_default_using_duration_from_database",
-        "aggregation.tests.AggregateTestCase.test_aggregation_default_zero",
-        "aggregation.tests.AggregateTestCase.test_group_by_nested_expression_with_params",
-        "many_to_one_null.tests.ManyToOneNullTests.test_unsaved",
-        "model_formsets.tests.ModelFormsetTest.test_edit_only_object_outside_of_queryset",
-        "ordering.tests.OrderingTests.test_order_by_expression_ref",
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_language_for_item_i18n_sitemap",
-        "sitemaps_tests.test_http.HTTPSitemapTests.test_language_for_item_i18n_sitemap",
-        "null_queries.tests.NullQueriesTests.test_unsaved",
-        "prefetch_related.tests.GenericRelationTests.test_deleted_GFK",
-        "aggregation_regress.tests.AggregationTests.test_aggregate_and_annotate_duplicate_columns_proxy",
-        "aggregation_regress.tests.AggregationTests.test_annotation_disjunction",
-        "aggregation_regress.tests.AggregationTests.test_filter_aggregates_negated_and_connector",
-        "aggregation_regress.tests.AggregationTests.test_filter_aggregates_negated_xor_connector",
-        "aggregation_regress.tests.AggregationTests.test_filter_aggregates_or_connector",
-        "aggregation_regress.tests.AggregationTests.test_filter_aggregates_xor_connector",
-        "aggregation_regress.tests.AggregationTests.test_aggregate_and_annotate_duplicate_columns_unmanaged",
-        "queries.test_bulk_update.BulkUpdateTests.test_unsaved_parent",
-        "queries.test_q.QCheckTests.test_basic",
-        "queries.test_q.QCheckTests.test_boolean_expression",
-        "queries.test_q.QCheckTests.test_expression",
-        "queries.tests.ExcludeTests.test_exclude_unsaved_o2o_object",
-        "queries.tests.ExcludeTests.test_exclude_unsaved_object",
-        "queries.tests.Queries5Tests.test_filter_unsaved_object",
-        "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_both_slice",
-        "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_lhs_slice",
-        "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_rhs_slice",
-        "queries.tests.QuerySetBitwiseOperationTests.test_xor_with_both_slice_and_ordering",
-        "queries.tests.Queries1Tests.test_filter_by_related_field_transform",
-        "known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_fk_select_related_multiple",
-        "known_related_objects.tests.ExistingRelatedInstancesTests.test_multilevel_reverse_fk_select_related",
-        "timezones.tests.NewDatabaseTests.test_aware_time_unsupported",
-        "contenttypes_tests.test_models.ContentTypesTests.test_app_labeled_name",
-        "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_lookup_name_sql_injection",
-        "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_lookup_name_sql_injection",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_lookup_name_sql_injection",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_lookup_name_sql_injection",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_ambiguous_and_invalid_times",
-        "custom_pk.tests.CustomPKTests.test_auto_field_subclass_create",
-        "constraints.tests.UniqueConstraintTests.test_validate_expression_condition",
-        "constraints.tests.CheckConstraintTests.test_validate",
-        "constraints.tests.CheckConstraintTests.test_validate_boolean_expressions",
-        "schema.tests.SchemaTests.test_add_auto_field",
-        "schema.tests.SchemaTests.test_alter_null_with_default_value_deferred_constraints",
-        "schema.tests.SchemaTests.test_autofield_to_o2o",
-        "backends.tests.BackendTestCase.test_queries_bare_where",
-        "expressions.tests.ExpressionOperatorTests.test_lefthand_bitwise_xor_right_null",
-        "expressions.tests.FTimeDeltaTests.test_durationfield_multiply_divide",
-        "inspectdb.tests.InspectDBTestCase.test_same_relations",
-        "migrations.test_operations.OperationTests.test_alter_field_pk_fk_char_to_int",
-        "migrations.test_operations.OperationTests.test_alter_field_with_func_unique_constraint",
-        "migrations.test_operations.OperationTests.test_alter_model_table_m2m_field",
-        "migrations.test_operations.OperationTests.test_remove_unique_together_on_unique_field",
-        "migrations.test_operations.OperationTests.test_rename_field_index_together",
-        "migrations.test_operations.OperationTests.test_rename_field_unique_together",
-        "migrations.test_operations.OperationTests.test_rename_model_with_db_table_rename_m2m",
-        "migrations.test_operations.OperationTests.test_rename_model_with_m2m_models_in_different_apps_with_same_name",
-        "delete.tests.DeletionTests.test_pk_none",
-        "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_time_comparison",
-        "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_time_comparison",
-        "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict_overlap_keys",
-        "backends.tests.LastExecutedQueryTest.test_last_executed_query_dict_with_duplicate_params",
-        "backends.tests.BackendTestCase.test_queries_logger",
-        "generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_bulk_create",
-        "generic_relations.tests.GenericRelationsTests.test_unsaved_generic_foreign_key_parent_save",
-        "schema.tests.SchemaTests.test_add_field_durationfield_with_default",
-        "delete.tests.DeletionTests.test_only_referenced_fields_selected",
-        "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
-        "get_or_create.tests.UpdateOrCreateTests.test_update_only_defaults_and_pre_save_fields_when_local_fields",
-        "backends.base.test_base.DatabaseWrapperLoggingTests.test_commit_debug_log",
-        "backends.base.test_base.DatabaseWrapperLoggingTests.test_rollback_debug_log",
-        "backends.base.test_base.MultiDatabaseTests.test_multi_database_init_connection_state_called_once",
-        # Spanner does not support automatic coercion from float64 to int64
-        "lookup.tests.LookupQueryingTests.test_annotate_greater_than_or_equal_float",
-        "lookup.tests.LookupQueryingTests.test_annotate_less_than_float",
-
+       "inspectdb.tests.InspectDBTestCase.test_digits_column_name_introspection",
     )
 
-
+    # skip_tests = (
+    #     # AssertionError: Lists differ: [<Book: Djangonaut: an art of living>, <Book: The Django Book>] != [<Book: The Django Book>, <Book: Djangonaut: an art of living>]
+    #     'admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_choices',  # noqa
+    #     # AssertionError: Lists differ: [<Book: Djangonaut: an art of living>, <Book: The Django Book>] != [<Book: The Django Book>, <Book: Djangonaut: an art of living>]
+    #     'admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_tuple_choices',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Unexpected '0__c' [at 1:312]
+    #     'admin_filters.tests.ListFiltersTests.test_facets_always',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Book: Djangonaut: an art of living>, <Book: Django: a biography>]
+    #     'admin_filters.tests.ListFiltersTests.test_facets_filter',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Unexpected '0__c' [at 1:312]
+    #     'admin_filters.tests.ListFiltersTests.test_facets_no_filter',  # noqa
+    #     # AssertionError: Lists differ: [<Employee: Jack Red>, <Employee: Jane,Green>] != [<Employee: Jane,Green>, <Employee: Jack Red>]
+    #     'admin_filters.tests.ListFiltersTests.test_lookup_using_custom_divider',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Book: Djangonaut: an art of living>, <B[46 chars]ook>]
+    #     'admin_filters.tests.ListFiltersTests.test_multi_related_field_filter',  # noqa
+    #     # AssertionError: 0 != 2
+    #     'admin_filters.tests.ListFiltersTests.test_relatedfieldlistfilter_reverse_relationships',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2718666736436091352}) due to previously existing row
+    #     'admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_foreignkey_default_ordering',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:800421233345595655}) due to previously existing row
+    #     'admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_foreignkey_ordering',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:272112542550741833}) due to previously existing row
+    #     'admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_foreignkey_reverse_relationships',  # noqa
+    #     # django.db.utils.DatabaseError: Save with update_fields did not affect any rows.
+    #     'admin_utils.test_logentry.LogEntryTests.test_hook_get_log_entries',  # noqa
+    #     # django.db.utils.DatabaseError: Save with update_fields did not affect any rows.
+    #     'admin_utils.test_logentry.LogEntryTests.test_log_action_fallback',  # noqa
+    #     # django.db.utils.DatabaseError: Save with update_fields did not affect any rows.
+    #     'admin_utils.test_logentry.LogEntryTests.test_log_actions',  # noqa
+    #     # django.db.utils.DatabaseError: Save with update_fields did not affect any rows.
+    #     'admin_utils.test_logentry.LogEntryTests.test_log_actions_single_object_param',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:4237909739519449978}) due to previously existing row
+    #     'admin_utils.tests.NestedObjectsTests.test_cyclic',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:3242609140558193233}) due to previously existing row
+    #     'admin_utils.tests.NestedObjectsTests.test_non_added_parent',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:4521910632409323237}) due to previously existing row
+    #     'admin_utils.tests.NestedObjectsTests.test_queries',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:3883534485101983556}) due to previously existing row
+    #     'admin_utils.tests.NestedObjectsTests.test_siblings',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2616225341005917343}) due to previously existing row
+    #     'admin_utils.tests.NestedObjectsTests.test_unrelated_roots',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Expected end of input but got '%' [at 1:255]
+    #     'custom_lookups.tests.BilateralTransformTests.test_bilateral_order',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Expected end of input but got '%' [at 1:249]
+    #     'custom_lookups.tests.BilateralTransformTests.test_div3_bilateral_extract',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Type not found: CHAR [at 1:265]
+    #     'custom_lookups.tests.BilateralTransformTests.test_transform_order_by',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Expected end of input but got '%' [at 1:249]
+    #     'custom_lookups.tests.LookupTests.test_basic_lookup',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Syntax error: Expected end of input but got '%' [at 1:249]
+    #     'custom_lookups.tests.LookupTests.test_div3_extract',  # noqa
+    #     # AssertionError: Counter() != Counter({'Bugs': 1, 'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_gfk_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Bugs': 1, 'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_m2m_related_manager',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2992045494423453555}) due to previously existing row
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_default_fk_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Bugs': 1, 'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_default_gfk_related_manager',  # noqa
+    #     # KeyError: 'funperson'
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_default_m2m_related_manager',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:4050303091736661446}) due to previously existing row
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_specified_fk_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_specified_gfk_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_removal_through_specified_m2m_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Bugs': 1, 'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_gfk_related_manager',  # noqa
+    #     # AssertionError: Counter() != Counter({'Droopy': 1})
+    #     'custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_gfk_related_manager',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2930240000839612056}) due to previously existing row
+    #     'custom_managers.tests.CustomManagersRegressTestCase.test_filtered_default_manager',  # noqa
+    #     # custom_managers.models.Book.DoesNotExist: Book matching query does not exist.
+    #     'custom_managers.tests.CustomManagersRegressTestCase.test_refresh_from_db_when_default_manager_filters',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1254089530524610714}) due to previously existing row
+    #     'custom_managers.tests.CustomManagersRegressTestCase.test_save_clears_annotations_from_base_manager',  # noqa
+    #     # delete.models.Avatar.DoesNotExist: Avatar matching query does not exist.
+    #     'delete.tests.DeletionTests.test_cannot_defer_constraint_checks',  # noqa
+    #     # AssertionError: False is not true
+    #     'delete.tests.DeletionTests.test_delete_with_keeping_parents',  # noqa
+    #     # AssertionError: False is not true
+    #     'delete.tests.DeletionTests.test_delete_with_keeping_parents_relationships',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Number of parameters in query exceeds the maximum allowed limit of 950.
+    #     'delete.tests.DeletionTests.test_large_delete',  # noqa
+    #     # AssertionError: <QuerySet []> is not true
+    #     'delete.tests.DeletionTests.test_relational_post_delete_signals_happen_before_parent_object',  # noqa
+    #     # delete.models.Avatar.DoesNotExist: Avatar matching query does not exist.
+    #     'delete.tests.FastDeleteTests.test_fast_delete_fk',  # noqa
+    #     # AssertionError: 0 != 1
+    #     'delete.tests.FastDeleteTests.test_fast_delete_inheritance',  # noqa
+    #     # AssertionError: False is not true
+    #     'delete.tests.FastDeleteTests.test_fast_delete_joined_qs',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Number of parameters in query exceeds the maximum allowed limit of 950.
+    #     'delete.tests.FastDeleteTests.test_fast_delete_large_batch',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'delete.tests.FastDeleteTests.test_fast_delete_qs',  # noqa
+    #     # delete.models.R.DoesNotExist: R matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_cascade_from_parent',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_do_nothing',  # noqa
+    #     # AttributeError: 'Base' object has no attribute 'donothing_set'
+    #     'delete.tests.OnDeleteTests.test_do_nothing_qscount',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_o2o_setnull',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2319247232448674962}) due to previously existing row
+    #     'delete.tests.OnDeleteTests.test_protect_path',  # noqa
+    #     # AttributeError: 'DeleteTop' object has no attribute 'donothing_set'
+    #     'delete.tests.OnDeleteTests.test_restrict_gfk_no_fast_delete',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2918716916701990538}) due to previously existing row
+    #     'delete.tests.OnDeleteTests.test_restrict_path_cascade_direct',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2672165368701163581}) due to previously existing row
+    #     'delete.tests.OnDeleteTests.test_restrict_path_cascade_indirect',  # noqa
+    #     # AttributeError: 'DeleteBottom' object has no attribute 'donothing_set'
+    #     'delete.tests.OnDeleteTests.test_restrict_path_cascade_indirect_diamond',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setdefault',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setdefault_none',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setnull',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setnull_from_child',  # noqa
+    #     # delete.models.R.DoesNotExist: R matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setnull_from_parent',  # noqa
+    #     # delete.models.A.DoesNotExist: A matching query does not exist.
+    #     'delete.tests.OnDeleteTests.test_setvalue',  # noqa
+    #     # AssertionError: 1 != 0
+    #     'delete_regress.tests.DeleteCascadeTests.test_generic_relation_cascade',  # noqa
+    #     # delete_regress.models.Researcher.DoesNotExist: Researcher matching query does not exist.
+    #     'delete_regress.tests.DeleteTests.test_foreign_key_delete_nullifies_correct_columns',  # noqa
+    #     # delete_regress.models.File.DoesNotExist: File matching query does not exist.
+    #     'delete_regress.tests.ProxyDeleteTest.test_delete_concrete_parent',  # noqa
+    #     # delete_regress.models.File.DoesNotExist: File matching query does not exist.
+    #     'delete_regress.tests.ProxyDeleteTest.test_delete_proxy',  # noqa
+    #     # delete_regress.models.File.DoesNotExist: File matching query does not exist.
+    #     'delete_regress.tests.ProxyDeleteTest.test_delete_proxy_of_proxy',  # noqa
+    #     # delete_regress.models.File.DoesNotExist: File matching query does not exist.
+    #     'delete_regress.tests.ProxyDeleteTest.test_delete_proxy_pair',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'delete_regress.tests.Ticket19102Tests.test_ticket_19102_annotate',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'delete_regress.tests.Ticket19102Tests.test_ticket_19102_defer',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'delete_regress.tests.Ticket19102Tests.test_ticket_19102_extra',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'delete_regress.tests.Ticket19102Tests.test_ticket_19102_select_related',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet [4374287881601817056, 2421530947108623847, 1519325622348343236]> != [1519325622348343236, 4374287881601817056, 2421530947108623847]
+    #     'expressions.tests.BasicExpressionsTests.test_nested_subquery_join_outer_ref',  # noqa
+    #     # AssertionError: Lists differ: [('James Smith', 'R'), ('Jack Black', 'P'), ('Jane Doe', 'G')] != [('Jane Doe', 'G'), ('James Smith', 'R'), ('Jack Black', 'P')]
+    #     'expressions_case.tests.CaseDocumentationExamples.test_conditional_update_example',  # noqa
+    #     # AssertionError: Lists differ: [('Jane Doe', '5%'), ('Jack Black', '10%'), ('James Smith', '0%')] != [('Jane Doe', '5%'), ('James Smith', '0%'), ('Jack Black', '10%')]
+    #     'expressions_case.tests.CaseDocumentationExamples.test_lookup_example',  # noqa
+    #     # AssertionError: Lists differ: [('James Smith', '5%'), ('Jane Doe', '0%'), ('Jack Black', '10%')] != [('Jane Doe', '0%'), ('James Smith', '5%'), ('Jack Black', '10%')]
+    #     'expressions_case.tests.CaseDocumentationExamples.test_simple_example',  # noqa
+    #     # AssertionError: Lists differ: [(3, 'other'), (3, 'other'), (2, 'two'), (4[44 chars]ne')] != [(1, 'one'), (2, 'two'), (3, 'other'), (2, [44 chars]er')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate',  # noqa
+    #     # AssertionError: Lists differ: [(2, 3, 'max'), (3, 3, 'min'), (3, 4, 'max'[57 chars]in')] != [(1, 1, 'min'), (2, 3, 'max'), (3, 4, 'max'[57 chars]in')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_aggregation_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(1, 1, ''), (3, 4, 'max = 4'), (2, 3, 'max = 3'), (3, [59 chars] 3')] != [(1, 1, ''), (2, 3, 'max = 3'), (3, 4, 'max = 4'), (2, [59 chars] '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_aggregation_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4, 3, 4), (4, None, 5, 5), (2, 2, 2, 3[56 chars], 1)] != [(1, None, 1, 1), (2, 2, 2, 3), (3, 4, 3, 4[56 chars], 5)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_aggregation_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(2, '+1'), (3, '+1'), (3, '+1'), (2, 'equa[38 chars]al')] != [(1, 'equal'), (2, '+1'), (3, '+1'), (2, 'e[38 chars]+1')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_annotation_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(3, 'one'), (2, 'zero'), (1, 'negative one[49 chars]ro')] != [(1, 'negative one'), (2, 'zero'), (3, 'one[49 chars]er')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_annotation_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (1, 2), (3, 3), (4, 4), (2, 5), (2, 5), (3, 3)] != [(1, 2), (2, 5), (3, 3), (2, 5), (3, 3), (3, 3), (4, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_annotation_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, '+1'), (1, 'equal'), (2, '+1'), (3, '+[38 chars]al')] != [(1, 'equal'), (2, '+1'), (3, '+1'), (2, 'e[38 chars]+1')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_expression_as_condition',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 5), (4, 4), (2, 5), (3, 3), (3, 3), (1, 2)] != [(1, 2), (2, 5), (3, 3), (2, 5), (3, 3), (3, 3), (4, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_expression_as_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, 0), (3, 0), (3, 0), (2, 0), (1, 0), (2, 0), (4, 5)] != [(1, 0), (2, 0), (3, 0), (2, 0), (3, 0), (3, 0), (4, 5)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_in_clause',  # noqa
+    #     # AssertionError: Lists differ: [(1, 'equal'), (4, 'other'), (3, 'equal'), (3, '+1'), (3,[27 chars]al')] != [(1, 'equal'), (2, '+1'), (3, '+1'), (2, 'equal'), (3, '+[27 chars]er')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_join_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(4, 'one'), (3, 'three'), (3, 'three'), (2[42 chars]wo')] != [(1, 'one'), (2, 'two'), (3, 'three'), (2, [42 chars]ne')]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_join_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 5), (1, 2), (2, 5), (3, 3), (3, 3), (4, 1)] != [(1, 2), (2, 5), (3, 3), (2, 5), (3, 3), (3, 3), (4, 1)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_with_join_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(4, None), (3, None), (1, 1), (2, 2), (3, None), (3, None), (2, 2)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_annotate_without_default',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4), (2, 2), (3, 4), (2, 2), (3, 4), (4, 4), (1, 3)] != [(1, 3), (2, 2), (3, 4), (2, 2), (3, 4), (3, 4), (4, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_combined_expression',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2, 'when'), (1, 1, 'default'), (3, 4, [76 chars]en')] != [(1, 1, 'default'), (2, 3, 'when'), (3, 4, [76 chars]lt')]
+    #     'expressions_case.tests.CaseExpressionTests.test_combined_q_object',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4), (3, 4), (2, 3), (1, 1)] != [(1, 1), (2, 3), (3, 4), (3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2, 2, 3), (3, 4, 3, 4), (3, 4, 3, 4)] != [(3, 4, 3, 4), (2, 2, 2, 3), (3, 4, 3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_aggregation_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4, 4), (3, 4, 4), (2, 2, 3), (3, 3, 4), (2, 3, 3)] != [(2, 3, 3), (3, 4, 4), (2, 2, 3), (3, 4, 4), (3, 3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_aggregation_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4, 3, 4), (3, 4, 3, 4), (2, 2, 2, 3)] != [(3, 4, 3, 4), (2, 2, 2, 3), (3, 4, 3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_aggregation_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4), (3, 4), (2, 2)] != [(3, 4), (2, 2), (3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_annotation_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(2, 3), (1, 1), (3, 4), (3, 4)] != [(1, 1), (2, 3), (3, 4), (3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_annotation_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 3)] != [(2, 3), (3, 3)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_annotation_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4, '3'), (3, 4, '3'), (2, 2, '2')] != [(3, 4, '3'), (2, 2, '2'), (3, 4, '3')]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_expression_as_condition',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 3), (1, 1)] != [(1, 1), (2, 3), (3, 3)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_expression_as_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 3)] != [(2, 3), (3, 3)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_join_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(1, 1), (3, 4), (3, 4), (2, 3)] != [(1, 1), (2, 3), (3, 4), (3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_join_in_predicate',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3), (2, 3), (1, 1)] != [(1, 1), (2, 3), (3, 3)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_with_join_in_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, 4), (3, 4), (2, 3)] != [(2, 3), (3, 4), (3, 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_filter_without_default',  # noqa
+    #     # AssertionError: Lists differ: [(1, 1), (4, 5), (2, 2), (3, 3)] != [(1, 1), (2, 2), (3, 3), (4, 5)]
+    #     'expressions_case.tests.CaseExpressionTests.test_in_subquery',  # noqa
+    #     # AssertionError: Lists differ: [] != [(<CaseTestModel: CaseTestModel object (3979996847327620241)>, 3)]
+    #     'expressions_case.tests.CaseExpressionTests.test_join_promotion',  # noqa
+    #     # AssertionError: Lists differ: [] != [(<CaseTestModel: CaseTestModel object (1354025885826785396)>, 3, 5)]
+    #     'expressions_case.tests.CaseExpressionTests.test_join_promotion_multiple_annotations',  # noqa
+    #     # AssertionError: Lists differ: [(3, 3, 'default'), (3, 4, 'default'), (3, [82 chars]en')] != [(1, 1, 'default'), (2, 3, 'when'), (3, 4, [82 chars]lt')]
+    #     'expressions_case.tests.CaseExpressionTests.test_lookup_different_fields',  # noqa
+    #     # AssertionError: Lists differ: [(1, 'less than 2'), (4, 'greater than 2'), (2, 'equal to 2'), [82 chars] 2')] != [(1, 'less than 2'), (2, 'equal to 2'), (3, 'greater than 2'), [82 chars] 2')]
+    #     'expressions_case.tests.CaseExpressionTests.test_lookup_in_condition',  # noqa
+    #     # AssertionError: Lists differ: [(3, 'other'), (4, 'other'), (2, 'two'), (3[44 chars]er')] != [(1, 'one'), (2, 'two'), (3, 'other'), (2, [44 chars]er')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2), (1, 1), (3, None), (2, 2), (4, None), (3, None), (3, None)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_big_integer',  # noqa
+    #     # AssertionError: Lists differ: [(3, b''), (3, b''), (4, b''), (1, b'one'), (3, b''), (2, b'two'), (2, b'two')] != [(1, b'one'), (2, b'two'), (3, b''), (2, b'two'), (3, b''), (3, b''), (4, b'')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_binary',  # noqa
+    #     # AssertionError: Lists differ: [(1, [13 chars]ue), (4, False), (3, False), (2, True), (3, False), (3, False)] != [(1, [13 chars]ue), (3, False), (2, True), (3, False), (3, False), (4, False)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_boolean',  # noqa
+    #     # AssertionError: Lists differ: [(3, None), (2, datetime.date(2015, 1, 2)),[92 chars]one)] != [(1, datetime.date(2015, 1, 1)), (2, dateti[92 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_date',  # noqa
+    #     # AssertionError: Lists differ: [(2, datetime.datetime(2015, 1, 2, 0, 0)), [122 chars]one)] != [(1, datetime.datetime(2015, 1, 1, 0, 0)), [122 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_date_time',  # noqa
+    #     # AssertionError: Lists differ: [(3, None), (1, datetime.timedelta(days=1))[95 chars]=2))] != [(1, datetime.timedelta(days=1)), (2, datet[95 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_duration',  # noqa
+    #     # AssertionError: Lists differ: [(3, ''), (3, ''), (3, ''), (2, '2@example.[54 chars]om')] != [(1, '1@example.com'), (2, '2@example.com')[54 chars] '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_email',  # noqa
+    #     # AssertionError: Lists differ: [(2, '~/2'), (1, '~/1'), (3, ''), (3, ''), (3, ''), (4, ''), (2, '~/2')] != [(1, '~/1'), (2, '~/2'), (3, ''), (2, '~/2'), (3, ''), (3, ''), (4, '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_file',  # noqa
+    #     # AssertionError: Lists differ: [(2, '~/2'), (4, ''), (3, ''), (3, ''), (3, ''), (2, '~/2'), (1, '~/1')] != [(1, '~/1'), (2, '~/2'), (3, ''), (2, '~/2'), (3, ''), (3, ''), (4, '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_file_path',  # noqa
+    #     # AssertionError: Lists differ: [(4, None), (3, None), (1, 1367412237981814[72 chars]434)] != [(1, 1367412237981814818), (2, 585835158945[72 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_fk',  # noqa
+    #     # google.api_core.exceptions.InvalidArgument: 400 Could not parse number_value: 1.1
+    #     'expressions_case.tests.CaseExpressionTests.test_update_float',  # noqa
+    #     # AssertionError: Lists differ: [(3, None), (4, None), (3, None), (2, '2.2.[44 chars].2')] != [(1, '1.1.1.1'), (2, '2.2.2.2'), (3, None),[44 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_generic_ip_address',  # noqa
+    #     # AssertionError: Lists differ: [(3, None), (2, False), (3, None), (1, True), (2, False), (3, None), (4, None)] != [(1, True), (2, False), (3, None), (2, False), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_null_boolean',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2), (3, None), (2, 2), (3, None), (1, 1), (4, None), (3, None)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_positive_big_integer',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2), (2, 2), (1, 1), (4, None), (3, None), (3, None), (3, None)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_positive_integer',  # noqa
+    #     # AssertionError: Lists differ: [(1, 1), (3, None), (3, None), (2, 2), (2, 2), (4, None), (3, None)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_positive_small_integer',  # noqa
+    #     # AssertionError: Lists differ: [(2, '2'), (3, ''), (4, ''), (1, '1'), (2, '2'), (3, ''), (3, '')] != [(1, '1'), (2, '2'), (3, ''), (2, '2'), (3, ''), (3, ''), (4, '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_slug',  # noqa
+    #     # AssertionError: Lists differ: [(2, 2), (3, None), (2, 2), (3, None), (4, None), (1, 1), (3, None)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_small_integer',  # noqa
+    #     # AssertionError: Lists differ: [(2, '2'), (2, '2'), (1, '1')] != [(1, '1'), (2, '2'), (2, '2')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_string',  # noqa
+    #     # AssertionError: Lists differ: [(4, ''), (2, '2'), (3, ''), (2, '2'), (1, '1'), (3, ''), (3, '')] != [(1, '1'), (2, '2'), (3, ''), (2, '2'), (3, ''), (3, ''), (4, '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_text',  # noqa
+    #     # AssertionError: Lists differ: [(1, [54 chars]ne), (3, None), (3, None), (2, datetime.time(2, 0)), (4, None)] != [(1, [54 chars]ne), (2, datetime.time(2, 0)), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_time',  # noqa
+    #     # AssertionError: Lists differ: [(2, 'http://2.example.com/'), (2, 'http://[78 chars] '')] != [(1, 'http://1.example.com/'), (2, 'http://[78 chars] '')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_url',  # noqa
+    #     # AssertionError: Lists differ: [(2, UUID('22222222-2222-2222-2222-22222222[149 chars]one)] != [(1, UUID('11111111-1111-1111-1111-11111111[149 chars]one)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_uuid',  # noqa
+    #     # AssertionError: Lists differ: [(1, 'equal'), (3, '+1'), (4, '+1'), (3, 'equal'), (2, '+[24 chars]+1')] != [(1, 'equal'), (2, '+1'), (3, '+1'), (2, 'equal'), (3, '+[24 chars]+1')]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_with_expression_as_condition',  # noqa
+    #     # AssertionError: Lists differ: [('4', 4), ('3', 3), ('1', 2), ('3', 3), ('2', 5), ('3', 3), ('2', 5)] != [('1', 2), ('2', 5), ('3', 3), ('2', 5), ('3', 3), ('3', 3), ('4', 4)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_with_expression_as_value',  # noqa
+    #     # AssertionError: Lists differ: [(3, None), (2, 2), (4, None), (3, None), (2, 2), (3, None), (1, 1)] != [(1, 1), (2, 2), (3, None), (2, 2), (3, None), (3, None), (4, None)]
+    #     'expressions_case.tests.CaseExpressionTests.test_update_without_default',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:698553405026791122}) due to previously existing row
+    #     'extra_regress.tests.ExtraRegressTests.test_dates_query',  # noqa
+    #     # AssertionError: Lists differ: [] != [{'alpha': 5, 'beta': 4, 'gamma': 3}]
+    #     'extra_regress.tests.ExtraRegressTests.test_extra_stay_tied',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<TestObject: TestObject: first,second,third>]
+    #     'extra_regress.tests.ExtraRegressTests.test_regression_10847',  # noqa
+    #     # AssertionError: Lists differ: [] != [2209773301735979797]
+    #     'extra_regress.tests.ExtraRegressTests.test_regression_7961',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<User: fred>]
+    #     'extra_regress.tests.ExtraRegressTests.test_regression_8819',  # noqa
+    #     # filtered_relation.models.Book.DoesNotExist: Book matching query does not exist.
+    #     'filtered_relation.tests.FilteredRelationTests.test_defer',  # noqa
+    #     # AssertionError: Lists differ: [(<Au[16 chars]ect (236906812684237367)>, <Editor: Editor obj[212 chars]4)>)] != [(<Au[16 chars]ect (3012576906549871166)>, <Editor: Editor ob[212 chars]0)>)]
+    #     'filtered_relation.tests.FilteredRelationTests.test_nested_foreign_key',  # noqa
+    #     # AssertionError: Lists differ: [(<Au[16 chars]ect (3161094245469267643)>, <Book: Book object[670 chars]6)>)] != [(<Au[16 chars]ect (4081081433700392266)>, <Book: Book object[670 chars]3)>)]
+    #     'filtered_relation.tests.FilteredRelationTests.test_select_related',  # noqa
+    #     # AssertionError: Lists differ: [(<Bo[104 chars]ect (3651164148391812823)>, <Author: Author ob[208 chars]1)>)] != [(<Bo[104 chars]ect (4422084702129245401)>, <Author: Author ob[208 chars]7)>)]
+    #     'filtered_relation.tests.FilteredRelationTests.test_select_related_foreign_key',  # noqa
+    #     # AssertionError: Lists differ: [(<Book: Book object (639667689057585893)>, <Author: Author obj[485 chars]4)>)] != [(<Book: Book object (2841054760192094425)>, <Author: Author ob[485 chars]4)>)]
+    #     'filtered_relation.tests.FilteredRelationTests.test_select_related_multiple',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:877463916671332695}) due to previously existing row
+    #     'fixtures.tests.CircularReferenceTests.test_circular_reference_natural_key',  # noqa
+    #     # KeyError: 'content_type'
+    #     'fixtures.tests.FixtureLoadingTests.test_dumpdata_objects_with_prefetch_related',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:877463916671332695}) due to previously existing row
+    #     'fixtures.tests.FixtureLoadingTests.test_loaddata_app_option',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:877463916671332695}) due to previously existing row
+    #     'fixtures.tests.FixtureLoadingTests.test_unmatched_identifier_loading',  # noqa
+    #     # AssertionError: Element counts were not equal:
+    #     'fixtures_regress.tests.M2MNaturalKeyFixtureTests.test_dump_and_load_m2m_simple',  # noqa
+    #     # KeyError: 'author'
+    #     'fixtures_regress.tests.NaturalKeyFixtureOnOtherDatabaseTests.test_natural_key_dependencies',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_fallback_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_post_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_post_unknown_page',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_post_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_csrf.FlatpageCSRFTests.test_view_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_admin_form_edit',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_admin_form_url_uniqueness_validation',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_admin_form_url_validation',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_doesnt_requires_trailing_slash_without_append_slash',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_nosites',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_requires_leading_slash',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_forms.FlatpageAdminFormTests.test_flatpage_requires_trailing_slash_with_append_slash',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_fallback_flatpage_root',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_fallback_flatpage_special_chars',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_fallback_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareAppendSlashTests.test_redirect_view_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_fallback_flatpage_special_chars',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_fallback_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_view_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_sitemaps.FlatpagesSitemapTests.test_flatpage_sitemap',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_tag',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_tag_for_anon_user',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_with_prefix',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_with_prefix_for_anon_user',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_with_variable_prefix',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_parsing_errors',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewAppendSlashTests.test_redirect_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewAppendSlashTests.test_redirect_fallback_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewAppendSlashTests.test_redirect_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewAppendSlashTests.test_redirect_view_flatpage_special_chars',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewAppendSlashTests.test_redirect_view_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewTests.test_fallback_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewTests.test_fallback_non_existent_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewTests.test_view_flatpage',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewTests.test_view_flatpage_special_chars',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1}) due to previously existing row
+    #     'flatpages_tests.test_views.FlatpageViewTests.test_view_non_existent_flatpage',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_aware_datetime_date_detail',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_date_detail_allow_future',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_date_detail_by_pk',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_date_detail_custom_month_format',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_datetime_date_detail',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_dates.DateDetailViewTests.test_get_object_custom_queryset',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1219012950021730710}) due to previously existing row
+    #     'generic_views.test_dates.DayArchiveViewTests.test_aware_datetime_day_view',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_context_object_name',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_custom_detail',  # noqa
+    #     # generic_views.models.Author.DoesNotExist: Author matching query does not exist.
+    #     'generic_views.test_detail.DetailViewTest.test_deferred_queryset_context_object_name',  # noqa
+    #     # generic_views.models.Author.DoesNotExist: Author matching query does not exist.
+    #     'generic_views.test_detail.DetailViewTest.test_deferred_queryset_template_name',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_detail_by_custom_pk',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_detail_by_pk',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_detail_by_pk_and_slug',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_detail_by_pk_ignore_slug',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_detail_by_pk_ignore_slug_mismatch',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_duplicated_context_object_name',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_template_name',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_template_name_field',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_template_name_suffix',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_detail.DetailViewTest.test_verbose_name',  # noqa
+    #     # AssertionError: 404 != 200 : Couldn't retrieve redirection page '/edit/author/859460047870351588/update/': response code was 404 (expected 200)
+    #     'generic_views.test_edit.CreateViewTests.test_create_with_interpolated_redirect',  # noqa
+    #     # AssertionError: 404 != 200 : Couldn't retrieve redirection page '/detail/artist/226157415023904884/': response code was 404 (expected 200)
+    #     'generic_views.test_edit.CreateViewTests.test_create_with_object_url',  # noqa
+    #     # AssertionError: 404 != 200 : Couldn't retrieve redirection page '/detail/author/3458255619212185607/': response code was 404 (expected 200)
+    #     'generic_views.test_edit.CreateViewTests.test_create_with_special_properties',  # noqa
+    #     # AssertionError: 404 != 302
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_by_delete',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_by_post',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_with_form_as_post',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_with_form_as_post_with_validation_error',  # noqa
+    #     # AssertionError: 404 != 302
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_with_interpolated_redirect',  # noqa
+    #     # AssertionError: 404 != 302
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_with_redirect',  # noqa
+    #     # AssertionError: 404 != 200
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_with_special_properties',  # noqa
+    #     # AssertionError: ImproperlyConfigured not raised
+    #     'generic_views.test_edit.DeleteViewTests.test_delete_without_redirect',  # noqa
+    #     # AssertionError: 404 != 302
+    #     'generic_views.test_edit.UpdateViewTests.test_update_with_object_url',  # noqa
+    #     # known_related_objects.models.Tournament.DoesNotExist: Tournament matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_foreign_key',  # noqa
+    #     # known_related_objects.models.Tournament.DoesNotExist: Tournament matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_foreign_key_prefetch_related',  # noqa
+    #     # KeyError: 'pool'
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_multilevel_reverse_fk_cyclic_select_related',  # noqa
+    #     # known_related_objects.models.PoolStyle.DoesNotExist: PoolStyle matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_one_to_one',  # noqa
+    #     # known_related_objects.models.PoolStyle.DoesNotExist: PoolStyle matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_one_to_one_prefetch_related',  # noqa
+    #     # known_related_objects.models.PoolStyle.DoesNotExist: PoolStyle matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_one_to_one_select_related',  # noqa
+    #     # IndexError: list index out of range
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_queryset_and',  # noqa
+    #     # IndexError: list index out of range
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_queryset_or_different_cached_items',  # noqa
+    #     # AssertionError: Items in the second set but not the first:
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_queryset_or_only_one_with_precache',  # noqa
+    #     # known_related_objects.models.Pool.DoesNotExist: Pool matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one',  # noqa
+    #     # known_related_objects.models.Pool.DoesNotExist: Pool matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_prefetch_related',  # noqa
+    #     # known_related_objects.models.Pool.DoesNotExist: Pool matching query does not exist.
+    #     'known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_select_related',  # noqa
+    #     # AssertionError: Lists differ: [{'in[449 chars]'pre_add', 'reverse': False, 'model': <class '[445 chars])>]}] != [{'in[449 chars]'pre_remove', 'reverse': False, 'model': <clas[840 chars])>]}]
+    #     'm2m_signals.tests.ManyToManySignalsTest.test_m2m_relations_signals_alternative_ways',  # noqa
+    #     # AssertionError: Lists differ: [{'in[900 chars]'pre_add', 'reverse': False, 'model': <class '[161 chars]t'>}] != [{'in[900 chars]'pre_remove', 'reverse': False, 'model': <clas[277 chars])>]}]
+    #     'm2m_signals.tests.ManyToManySignalsTest.test_m2m_relations_signals_clearing_removing',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<PersonSelfRefM2M: PersonSelfRefM2M object (1221558887748430855)>]
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_add_on_symmetrical_m2m_with_intermediate_model',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Chris']
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_self_referential_non_symmetrical_both',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Chris']
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_self_referential_non_symmetrical_clear_first_side',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Chris']
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_self_referential_non_symmetrical_first_side',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<PersonSelfRefM2M: PersonSelfRefM2M object (1542819018270698516)>]
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_self_referential_symmetrical',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<PersonSelfRefM2M: PersonSelfRefM2M obje[87 chars]59)>]
+    #     'm2m_through.tests.M2mThroughReferentialTests.test_set_on_symmetrical_m2m_with_intermediate_model',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (2582787503822711123)>]
+    #     'm2m_through.tests.M2mThroughTests.test_add_on_m2m_with_intermediate_model',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (3266042330056946[48 chars]61)>]
+    #     'm2m_through.tests.M2mThroughTests.test_add_on_m2m_with_intermediate_model_callable_through_default',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (1800310795732488898)>]
+    #     'm2m_through.tests.M2mThroughTests.test_create_on_m2m_with_intermediate_model',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (2790206054983804420)>]
+    #     'm2m_through.tests.M2mThroughTests.test_create_on_m2m_with_intermediate_model_callable_through_default',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (2254829871517973[48 chars]54)>]
+    #     'm2m_through.tests.M2mThroughTests.test_remove_on_m2m_with_intermediate_model_multiple',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Person: Person object (4507451925922924[48 chars]74)>]
+    #     'm2m_through.tests.M2mThroughTests.test_set_on_m2m_with_intermediate_model_callable_through_default',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Jane', 'Jim']
+    #     'm2m_through.tests.M2mThroughTests.test_through_fields',  # noqa
+    #     # AssertionError: Element counts were not equal:
+    #     'm2m_through_regress.test_multitable.MultiTableTests.test_m2m_query',  # noqa
+    #     # AssertionError: Element counts were not equal:
+    #     'm2m_through_regress.test_multitable.MultiTableTests.test_m2m_query_proxied',  # noqa
+    #     # AssertionError: Element counts were not equal:
+    #     'm2m_through_regress.test_multitable.MultiTableTests.test_m2m_reverse_query',  # noqa
+    #     # AssertionError: Element counts were not equal:
+    #     'm2m_through_regress.test_multitable.MultiTableTests.test_m2m_reverse_query_proxied',  # noqa
+    #     # AssertionError: Lists differ: [('mi[49 chars] '0002_second'), ('migrations2', '0001_squashe[37 chars]al')] != [('mi[49 chars] '0001_initial'), ('migrations2', '0002_second[37 chars]02')]
+    #     'migrations.test_commands.MigrateTests.test_prune_respect_app_label',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_custom_user',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_detect_soft_applied_add_field_manytomanyfield',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_empty_plan',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrate_backward_to_squashed_migration',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrate_marks_replacement_applied_even_if_it_did_nothing',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrate_marks_replacement_unapplied',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrate_skips_schema_creation',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrations_applied_and_recorded_atomically',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_migrations_not_applied_on_deferred_sql_failure',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_mixed_plan_not_supported',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_non_atomic_migration',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_process_callback',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_run',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_run_with_squashed',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_unrelated_applied_migrations_mutate_state',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_unrelated_model_lookups_backwards',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: django_content_type.id in table: django_content_type
+    #     'migrations.test_executor.ExecutorTests.test_unrelated_model_lookups_forwards',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: test_mltdb_runsql3_pony.id in table: test_mltdb_runsql3_pony
+    #     'migrations.test_multidb.MultiDBOperationTests.test_run_sql_migrate_foo_router_with_hints',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 A new row in table test_adflbddd_pony does not specify a non-null value for NOT NULL column: height
+    #     'migrations.test_operations.OperationTests.test_add_field_both_defaults',  # noqa
+    #     # AssertionError: None != 4
+    #     'migrations.test_operations.OperationTests.test_add_field_database_default',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: height in table: test_adflddf_pony referenced by key: {Int64(364560731518364946)} 9: Cannot specify a null...
+    #     'migrations.test_operations.OperationTests.test_add_field_database_default_function',  # noqa
+    #     # AssertionError: 'special_char' unexpectedly found in ['id', 'pink', 'weight', 'green', 'yellow', 'special_char']
+    #     'migrations.test_operations.OperationTests.test_add_field_database_default_special_char_escaping',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alterconstraint_pony with indices: test_alter_constraint_pony_fields_uq.
+    #     'migrations.test_operations.OperationTests.test_alter_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alterconstraint_pony with indices: test_alter_constraint_pony_fields_uq.
+    #     'migrations.test_operations.OperationTests.test_alter_field_add_database_default',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alterconstraint_pony with indices: test_alter_constraint_pony_fields_uq.
+    #     'migrations.test_operations.OperationTests.test_alter_field_add_db_column_noop',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_change_blank_nullable_database_default_to_not_null',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_change_default_to_database_default',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_change_nullable_to_database_default_not_null',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_change_nullable_to_decimal_database_default_not_null',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_foreignobject_noop',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_pk_fk_db_collation',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_afadbn_rider with indices: test_afadbn_rider_pony_id_d47f6ec5,test_afadbn_rider_friend_id_f355bd15.
+    #     'migrations.test_operations.OperationTests.test_alter_field_pk_mti_and_fk_to_base',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_field_pk_mti_fk',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_field_reloads_state_fk_with_to_field_related_name_target_type_change',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_field_reloads_state_on_fk_with_to_field_target_type_change',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_field_with_func_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_id_pk_to_uuid_pk',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_index_together_remove_with_unique_together',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_alter_model_table_comment',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_autofield__bigautofield_foreignfield_growth',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_composite_pk_operations',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_create_fk_models_to_pk_field_db_collation',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_create_model_constraint_percent_escaping',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_create_model_with_boolean_expression_in_check_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_create_model_with_covering_unique_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_generated_field_changes_output_field',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_invalid_generated_field_changes_on_rename_stored',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_invalid_generated_field_changes_on_rename_virtual',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_invalid_generated_field_changes_stored',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_invalid_generated_field_changes_virtual',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_invalid_generated_field_persistency_change',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_covering_unique_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_deferred_unique_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_func_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_func_unique_constraint',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_generated_field_stored',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_generated_field_virtual',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_remove_unique_together_on_pk_field',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_rename_field_add_non_nullable_field_with_composite_pk',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rfwdbc_pony with indices: test_rfwdbc_pony_db_fk_field_005950bb.
+    #     'migrations.test_operations.OperationTests.test_rename_field_with_db_column',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_rename_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_rename_index_arguments',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_rename_index_state_forwards',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_alflpkmtifk_shetlandrider with indices: test_alflpkmtifk_shetlandrider_pony_id_66e71f92.
+    #     'migrations.test_operations.OperationTests.test_rename_index_state_forwards_unnamed_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_index_unknown_unnamed_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_index_unnamed_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_index_unnamed_index_with_unique_index',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_m2m_field_with_2_references',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_model_no_relations_with_db_table_noop',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_rename_model_with_db_table_and_fk_noop',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_run_python_invalid_reverse_code',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_run_sql_add_missing_semicolon_on_collect_sql',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_run_sql_backward_reverse_sql_required',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_smallfield_autofield_foreignfield_growth',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot drop table test_rnidsfui_pony with indices: test_rnidsfui_pony_weight_pink_49fa4b8b_idx.
+    #     'migrations.test_operations.OperationTests.test_smallfield_bigautofield_foreignfield_growth',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1485591505974932196}) due to previously existing row
+    #     'model_forms.tests.FileAndImageFieldTests.test_file_field_data',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2460314589753408882}) due to previously existing row
+    #     'model_forms.tests.FileAndImageFieldTests.test_filefield_required_false',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:3935244914170661535}) due to previously existing row
+    #     'model_forms.tests.ModelFormBaseTest.test_blank_false_with_null_true_foreign_key_field',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.ModelFormBaseTest.test_blank_with_null_foreign_key_field',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:877367358247552621}) due to previously existing row
+    #     'model_forms.tests.ModelFormBaseTest.test_save_blank_false_with_required_false',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:2476540305045542110}) due to previously existing row
+    #     'model_forms.tests.ModelFormBasicTests.test_custom_form_fields',  # noqa
+    #     # ValueError: The Article could not be created because the data didn't validate.
+    #     'model_forms.tests.ModelFormBasicTests.test_m2m_editing',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: model_forms_article.created in table: model_forms_article
+    #     'model_forms.tests.ModelFormBasicTests.test_subset_fields',  # noqa
+    #     # AssertionError: False is not True
+    #     'model_forms.tests.ModelFormBasicTests.test_validate_foreign_key_to_model_with_overridden_manager',  # noqa
+    #     # google.api_core.exceptions.FailedPrecondition: 400 Cannot specify a null value for column: model_forms_article.created in table: model_forms_article
+    #     'model_forms.tests.ModelMultipleChoiceFieldTests.test_to_field_name_with_initial_data',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1028010144685281847}) due to previously existing row
+    #     'model_forms.tests.ModelOneToOneFieldTests.test_assignment_of_none',  # noqa
+    #     # ValueError: The WriterProfile could not be created because the data didn't validate.
+    #     'model_forms.tests.ModelOneToOneFieldTests.test_onetoonefield',  # noqa
+    #     # AssertionError: Lists differ: [] != [<Colour: blue>]
+    #     'model_forms.tests.ModelToDictTests.test_many_to_many',  # noqa
+    #     # ValueError: The Inventory could not be changed because the data didn't validate.
+    #     'model_forms.tests.OtherModelFormTests.test_foreignkeys_which_use_to_field',  # noqa
+    #     # AssertionError: 2 != 1
+    #     'model_forms.tests.UniqueTest.test_abstract_inherited_unique',  # noqa
+    #     # AssertionError: 2 != 1
+    #     'model_forms.tests.UniqueTest.test_abstract_inherited_unique_together',  # noqa
+    #     # AssertionError: 2 != 1
+    #     'model_forms.tests.UniqueTest.test_inherited_unique',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.UniqueTest.test_inherited_unique_for_date',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.UniqueTest.test_inherited_unique_together',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.UniqueTest.test_simple_unique',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.UniqueTest.test_unique_for_date',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_forms.tests.UniqueTest.test_unique_null',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_formsets.tests.DeletionTests.test_outdated_deletion',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_formsets.tests.ModelFormsetTest.test_commit_false',  # noqa
+    #     # AssertionError: False is not True
+    #     'model_formsets.tests.ModelFormsetTest.test_edit_only',  # noqa
+    #     # AssertionError: False is not True
+    #     'model_formsets.tests.ModelFormsetTest.test_edit_only_formset_factory_with_basemodelformset',  # noqa
+    #     # AssertionError: False is not True
+    #     'model_formsets.tests.ModelFormsetTest.test_edit_only_inlineformset_factory',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_formsets.tests.ModelFormsetTest.test_inline_formsets',  # noqa
+    #     # KeyError: 'team'
+    #     'model_formsets.tests.ModelFormsetTest.test_inlineformset_factory_with_null_fk',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_formsets.tests.ModelFormsetTest.test_model_inheritance',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_formsets.tests.ModelFormsetTest.test_simple_save',  # noqa
+    #     # AssertionError: Errors found on formset:[{'id': ['Select a valid choice. That choice is not one of the available choices.']}]
+    #     'model_formsets_regress.tests.InlineFormsetTests.test_formset_over_inherited_model',  # noqa
+    #     # AssertionError: Errors found on formset:[{'id': ['Select a valid choice. That choice is not one of the available choices.']}]
+    #     'model_formsets_regress.tests.InlineFormsetTests.test_formset_over_to_field',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet [<Parent: Parent object (138329[58 chars]0)>]> != [<Parent: Parent object (2878855750519726[47 chars]30)>]
+    #     'model_inheritance.tests.ModelInheritanceTests.test_inherited_ordering_pk_desc',  # noqa
+    #     # AssertionError: Lists differ: [] != [<BirthdayParty: BirthdayParty object (2574610211792724733)>]
+    #     'model_inheritance_regress.tests.ModelInheritanceTest.test_abstract_base_class_m2m_relation_inheritance',  # noqa
+    #     # model_inheritance_regress.models.User.DoesNotExist: User matching query does not exist.
+    #     'model_inheritance_regress.tests.ModelInheritanceTest.test_create_new_instance_with_pk_equals_none',  # noqa
+    #     # model_inheritance_regress.models.Person.DoesNotExist: Person matching query does not exist.
+    #     'model_inheritance_regress.tests.ModelInheritanceTest.test_create_new_instance_with_pk_equals_none_multi_inheritance',  # noqa
+    #     # AssertionError: False is not true
+    #     'model_inheritance_regress.tests.ModelInheritanceTest.test_inherited_unique_field_with_form',  # noqa
+    #     # model_inheritance_regress.models.Place.DoesNotExist: Place matching query does not exist.
+    #     'model_inheritance_regress.tests.ModelInheritanceTest.test_issue_7276',  # noqa
+    #     # AssertionError: Lists differ: [] != [1]
+    #     'model_regress.tests.ModelTests.test_date_filter_null',  # noqa
+    #     # model_regress.models.Article.DoesNotExist: Article matching query does not exist.
+    #     'model_regress.tests.ModelTests.test_empty_choice',  # noqa
+    #     # AssertionError: datetime.datetime(2000, 1, 1, 12, 0, 20, 24) != datetime.datetime(2000, 1, 1, 6, 1, 1)
+    #     'model_regress.tests.ModelTests.test_get_next_prev_by_field',  # noqa
+    #     # model_regress.models.Article.DoesNotExist: Article matching query does not exist.
+    #     'model_regress.tests.ModelTests.test_long_textfield',  # noqa
+    #     # model_regress.models.Article.DoesNotExist: Article matching query does not exist.
+    #     'model_regress.tests.ModelTests.test_long_unicode_textfield',  # noqa
+    #     # AssertionError: Lists differ: [] != ['custom_action']
+    #     'modeladmin.test_actions.AdminActionsTests.test_get_actions_respects_permissions',  # noqa
+    #     # KeyError: 'content_type'
+    #     'modeladmin.tests.ModelAdminTests.test_log_actions',  # noqa
+    #     # KeyError: 'content_type'
+    #     'modeladmin.tests.ModelAdminTests.test_log_deletion',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet [(3505535116110580797, 12682459[236 chars]'')]> != [(3505535116110580797, 126824595474708279[225 chars] '')]
+    #     'modeladmin.tests.ModelAdminTests.test_log_deletion_fallback',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet [(2787430962434337855, 66691067[232 chars]'')]> != [(2787430962434337855, 666910670159521668[221 chars] '')]
+    #     'modeladmin.tests.ModelAdminTests.test_log_deletions',  # noqa
+    #     # django.core.exceptions.ValidationError: {'owner': ['person instance with id 1164865903192662971 is not a valid choice.']}
+    #     'multiple_database.tests.QueryTestCase.test_foreign_key_validation',  # noqa
+    #     # django.core.exceptions.ValidationError: ['person instance with id 1742199134075767842 is not a valid choice.']
+    #     'multiple_database.tests.QueryTestCase.test_foreign_key_validation_with_router',  # noqa
+    #     # multiple_database.models.Book.DoesNotExist: Book matching query does not exist.
+    #     'multiple_database.tests.RouterTestCase.test_deferred_models',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:3360412713858443898}) due to previously existing row
+    #     'multiple_database.tests.SignalTests.test_database_arg_save_and_delete',  # noqa
+    #     # AssertionError: Lists differ: [<Scr[54 chars]003)>, <ScreeningNullFK: ScreeningNullFK objec[20 chars]84)>] != [<Scr[54 chars]003)>]
+    #     'nested_foreign_keys.tests.NestedForeignKeysTests.test_null_exclude',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:169157739193595396}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_assign_none_reverse_relation',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1756083816253810606}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_assign_o2o_id_none',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1500036199283904459}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_assign_o2o_id_value',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1432148271646272397}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_cached_relation_invalidated_on_save',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Restaurant: Demon Dogs the restaurant>]
+    #     'one_to_one.tests.OneToOneTests.test_create_models_m2m',  # noqa
+    #     # AssertionError: Sequences differ: <QuerySet []> != [<Waiter: Joe the waiter at Demon Dogs the restaurant>]
+    #     'one_to_one.tests.OneToOneTests.test_foreign_key',  # noqa
+    #     # one_to_one.models.Restaurant.DoesNotExist: Restaurant matching query does not exist.
+    #     'one_to_one.tests.OneToOneTests.test_manager_get',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1444508500162408010}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_nullable_o2o_delete',  # noqa
+    #     # KeyError: 'place'
+    #     'one_to_one.tests.OneToOneTests.test_rel_pk_subquery',  # noqa
+    #     # one_to_one.models.Director.DoesNotExist: Director matching query does not exist.
+    #     'one_to_one.tests.OneToOneTests.test_related_object',  # noqa
+    #     # one_to_one.models.Place.restaurant.RelatedObjectDoesNotExist: Place has no restaurant.
+    #     'one_to_one.tests.OneToOneTests.test_related_object_cache',  # noqa
+    #     # one_to_one.models.Place.DoesNotExist: Place matching query does not exist.
+    #     'one_to_one.tests.OneToOneTests.test_related_object_cached_when_reverse_is_accessed',  # noqa
+    #     # KeyError: 'place'
+    #     'one_to_one.tests.OneToOneTests.test_reverse_object_cached_when_related_is_accessed',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:943045842421092922}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_reverse_object_cached_when_related_is_unset',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'one_to_one.tests.OneToOneTests.test_reverse_object_does_not_exist_cache',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:384310892827078104}) due to previously existing row
+    #     'one_to_one.tests.OneToOneTests.test_reverse_relationship_cache_cascade',  # noqa
+    #     # one_to_one.models.UndergroundBar.DoesNotExist: UndergroundBar matching query does not exist.
+    #     'one_to_one.tests.OneToOneTests.test_save_nullable_o2o_after_parent',  # noqa
+    #     # KeyError: 'place'
+    #     'one_to_one.tests.OneToOneTests.test_setter',  # noqa
+    #     # one_to_one.models.Waiter.DoesNotExist: Waiter matching query does not exist.
+    #     'one_to_one.tests.OneToOneTests.test_update_one_to_one_pk',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Hello']
+    #     'or_lookups.tests.OrLookupsTests.test_complex_filter',  # noqa
+    #     # or_lookups.models.Article.DoesNotExist: Article matching query does not exist.
+    #     'or_lookups.tests.OrLookupsTests.test_other_arg_queries',  # noqa
+    #     # AssertionError: Lists differ: [] != ['Hello', 'Goodbye']
+    #     'or_lookups.tests.OrLookupsTests.test_pk_q',  # noqa
+    #     # AssertionError: Lists differ: ['Hello', 'Goodbye', 'Hello and goodbye'] != ['Hello', 'Hello and goodbye']
+    #     'or_lookups.tests.OrLookupsTests.test_q_negated',  # noqa
+    #     # System check identified no issues (0 silenced).
+    #     'proxy_model_inheritance.tests.MultiTableInheritanceProxyTest.test_deletion_through_intermediate_proxy',  # noqa
+    #     # proxy_models.models.MyPerson.DoesNotExist: MyPerson matching query does not exist.
+    #     'proxy_models.tests.ProxyModelTests.test_basic_proxy',  # noqa
+    #     # AssertionError: Lists differ: ['George', 'Bruce'] != ['Bruce', 'George']
+    #     'proxy_models.tests.ProxyModelTests.test_proxy_delete',  # noqa
+    #     # AssertionError: 0 != 1 : 0 queries executed, 1 expected
+    #     'proxy_models.tests.ProxyModelTests.test_proxy_update',  # noqa
+    #     # System check identified no issues (1 silenced).
+    #     'raw_query.tests.RawQueryTests.test_missing_fields',  # noqa
+    #     # select_related_regress.models.State.DoesNotExist: State matching query does not exist.
+    #     'select_related_regress.tests.SelectRelatedRegressTests.test_regression_12851',  # noqa
+    #     # KeyError: 'start'
+    #     'select_related_regress.tests.SelectRelatedRegressTests.test_regression_7110',  # noqa
+    #     # KeyError: 'status'
+    #     'select_related_regress.tests.SelectRelatedRegressTests.test_regression_8036',  # noqa
+    #     # google.api_core.exceptions.AlreadyExists: 409 Failed to insert row with primary key ({pk#id:1697029550452825661}) due to previously existing row
+    #     'signals.tests.SignalTests.test_save_signals',  # noqa
+    #     # System check identified no issues (0 silenced).
+    #     'timezones.tests.NewDatabaseTests.test_update_with_timedelta',  # noqa
+    #     "serializers.test_json.JsonSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_json.JsonSerializerTestCase.test_serialize_with_null_pk",
+    #     "serializers.test_xml.XmlSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_xml.XmlSerializerTestCase.test_serialize_with_null_pk",
+    #     "serializers.test_yaml.YamlSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_yaml.YamlSerializerTestCase.test_serialize_with_null_pk",
+    #     # Tests that assume a serial pk.
+    #     "servers.tests.LiveServerDatabase.test_fixtures_loaded",
+    #     "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_language_for_item_i18n_sitemap",
+    #     "sitemaps_tests.test_http.HTTPSitemapTests.test_language_for_item_i18n_sitemap",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_latest_post_date",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_rss091_feed",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_rss2_feed",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_template_feed",
+    #     # Tests that expect it to be empty until saved in db.
+    #     "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
+    #     # Tests that require transactions.
+    #     "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
+    #     "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
+    #     "test_utils.tests.CaptureOnCommitCallbacksTests.test_pre_callback",
+    #     "test_utils.tests.CaptureOnCommitCallbacksTests.test_using",
+    #     "test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction",
+    #     "timezones.tests.AdminTests.test_change_editable",
+    #     "timezones.tests.AdminTests.test_change_editable_in_other_timezone",
+    #     "timezones.tests.AdminTests.test_change_readonly",
+    #     "timezones.tests.AdminTests.test_change_readonly_in_other_timezone",
+    #     "timezones.tests.AdminTests.test_changelist",
+    #     "timezones.tests.AdminTests.test_changelist_in_other_timezone",
+    #     "timezones.tests.LegacyDatabaseTests.test_cursor_execute_accepts_naive_datetime",
+    #     "timezones.tests.LegacyDatabaseTests.test_cursor_execute_returns_naive_datetime",
+    #     # Spanner does not support iso_week_day but week_day is supported.
+    #     "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
+    #     "timezones.tests.NewDatabaseTests.test_aware_time_unsupported",
+    #     "timezones.tests.NewDatabaseTests.test_cursor_execute_accepts_naive_datetime",
+    #     "timezones.tests.NewDatabaseTests.test_cursor_execute_returns_naive_datetime",
+    #     # datetimes retrieved from the database with the wrong hour when
+    #     # USE_TZ = True: https://github.com/googleapis/python-spanner-django/issues/193
+    #     "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
+    #     "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
+    #     "timezones.tests.NewDatabaseTests.test_query_datetime_lookups_in_other_timezone",
+    #     # extract() with timezone not working as expected:
+    #     # https://github.com/googleapis/python-spanner-django/issues/191
+    #     "timezones.tests.NewDatabaseTests.test_query_datetimes",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
+    #     # Tests that require transactions.
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_on_reconnect",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_no_hooks_run_from_failed_transaction",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_no_savepoints_atomic_merged_with_outer",
+    #     "validation.test_custom_messages.CustomMessagesTests.test_custom_null_message",
+    #     "validation.test_custom_messages.CustomMessagesTests.test_custom_simple_validator_message",
+    #     "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_adding_and_pk_not_specified",  # noqa
+    #     "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_not_adding",
+    #     "validation.test_validators.TestModelsWithValidators.test_custom_validator_passes_for_correct_value",
+    #     "validation.test_validators.TestModelsWithValidators.test_custom_validator_raises_error_for_incorrect_value",
+    #     "validation.test_validators.TestModelsWithValidators.test_field_validators_can_be_any_iterable",
+    #     "backends.tests.FkConstraintsTests.test_check_constraints",
+    #     "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
+    #     "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
+    #     "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
+    #     "basic.tests.ModelTest.test_hash",
+    #     "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
+    #     "custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_fk_related_manager",
+    #     "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
+    #     "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
+    #     "generic_relations.tests.GenericRelationsTests.test_generic_update_or_create_when_updated",
+    #     "generic_relations.tests.GenericRelationsTests.test_update_or_create_defaults",
+    #     "m2m_through_regress.tests.ToFieldThroughTests.test_m2m_relations_unusable_on_null_pk_obj",
+    #     "many_to_many.tests.ManyToManyTests.test_add",
+    #     "many_to_one.tests.ManyToOneTests.test_fk_assignment_and_related_object_cache",
+    #     "many_to_one.tests.ManyToOneTests.test_relation_unsaved",
+    #     "model_fields.test_durationfield.TestSerialization.test_dumping",
+    #     "model_fields.test_uuid.TestSerialization.test_dumping",
+    #     "model_fields.test_booleanfield.ValidationTest.test_nullbooleanfield_blank",
+    #     "model_inheritance.tests.ModelInheritanceTests.test_create_child_no_update",
+    #     "model_regress.tests.ModelTests.test_get_next_prev_by_field_unsaved",
+    #     "one_to_one.tests.OneToOneTests.test_get_reverse_on_unsaved_object",
+    #     "one_to_one.tests.OneToOneTests.test_o2o_primary_key_delete",
+    #     "one_to_one.tests.OneToOneTests.test_set_reverse_on_unsaved_object",
+    #     "one_to_one.tests.OneToOneTests.test_unsaved_object",
+    #     "queries.test_bulk_update.BulkUpdateNoteTests.test_unsaved_models",
+    #     "expressions_case.tests.CaseExpressionTests.test_update_decimal",
+    #     "serializers.test_json.JsonSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_json.JsonSerializerTestCase.test_serialize_with_null_pk",
+    #     "serializers.test_xml.XmlSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_xml.XmlSerializerTestCase.test_serialize_with_null_pk",
+    #     "serializers.test_yaml.YamlSerializerTestCase.test_pkless_serialized_strings",
+    #     "serializers.test_yaml.YamlSerializerTestCase.test_serialize_with_null_pk",
+    #     "serializers.test_data.SerializerDataTests.test_yaml_serializer",
+    #     "serializers.test_data.SerializerDataTests.test_xml_serializer",
+    #     "serializers.test_data.SerializerDataTests.test_python_serializer",
+    #     "serializers.test_data.SerializerDataTests.test_json_serializer",
+    #     "timezones.tests.LegacyDatabaseTests.test_cursor_execute_accepts_naive_datetime",
+    #     "timezones.tests.NewDatabaseTests.test_cursor_execute_accepts_naive_datetime",
+    #     "timezones.tests.AdminTests.test_change_editable",
+    #     "timezones.tests.AdminTests.test_change_editable_in_other_timezone",
+    #     "timezones.tests.AdminTests.test_change_readonly",
+    #     "timezones.tests.AdminTests.test_change_readonly_in_other_timezone",
+    #     "timezones.tests.AdminTests.test_changelist",
+    #     "timezones.tests.AdminTests.test_changelist_in_other_timezone",
+    #     "timezones.tests.LegacyDatabaseTests.test_cursor_execute_returns_naive_datetime",
+    #     "timezones.tests.NewDatabaseTests.test_cursor_execute_returns_naive_datetime",
+    #     "validation.test_custom_messages.CustomMessagesTests.test_custom_null_message",
+    #     "validation.test_custom_messages.CustomMessagesTests.test_custom_simple_validator_message",
+    #     "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_adding_and_pk_not_specified",
+    #     "validation.test_unique.PerformUniqueChecksTest.test_primary_key_unique_check_not_performed_when_not_adding",
+    #     "validation.test_validators.TestModelsWithValidators.test_custom_validator_passes_for_correct_value",
+    #     "validation.test_validators.TestModelsWithValidators.test_custom_validator_raises_error_for_incorrect_value",
+    #     "validation.test_validators.TestModelsWithValidators.test_field_validators_can_be_any_iterable",
+    #     "servers.tests.LiveServerDatabase.test_fixtures_loaded",
+    #     "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_nullbooleanfield",
+    #     "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter_tuple",
+    #     "admin_filters.tests.ListFiltersTests.test_booleanfieldlistfilter",
+    #     "admin_filters.tests.ListFiltersTests.test_datefieldlistfilter_with_time_zone_support",
+    #     "admin_filters.tests.ListFiltersTests.test_datefieldlistfilter",
+    #     "admin_filters.tests.ListFiltersTests.test_fieldlistfilter_underscorelookup_tuple",
+    #     "admin_filters.tests.ListFiltersTests.test_fk_with_to_field",
+    #     "admin_filters.tests.ListFiltersTests.test_listfilter_genericrelation",
+    #     "admin_filters.tests.ListFiltersTests.test_lookup_with_non_string_value_underscored",
+    #     "admin_filters.tests.ListFiltersTests.test_lookup_with_non_string_value",
+    #     "admin_filters.tests.ListFiltersTests.test_relatedfieldlistfilter_manytomany",
+    #     "admin_filters.tests.ListFiltersTests.test_simplelistfilter",
+    #     "admin_inlines.tests.TestInline.test_inline_hidden_field_no_column",
+    #     "proxy_models.tests.ProxyModelAdminTests.test_delete_str_in_model_admin",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_localized_datetime_input",
+    #     "admin_utils.test_logentry.LogEntryTests.test_proxy_model_content_type_is_used_for_log_entries",
+    #     "admin_utils.test_logentry.LogEntryTests.test_action_flag_choices",
+    #     "admin_utils.test_logentry.LogEntryTests.test_log_action",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_formsets",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_change_message_not_json",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_get_admin_url",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_get_edited_object",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_repr",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_save",
+    #     "admin_utils.test_logentry.LogEntryTests.test_logentry_unicode",
+    #     "admin_utils.test_logentry.LogEntryTests.test_recentactions_without_content_type",
+    #     "admin_views.tests.AdminViewPermissionsTest.test_history_view",
+    #     "aggregation.test_filter_argument.FilteredAggregateTests.test_plain_annotate",
+    #     "aggregation.tests.AggregateTestCase.test_annotate_basic",
+    #     "aggregation.tests.AggregateTestCase.test_annotation",
+    #     "aggregation.tests.AggregateTestCase.test_filtering",
+    #     "aggregation_regress.tests.AggregationTests.test_more_more",
+    #     "aggregation_regress.tests.AggregationTests.test_more_more_more",
+    #     "defer_regress.tests.DeferRegressionTest.test_ticket_12163",
+    #     "defer_regress.tests.DeferRegressionTest.test_ticket_23270",
+    #     "distinct_on_fields.tests.DistinctOnTests.test_basic_distinct_on",
+    #     "extra_regress.tests.ExtraRegressTests.test_regression_7314_7372",
+    #     "generic_relations_regress.tests.GenericRelationTests.test_annotate",
+    #     "get_earliest_or_latest.tests.TestFirstLast",
+    #     "known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_multi_prefetch_related",
+    #     "known_related_objects.tests.ExistingRelatedInstancesTests.test_reverse_one_to_one_multi_select_related",
+    #     "lookup.tests.LookupTests.test_get_next_previous_by",
+    #     "lookup.tests.LookupTests.test_values_list",
+    #     "migrations.test_operations.OperationTests.test_alter_order_with_respect_to",
+    #     "model_fields.tests.GetChoicesOrderingTests.test_get_choices_reverse_related_field",
+    #     "model_formsets.tests.ModelFormsetTest.test_custom_pk",
+    #     "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_custom_delete",
+    #     "multiple_database.tests.RouterTestCase.test_generic_key_cross_database_protection",
+    #     "ordering.tests.OrderingTests.test_default_ordering_by_f_expression",
+    #     "ordering.tests.OrderingTests.test_order_by_fk_attname",
+    #     "ordering.tests.OrderingTests.test_order_by_override",
+    #     "ordering.tests.OrderingTests.test_order_by_pk",
+    #     "prefetch_related.test_prefetch_related_objects.PrefetchRelatedObjectsTests.test_m2m_then_m2m",
+    #     "prefetch_related.tests.CustomPrefetchTests.test_custom_qs",
+    #     "prefetch_related.tests.CustomPrefetchTests.test_nested_prefetch_related_are_not_overwritten",
+    #     "prefetch_related.tests.ForeignKeyToFieldTest.test_m2m",
+    #     "queries.test_bulk_update.BulkUpdateNoteTests.test_multiple_fields",
+    #     "queries.test_bulk_update.BulkUpdateTests.test_inherited_fields",
+    #     "queries.tests.Queries4Tests.test_ticket15316_exclude_true",
+    #     "queries.tests.Queries5Tests.test_ticket7256",
+    #     "queries.tests.SubqueryTests.test_related_sliced_subquery",
+    #     "queries.tests.Ticket14056Tests.test_ticket_14056",
+    #     "queries.tests.RelatedLookupTypeTests.test_values_queryset_lookup",
+    #     "raw_query.tests.RawQueryTests.test_annotations",
+    #     "raw_query.tests.RawQueryTests.test_get_item",
+    #     "select_related.tests.SelectRelatedTests.test_field_traversal",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_rss2_feed",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_latest_post_date",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_rss091_feed",
+    #     "syndication_tests.tests.SyndicationFeedTest.test_template_feed",
+    #     "datetimes.tests.DateTimesTests.test_21432",
+    #     "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
+    #     "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_timezone_applied_before_truncation",
+    #     "timezones.tests.NewDatabaseTests.test_query_datetimes",
+    #     "annotations.tests.NonAggregateAnnotationTestCase.test_combined_annotation_commutative",
+    #     "db_functions.comparison.test_cast.CastTests.test_cast_to_decimal_field",
+    #     "model_fields.test_decimalfield.DecimalFieldTests.test_fetch_from_db_without_float_rounding",
+    #     "model_fields.test_decimalfield.DecimalFieldTests.test_roundtrip_with_trailing_zeros",
+    #     # functions on full population.
+    #     # SELECT list expression references <column> which is neither grouped
+    #     # nor aggregated: https://github.com/googleapis/python-spanner-django/issues/245
+    #     # ",
+    #     # and DATE: https://github.com/googleapis/python-spanner-django/issues/255
+    #     # duration arithmetic fails with dates: No matching signature for
+    #     # function TIMESTAMP_ADD: https://github.com/googleapis/python-spanner-django/issues/253
+    #     # This test doesn",
+    #     # support select for update either (besides the ",
+    #     # restriction).
+    #     # integer division produces a float result, which can",
+    #     "expressions.tests.ExpressionOperatorTests.test_lefthand_division",
+    #     "expressions.tests.ExpressionOperatorTests.test_right_hand_division",
+    #     # an integer column:
+    #     # https://github.com/googleapis/python-spanner-django/issues/331
+    #     # Cloud Spanner",
+    #     # is unspecified unless these operators are used after ORDER BY.",
+    #     "aggregation_regress.tests.AggregationTests.test_sliced_conditional_aggregate",
+    #     "queries.tests.QuerySetBitwiseOperationTests.test_or_with_both_slice",
+    #     "queries.tests.QuerySetBitwiseOperationTests.test_or_with_both_slice_and_ordering",
+    #     "queries.tests.QuerySetBitwiseOperationTests.test_or_with_lhs_slice",
+    #     "queries.tests.QuerySetBitwiseOperationTests.test_or_with_rhs_slice",
+    #     "queries.tests.SubqueryTests.test_slice_subquery_and_query",
+    #     # allowed limit of 1000.",
+    #     "queries.test_bulk_update.BulkUpdateTests.test_large_batch",
+    #     # casting DateField to DateTimeField adds an unexpected hour:
+    #     # https://github.com/googleapis/python-spanner-django/issues/260
+    #     # Tests that fail during tear down on databases that don",
+    #     "contenttypes_tests.test_models.ContentTypesMultidbTests.test_multidb",
+    #     "cache.tests.CreateCacheTableForDBCacheTests",
+    #     "cache.tests.DBCacheTests",
+    #     "cache.tests.DBCacheWithTimeZoneTests",
+    #     "delete.tests.DeletionTests.test_queryset_delete_returns_num_rows",
+    #     "delete.tests.DeletionTests.test_model_delete_returns_num_rows",
+    #     "delete.tests.DeletionTests.test_deletion_order",
+    #     "delete.tests.FastDeleteTests.test_fast_delete_empty_no_update_can_self_select",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_does_not_execute_if_transaction_rolled_back",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_after_rollback",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_hooks_cleared_on_reconnect",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_no_hooks_run_from_failed_transaction",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_no_savepoints_atomic_merged_with_outer",
+    #     "get_or_create.tests.UpdateOrCreateTests.test_integrity",
+    #     "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
+    #     "get_or_create.tests.UpdateOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",
+    #     "test_utils.tests.TestBadSetUpTestData.test_failure_in_setUpTestData_should_rollback_transaction",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_discards_hooks_from_rolled_back_savepoint",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_rolled_back_with_outer",
+    #     "transaction_hooks.tests.TestConnectionOnCommit.test_inner_savepoint_does_not_affect_outer",
+    #     "introspection.tests.IntrospectionTests.test_sequence_list",
+    #     "backends.tests.BackendTestCase.test_cursor_execute_with_pyformat",
+    #     "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat",
+    #     "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat_iterator",
+    #     "migrations.test_commands.MigrateTests.test_migrate_fake_initial",
+    #     "migrations.test_commands.MigrateTests.test_migrate_initial_false",
+    #     "migrations.test_executor.ExecutorTests.test_soft_apply",
+    #     "migrations.test_executor.ExecutorTests.test_alter_id_type_with_fk",
+    #     "schema.tests.SchemaTests.test_alter_auto_field_to_char_field",
+    #     "schema.tests.SchemaTests.test_alter_text_field_to_date_field",
+    #     "schema.tests.SchemaTests.test_alter_text_field_to_datetime_field",
+    #     "schema.tests.SchemaTests.test_alter_text_field_to_time_field",
+    #     "contenttypes_tests.test_operations.ContentTypeOperationsTests",
+    #     "migrations.test_operations.OperationTests.test_alter_fk_non_fk",
+    #     "migrations.test_operations.OperationTests.test_alter_model_table",
+    #     "migrations.test_operations.OperationTests.test_alter_model_table_m2m",
+    #     "migrations.test_operations.OperationTests.test_rename_field",
+    #     "migrations.test_operations.OperationTests.test_rename_field_reloads_state_on_fk_target_changes",
+    #     "migrations.test_operations.OperationTests.test_rename_m2m_model_after_rename_field",
+    #     "migrations.test_operations.OperationTests.test_rename_m2m_target_model",
+    #     "migrations.test_operations.OperationTests.test_rename_m2m_through_model",
+    #     "migrations.test_operations.OperationTests.test_rename_model",
+    #     "migrations.test_operations.OperationTests.test_rename_model_with_m2m",
+    #     "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_fk",
+    #     "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_m2m",
+    #     "migrations.test_operations.OperationTests.test_rename_model_with_superclass_fk",
+    #     "migrations.test_operations.OperationTests.test_repoint_field_m2m",
+    #     "schema.tests.SchemaTests.test_alter_db_table_case",
+    #     "schema.tests.SchemaTests.test_alter_pk_with_self_referential_field",
+    #     "schema.tests.SchemaTests.test_rename",
+    #     "schema.tests.SchemaTests.test_db_table",
+    #     "schema.tests.SchemaTests.test_m2m_rename_field_in_target_model",
+    #     "schema.tests.SchemaTests.test_m2m_repoint",
+    #     "schema.tests.SchemaTests.test_m2m_repoint_custom",
+    #     "schema.tests.SchemaTests.test_m2m_repoint_inherited",
+    #     "schema.tests.SchemaTests.test_rename_column_renames_deferred_sql_references",
+    #     "schema.tests.SchemaTests.test_rename_keep_null_status",
+    #     "schema.tests.SchemaTests.test_rename_referenced_field",
+    #     "schema.tests.SchemaTests.test_rename_table_renames_deferred_sql_references",
+    #     "schema.tests.SchemaTests.test_referenced_field_without_constraint_rename_inside_atomic_block",
+    #     "schema.tests.SchemaTests.test_referenced_table_without_constraint_rename_inside_atomic_block",
+    #     "schema.tests.SchemaTests.test_unique_name_quoting",
+    #     "schema.tests.SchemaTests.test_alter_not_unique_field_to_primary_key",
+    #     "schema.tests.SchemaTests.test_primary_key",
+    #     "schema.tests.SchemaTests.test_alter_int_pk_to_int_unique",
+    #     "migrations.test_executor.ExecutorTests.test_atomic_operation_in_non_atomic_migration",
+    #     # https://github.com/googleapis/python-spanner-django/issues/378
+    #     # parsing INSERT with one inlined value and one placeholder fails:
+    #     # https://github.com/googleapis/python-spanner-django/issues/393
+    #     # This test doesn",
+    #     "multiple_database.tests.AuthTestCase",
+    #     "migrations.test_loader.LoaderTests.test_loading_squashed",
+    #     "model_inheritance_regress.tests.ModelInheritanceTest.test_issue_6755",
+    #     "model_forms.tests.ModelFormBasicTests.test_runtime_choicefield_populated",
+    #     "model_forms.tests.ModelFormBasicTests.test_multi_fields",
+    #     "model_forms.tests.ModelFormBasicTests.test_m2m_initial_callable",
+    #     "model_forms.tests.ModelFormBasicTests.test_initial_values",
+    #     "model_forms.tests.OtherModelFormTests.test_prefetch_related_queryset",
+    #     "model_formsets.tests.ModelFormsetTest.test_prevent_change_outer_model_and_create_invalid_data",
+    #     "model_formsets_regress.tests.FormfieldShouldDeleteFormTests.test_no_delete",
+    #     "model_formsets_regress.tests.FormsetTests.test_extraneous_query_is_not_run",
+    #     "model_formsets.tests.ModelFormsetTest.test_inline_formsets_with_custom_pk",
+    #     "model_forms.tests.ModelFormBaseTest.test_exclude_and_validation",
+    #     "model_forms.tests.UniqueTest.test_unique_together",
+    #     "model_forms.tests.UniqueTest.test_override_unique_together_message",
+    #     # Failing on kokoro but passes locally. Issue: Multiple queries executed expected 1.
+    #     # Spanner does not support UUID field natively
+    #     # Spanner does not support very long FK name: 400 Foreign Key name not valid
+    #     # Spanner does not support setting a default value on columns.
+    #     # Direct SQL query test that do not follow spanner syntax.
+    #     # Insert sql with param variables using %(name)s parameter style is failing
+    #     # https://github.com/googleapis/python-spanner/issues/542
+    #     # Spanner autofield is replaced with uuid4 so validation is disabled
+    #     # Spanner does not support deferred unique constraints
+    #     # Spanner does not support JSON object query on fields.
+    #     # Spanner gived SHA encryption output in bytes, django expects it in hex string format.
+    #     # Spanner does not support RANDOM number generation function
+    #     # Spanner supports order by id, but it",
+    #     "model_forms.test_modelchoicefield.ModelChoiceFieldTests.test_choice_iterator_passes_model_to_widget",
+    #     "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
+    #     "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
+    #     "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
+    #     "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
+    #     "backends.tests.BackendTestCase.test_cursor_executemany_with_empty_params_list",
+    #     "annotations.tests.NonAggregateAnnotationTestCase.test_grouping_by_q_expression_annotation",
+    #     "test_utils.test_testcase.TestDataTests.test_class_attribute_identity",
+    #     "model_fields.test_jsonfield.TestSerialization.test_dumping",
+    #     "model_fields.test_jsonfield.TestSerialization.test_dumping",
+    #     "model_fields.test_jsonfield.TestSerialization.test_dumping",
+    #     "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+    #     "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+    #     "model_fields.test_jsonfield.TestSerialization.test_xml_serialization",
+    #     "bulk_create.tests.BulkCreateTests.test_unsaved_parent",
+    #     "lookup.tests.LookupTests.test_exact_query_rhs_with_selected_columns",
+    #     "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched",
+    #     "prefetch_related.tests.DirectPrefetchedObjectCacheReuseTests.test_detect_is_fetched_with_to_attr",
+    #     "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
+    #     # Field: GenericIPAddressField is mapped to String in Spanner
+    #     # BigIntegerField is mapped to IntegerField in Spanner
+    #     # Spanner limitation: Cannot change type of column.
+    #     # Spanner limitation: Cannot rename tables and columns.
+    #     # Django 4 and 3 skips migrated:
+    #     # Spanner does not support automatic coercion from float64 to int64
+    # )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):
         # Some code isn't yet supported by the Spanner emulator.
         skip_tests += (
-            # Emulator doesn't support views.
-            "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
-            "introspection.tests.IntrospectionTests.test_table_names_with_views",
-            # Check constraints are not supported by Spanner emulator.
-            "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
-            "constraints.tests.CheckConstraintTests.test_name",  # noqa
-            "admin_docs.test_views.AdminDocViewDefaultEngineOnly.test_template_detail_path_traversal",  # noqa
+            "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params",  # noqa
             # Untyped parameters are not supported:
             # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
-            "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa
-            "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params",  # noqa
+            "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_dst_time_zone",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_time_zone",  # noqa
             "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_invalid_params",  # noqa
             "admin_changelist.tests.ChangeListTests.test_builtin_lookup_in_search_fields",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_changelist_search_form_validation",  # noqa
             "admin_changelist.tests.ChangeListTests.test_changelist_view_list_editable_changed_objects_uses_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_clear_all_filters_link",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_clear_all_filters_link_callable_filter",  # noqa
             "admin_changelist.tests.ChangeListTests.test_computed_list_display_localization",  # noqa
             "admin_changelist.tests.ChangeListTests.test_custom_lookup_in_search_fields",  # noqa
             "admin_changelist.tests.ChangeListTests.test_custom_lookup_with_pk_shortcut",  # noqa
@@ -598,6 +1281,16 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_changelist.tests.ChangeListTests.test_get_list_editable_queryset_with_regex_chars_in_prefix",  # noqa
             "admin_changelist.tests.ChangeListTests.test_get_select_related_custom_method",  # noqa
             "admin_changelist.tests.ChangeListTests.test_multiuser_edit",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_clear_all_filters_link",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_inherited_m2m_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_m2m_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_m2m_to_inherited_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_many_to_many_at_second_level_in_search_fields",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_non_unique_related_object_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_non_unique_related_object_in_search_fields",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_through_m2m_at_second_level_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_through_m2m_in_list_filter",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_no_exists_for_m2m_in_list_filter_without_params",  # noqa
             "admin_changelist.tests.ChangeListTests.test_no_list_display_links",  # noqa
             "admin_changelist.tests.ChangeListTests.test_object_tools_displayed_no_add_permission",  # noqa
             "admin_changelist.tests.ChangeListTests.test_pagination",  # noqa
@@ -617,6 +1310,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_changelist.tests.ChangeListTests.test_specified_ordering_by_f_expression",  # noqa
             "admin_changelist.tests.ChangeListTests.test_specified_ordering_by_f_expression_without_asc_desc",  # noqa
             "admin_changelist.tests.ChangeListTests.test_total_ordering_optimization",  # noqa
+            "admin_changelist.tests.ChangeListTests.test_total_ordering_optimization_meta_constraints",  # noqa
             "admin_changelist.tests.ChangeListTests.test_tuple_list_display",  # noqa
             "admin_changelist.tests.GetAdminLogTests.test_no_user",  # noqa
             "admin_custom_urls.tests.AdminCustomUrlsTest.test_add_with_GET_args",  # noqa
@@ -627,8 +1321,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_custom_urls.tests.AdminCustomUrlsTest.test_post_save_change_redirect",  # noqa
             "admin_custom_urls.tests.AdminCustomUrlsTest.test_post_url_continue",  # noqa
             "admin_docs.test_middleware.XViewMiddlewareTest.test_callable_object_view",  # noqa
+            "admin_docs.test_middleware.XViewMiddlewareTest.test_no_auth_middleware",  # noqa
             "admin_docs.test_middleware.XViewMiddlewareTest.test_xview_class",  # noqa
             "admin_docs.test_middleware.XViewMiddlewareTest.test_xview_func",  # noqa
+            "admin_docs.test_views.AdminDocViewDefaultEngineOnly.test_template_detail_path_traversal",  # noqa
             "admin_docs.test_views.AdminDocViewTests.test_bookmarklets",  # noqa
             "admin_docs.test_views.AdminDocViewTests.test_index",  # noqa
             "admin_docs.test_views.AdminDocViewTests.test_missing_docutils",  # noqa
@@ -671,9 +1367,16 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_docs.test_views.TestModelDetailView.test_model_not_found",  # noqa
             "admin_docs.test_views.TestModelDetailView.test_model_with_many_to_one",  # noqa
             "admin_docs.test_views.TestModelDetailView.test_model_with_no_backward_relations_render_only_relevant_fields",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_manytomany",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_underscorelookup_foreignkey",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_none_returning_lookups",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_queryset_based_lookups",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_without_parameter",  # noqa
+            "admin_filters.tests.ListFiltersTests.test_two_characters_long_field",  # noqa
             "admin_inlines.tests.TestInline.test_callable_lookup",  # noqa
             "admin_inlines.tests.TestInline.test_can_delete",  # noqa
             "admin_inlines.tests.TestInline.test_create_inlines_on_inherited_model",  # noqa
+            "admin_inlines.tests.TestInline.test_custom_form_tabular_inline_extra_field_label",  # noqa
             "admin_inlines.tests.TestInline.test_custom_form_tabular_inline_label",  # noqa
             "admin_inlines.tests.TestInline.test_custom_form_tabular_inline_overridden_label",  # noqa
             "admin_inlines.tests.TestInline.test_custom_get_extra_form",  # noqa
@@ -686,10 +1389,12 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_inlines.tests.TestInline.test_inline_primary",  # noqa
             "admin_inlines.tests.TestInline.test_inlines_show_change_link_registered",  # noqa
             "admin_inlines.tests.TestInline.test_inlines_show_change_link_unregistered",  # noqa
+            "admin_inlines.tests.TestInline.test_inlines_singular_heading_one_to_one",  # noqa
             "admin_inlines.tests.TestInline.test_localize_pk_shortcut",  # noqa
             "admin_inlines.tests.TestInline.test_many_to_many_inlines",  # noqa
             "admin_inlines.tests.TestInline.test_min_num",  # noqa
             "admin_inlines.tests.TestInline.test_no_parent_callable_lookup",  # noqa
+            "admin_inlines.tests.TestInline.test_non_editable_custom_form_tabular_inline_extra_field_label",  # noqa
             "admin_inlines.tests.TestInline.test_non_related_name_inline",  # noqa
             "admin_inlines.tests.TestInline.test_noneditable_inline_has_field_inputs",  # noqa
             "admin_inlines.tests.TestInline.test_readonly_stacked_inline_label",  # noqa
@@ -726,6 +1431,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "admin_inlines.tests.TestReadOnlyChangeViewInlinePermissions.test_post_to_change_url_not_allowed",  # noqa
             "admin_inlines.tests.TestReadOnlyChangeViewInlinePermissions.test_submit_line_shows_only_close_button",  # noqa
             "admin_ordering.tests.TestAdminOrdering.test_dynamic_ordering",  # noqa
+            "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",  # noqa
             "aggregation.tests.AggregateTestCase.test_add_implementation",  # noqa
             "aggregation.tests.AggregateTestCase.test_aggregate_alias",  # noqa
             "aggregation.tests.AggregateTestCase.test_aggregate_annotation",  # noqa
@@ -781,13 +1487,24 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "annotations.tests.NonAggregateAnnotationTestCase.test_custom_functions",  # noqa
             "annotations.tests.NonAggregateAnnotationTestCase.test_custom_functions_can_ref_other_functions",  # noqa
             "annotations.tests.NonAggregateAnnotationTestCase.test_filter_decimal_annotation",  # noqa
+            # Untyped parameters are not supported:
+            # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
+            "auth_tests.test_admin_multidb.MultiDatabaseTests.test_add_view",  # noqa
             "auth_tests.test_auth_backends.AllowAllUsersModelBackendTest.test_authenticate",  # noqa
             "auth_tests.test_auth_backends.AllowAllUsersModelBackendTest.test_get_user",  # noqa
+            "auth_tests.test_auth_backends.AuthenticateTests.test_authenticate_sensitive_variables",  # noqa
+            "auth_tests.test_auth_backends.AuthenticateTests.test_clean_credentials_sensitive_variables",  # noqa
+            "auth_tests.test_auth_backends.AuthenticateTests.test_skips_backends_with_decorated_method",  # noqa
             "auth_tests.test_auth_backends.AuthenticateTests.test_skips_backends_without_arguments",  # noqa
             "auth_tests.test_auth_backends.AuthenticateTests.test_type_error_raised",  # noqa
+            "auth_tests.test_auth_backends.BaseBackendTest.test_get_all_permissions",  # noqa
+            "auth_tests.test_auth_backends.BaseBackendTest.test_get_group_permissions",  # noqa
+            "auth_tests.test_auth_backends.BaseBackendTest.test_get_user_permissions",  # noqa
+            "auth_tests.test_auth_backends.BaseBackendTest.test_has_perm",  # noqa
             "auth_tests.test_auth_backends.ChangedBackendSettingsTest.test_changed_backend_settings",  # noqa
             "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_anonymous_has_no_permissions",  # noqa
             "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_authentication_timing",  # noqa
+            "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_authentication_without_credentials",  # noqa
             "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_custom_perms",  # noqa
             "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_get_all_superuser_permissions",  # noqa
             "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_has_no_object_perm",  # noqa
@@ -796,6 +1513,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_auth_backends.CustomUserModelBackendAuthenticateTest.test_authenticate",  # noqa
             "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_anonymous_has_no_permissions",  # noqa
             "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_authentication_timing",  # noqa
+            "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_authentication_without_credentials",  # noqa
             "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_custom_perms",  # noqa
             "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_get_all_superuser_permissions",  # noqa
             "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_has_no_object_perm",  # noqa
@@ -809,6 +1527,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_auth_backends.ModelBackendTest.test_authenticate_inactive",  # noqa
             "auth_tests.test_auth_backends.ModelBackendTest.test_authenticate_user_without_is_active_field",  # noqa
             "auth_tests.test_auth_backends.ModelBackendTest.test_authentication_timing",  # noqa
+            "auth_tests.test_auth_backends.ModelBackendTest.test_authentication_without_credentials",  # noqa
             "auth_tests.test_auth_backends.ModelBackendTest.test_custom_perms",  # noqa
             "auth_tests.test_auth_backends.ModelBackendTest.test_get_all_superuser_permissions",  # noqa
             "auth_tests.test_auth_backends.ModelBackendTest.test_has_no_object_perm",  # noqa
@@ -828,6 +1547,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_auth_backends.SelectingBackendTests.test_non_string_backend",  # noqa
             "auth_tests.test_auth_backends.UUIDUserTests.test_login",  # noqa
             "auth_tests.test_basic.BasicTestCase.test_superuser",  # noqa
+            "auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password",  # noqa
             "auth_tests.test_basic.BasicTestCase.test_unicode_username",  # noqa
             "auth_tests.test_basic.BasicTestCase.test_user",  # noqa
             "auth_tests.test_basic.BasicTestCase.test_user_no_email",  # noqa
@@ -838,11 +1558,16 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_context_processors.AuthContextProcessorTests.test_session_is_accessed",  # noqa
             "auth_tests.test_context_processors.AuthContextProcessorTests.test_session_not_accessed",  # noqa
             "auth_tests.test_context_processors.AuthContextProcessorTests.test_user_attrs",  # noqa
+            "auth_tests.test_decorators.LoginRequiredTestCase.test_callable",  # noqa
+            "auth_tests.test_decorators.LoginRequiredTestCase.test_login_required",  # noqa
+            "auth_tests.test_decorators.LoginRequiredTestCase.test_login_required_next_url",  # noqa
+            "auth_tests.test_decorators.LoginRequiredTestCase.test_view",  # noqa
             "auth_tests.test_decorators.PermissionsRequiredDecoratorTest.test_many_permissions_in_set_pass",  # noqa
             "auth_tests.test_decorators.PermissionsRequiredDecoratorTest.test_many_permissions_pass",  # noqa
             "auth_tests.test_decorators.PermissionsRequiredDecoratorTest.test_permissioned_denied_exception_raised",  # noqa
             "auth_tests.test_decorators.PermissionsRequiredDecoratorTest.test_permissioned_denied_redirect",  # noqa
             "auth_tests.test_decorators.PermissionsRequiredDecoratorTest.test_single_permission_pass",  # noqa
+            "auth_tests.test_forms.AdminPasswordChangeFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.AdminPasswordChangeFormTest.test_missing_passwords",  # noqa
             "auth_tests.test_forms.AdminPasswordChangeFormTest.test_non_matching_passwords",  # noqa
             "auth_tests.test_forms.AdminPasswordChangeFormTest.test_one_password",  # noqa
@@ -850,6 +1575,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.AdminPasswordChangeFormTest.test_success",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_custom_login_allowed_policy",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_get_invalid_login_error",  # noqa
+            "auth_tests.test_forms.AuthenticationFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_inactive_user",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_inactive_user_i18n",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_inactive_user_incorrect_password",  # noqa
@@ -859,12 +1585,31 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.AuthenticationFormTest.test_password_whitespace_not_stripped",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_success",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_unicode_username",  # noqa
+            "auth_tests.test_forms.AuthenticationFormTest.test_username_field_autocapitalize_none",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_username_field_label",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_username_field_label_empty_string",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_username_field_label_not_set",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_username_field_max_length_defaults_to_254",  # noqa
             "auth_tests.test_forms.AuthenticationFormTest.test_username_field_max_length_matches_user_model",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_both_passwords",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_hidden_username_field",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_custom_form_with_different_username_field",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_duplicate_normalized_unicode",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_html_autocomplete_attributes",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_invalid_data",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_normalize_username",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_help_text",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_verification",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_password_whitespace_not_stripped",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_success",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_unicode_username",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_already_exists",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_user_create_form_validates_password_with_all_data",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_username_field_autocapitalize_none",  # noqa
+            "auth_tests.test_forms.BaseUserCreationFormTest.test_validates_password",  # noqa
             "auth_tests.test_forms.PasswordChangeFormTest.test_field_order",  # noqa
+            "auth_tests.test_forms.PasswordChangeFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.PasswordChangeFormTest.test_incorrect_password",  # noqa
             "auth_tests.test_forms.PasswordChangeFormTest.test_password_verification",  # noqa
             "auth_tests.test_forms.PasswordChangeFormTest.test_password_whitespace_not_stripped",  # noqa
@@ -873,6 +1618,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.PasswordResetFormTest.test_custom_email_constructor",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_custom_email_field",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_custom_email_subject",  # noqa
+            "auth_tests.test_forms.PasswordResetFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_inactive_user",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_invalid_email",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_nonexistent_email",  # noqa
@@ -885,6 +1631,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.PasswordResetFormTest.test_user_email_unicode_collision",  # noqa
             "auth_tests.test_forms.PasswordResetFormTest.test_user_email_unicode_collision_nonexistent",  # noqa
             "auth_tests.test_forms.SetPasswordFormTest.test_help_text_translation",  # noqa
+            "auth_tests.test_forms.SetPasswordFormTest.test_html_autocomplete_attributes",  # noqa
             "auth_tests.test_forms.SetPasswordFormTest.test_password_verification",  # noqa
             "auth_tests.test_forms.SetPasswordFormTest.test_password_whitespace_not_stripped",  # noqa
             "auth_tests.test_forms.SetPasswordFormTest.test_success",  # noqa
@@ -898,6 +1645,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_forms.UserChangeFormTest.test_custom_form",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_password_excluded",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_unusable_password",  # noqa
+            "auth_tests.test_forms.UserChangeFormTest.test_username_field_autocapitalize_none",  # noqa
             "auth_tests.test_forms.UserChangeFormTest.test_username_validity",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password",  # noqa
             "auth_tests.test_handlers.ModWsgiHandlerTestCase.test_check_password_custom_user",  # noqa
@@ -913,11 +1661,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_basic_usage",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_default_username",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_email_in_username",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_environment_variable_non_interactive",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_existing_username",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_existing_username_non_interactive",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_existing_username_provided_via_option_and_interactive",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_fk",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_fk_interactive",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m_interactive",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m_interactive_blank",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_ignore_environment_variable_interactive",  # noqa
+            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_ignore_environment_variable_non_interactive",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_invalid_username",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_non_ascii_verbose_name",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_passing_stdin",  # noqa
@@ -931,15 +1685,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_validation_mismatched_passwords",  # noqa
             "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_verbosity_zero",  # noqa
             "auth_tests.test_management.GetDefaultUsernameTestCase.test_existing",  # noqa
+            "auth_tests.test_management.GetDefaultUsernameTestCase.test_with_database",  # noqa
             "auth_tests.test_management.MultiDBChangepasswordManagementCommandTestCase.test_that_changepassword_command_with_database_option_uses_given_db",  # noqa
+            "auth_tests.test_management.MultiDBCreatesuperuserTestCase.test_createsuperuser_command_suggested_username_with_database_option",  # noqa
             "auth_tests.test_management.MultiDBCreatesuperuserTestCase.test_createsuperuser_command_with_database_option",  # noqa
             "auth_tests.test_middleware.TestAuthenticationMiddleware.test_changed_password_invalidates_session",  # noqa
             "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_password_change_doesnt_invalidate_session",  # noqa
+            "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_session",  # noqa
             "auth_tests.test_migrations.ProxyModelWithDifferentAppLabelTests.test_user_has_now_proxy_model_permissions",  # noqa
             "auth_tests.test_migrations.ProxyModelWithDifferentAppLabelTests.test_user_keeps_same_permissions_after_migrating_backward",  # noqa
             "auth_tests.test_migrations.ProxyModelWithSameAppLabelTests.test_user_keeps_same_permissions_after_migrating_backward",  # noqa
             "auth_tests.test_migrations.ProxyModelWithSameAppLabelTests.test_user_still_has_proxy_model_permissions",  # noqa
-            "proxy_models.tests.ProxyModelAdminTests.test_delete_str_in_model_admin",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_access_mixin_permission_denied_response",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_stacked_mixins_missing_permission",  # noqa
             "auth_tests.test_mixins.AccessMixinTests.test_stacked_mixins_not_logged_in",  # noqa
@@ -959,24 +1715,39 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_models.TestCreateSuperUserSignals.test_create_user",  # noqa
             "auth_tests.test_models.UserManagerTestCase.test_create_user",  # noqa
             "auth_tests.test_models.UserManagerTestCase.test_create_user_is_staff",  # noqa
+            "auth_tests.test_models.UserManagerTestCase.test_runpython_manager_methods",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_backend_without_with_perm",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_basic",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_custom_backend",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_custom_backend_pass_obj",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_invalid_backend_type",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_invalid_permission_name",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_invalid_permission_type",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_multiple_backends",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_backend",  # noqa
+            "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_permission",  # noqa
+            "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_header_disappears",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_inactive_user",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_known_user",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_last_login",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_unknown_user",  # noqa
             "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_user_switch_forces_new_login",  # noqa
+            "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_header_disappears",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_inactive_user",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_known_user",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_last_login",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_unknown_user",  # noqa
             "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_user_switch_forces_new_login",  # noqa
+            "auth_tests.test_remote_user.PersistentRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_header_disappears",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_inactive_user",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_known_user",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_last_login",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_unknown_user",  # noqa
             "auth_tests.test_remote_user.PersistentRemoteUserTest.test_user_switch_forces_new_login",  # noqa
+            "auth_tests.test_remote_user.RemoteUserCustomTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.RemoteUserCustomTest.test_header_disappears",  # noqa
             "auth_tests.test_remote_user.RemoteUserCustomTest.test_inactive_user",  # noqa
             "auth_tests.test_remote_user.RemoteUserCustomTest.test_known_user",  # noqa
@@ -988,6 +1759,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_remote_user.RemoteUserNoCreateTest.test_known_user",  # noqa
             "auth_tests.test_remote_user.RemoteUserNoCreateTest.test_last_login",  # noqa
             "auth_tests.test_remote_user.RemoteUserNoCreateTest.test_user_switch_forces_new_login",  # noqa
+            "auth_tests.test_remote_user.RemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
             "auth_tests.test_remote_user.RemoteUserTest.test_header_disappears",  # noqa
             "auth_tests.test_remote_user.RemoteUserTest.test_inactive_user",  # noqa
             "auth_tests.test_remote_user.RemoteUserTest.test_known_user",  # noqa
@@ -1000,10 +1772,19 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_signals.SignalTestCase.test_logout",  # noqa
             "auth_tests.test_signals.SignalTestCase.test_logout_anonymous",  # noqa
             "auth_tests.test_signals.SignalTestCase.test_update_last_login",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_change_done_view",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_change_view",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_complete_view",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_custom_username_hint",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_invalid_token",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_valid_token",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_done_view",  # noqa
+            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_view",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_10265",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_check_token_with_nonexistent_token_and_user",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_make_token",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_timeout",  # noqa
+            "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
             "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_secret",  # noqa
             "auth_tests.test_validators.UserAttributeSimilarityValidatorTest.test_validate",  # noqa
             "auth_tests.test_views.AuthViewNamedURLTests.test_named_urls",  # noqa
@@ -1074,6 +1855,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "auth_tests.test_views.LogoutThenLoginTests.test_default_logout_then_login",  # noqa
             "auth_tests.test_views.LogoutThenLoginTests.test_logout_then_login_with_custom_login",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_complete",  # noqa
+            "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token",  # noqa
+            "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token_link_redirects_to_set_password_page",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_different_passwords",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_display_user_from_form",  # noqa
             "auth_tests.test_views.PasswordResetTest.test_confirm_invalid",  # noqa
@@ -1110,25 +1893,30 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "backends.tests.FkConstraintsTests.test_disable_constraint_checks_manually",  # noqa
             "backends.tests.FkConstraintsTests.test_integrity_checks_on_creation",  # noqa
             "backends.tests.FkConstraintsTests.test_integrity_checks_on_update",  # noqa
-            "basic.tests.ModelTest.test_ticket_20278",
-            "basic.tests.ModelRefreshTests.test_lookup_in_fields",
-            "basic.tests.ModelRefreshTests.test_prefetched_cache_cleared",
             "basic.tests.ModelRefreshTests.test_lookup_in_fields",
             "basic.tests.ModelRefreshTests.test_prefetched_cache_cleared",
             "basic.tests.ModelRefreshTests.test_refresh_fk",
             "basic.tests.ModelRefreshTests.test_refresh_fk_on_delete_set_null",
             "basic.tests.ModelRefreshTests.test_refresh_null_fk",
             "basic.tests.ModelRefreshTests.test_unknown_kwarg",
+            "basic.tests.ModelTest.test_ticket_20278",
             "bulk_create.tests.BulkCreateTests.test_bulk_insert_nullable_fields",  # noqa
+            # Check constraints are not supported by Spanner emulator.
+            "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
+            # Check constraints are not supported by Spanner emulator.
+            "constraints.tests.CheckConstraintTests.test_database_constraint",  # noqa
+            "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
+            "constraints.tests.CheckConstraintTests.test_name",  # noqa
+            "custom_lookups.tests.SubqueryTransformTests.test_subquery_usage",  # noqa
             "custom_pk.tests.CustomPKTests.test_required_pk",  # noqa
             "custom_pk.tests.CustomPKTests.test_unique_pk",  # noqa
-            "custom_lookups.tests.SubqueryTransformTests.test_subquery_usage",  # noqa
             "datatypes.tests.DataTypesTestCase.test_boolean_type",  # noqa
             "datatypes.tests.DataTypesTestCase.test_date_type",  # noqa
             "datatypes.tests.DataTypesTestCase.test_textfields_str",  # noqa
             "datatypes.tests.DataTypesTestCase.test_time_field",  # noqa
             "datatypes.tests.DataTypesTestCase.test_year_boundaries",  # noqa
             "dates.tests.DatesTests.test_related_model_traverse",  # noqa
+            "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",  # noqa
             "datetimes.tests.DateTimesTests.test_datetimes_has_lazy_iterator",  # noqa
             "datetimes.tests.DateTimesTests.test_datetimes_returns_available_dates_for_given_scope_and_given_field",  # noqa
             "datetimes.tests.DateTimesTests.test_related_model_traverse",  # noqa
@@ -1142,6 +1930,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "db_functions.comparison.test_cast.CastTests.test_cast_from_value",  # noqa
             "db_functions.comparison.test_cast.CastTests.test_cast_to_char_field_with_max_length",  # noqa
             "db_functions.comparison.test_cast.CastTests.test_cast_to_char_field_without_max_length",  # noqa
+            "db_functions.comparison.test_cast.CastTests.test_cast_to_duration",  # noqa
             "db_functions.comparison.test_cast.CastTests.test_cast_to_integer",  # noqa
             "db_functions.comparison.test_cast.CastTests.test_cast_to_text_field",  # noqa
             "db_functions.comparison.test_coalesce.CoalesceTests.test_basic",  # noqa
@@ -1316,25 +2105,38 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "expressions.tests.IterableLookupInnerExpressionsTests.test_range_lookup_allows_F_expressions_and_expressions_for_integers",  # noqa
             "expressions.tests.ValueTests.test_update_TimeField_using_Value",  # noqa
             "expressions.tests.ValueTests.test_update_UUIDField_using_Value",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_loaddata_error_message",  # noqa
             "fixtures.tests.FixtureLoadingTests.test_ambiguous_compressed_fixture",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_output",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_pks",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loaddata_error_message",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loaddata_verbosity_three",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loading_and_dumping",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_loading_stdin",  # noqa
+            "fixtures.tests.FixtureLoadingTests.test_output_formats",  # noqa
             "fixtures.tests.FixtureTransactionTests.test_format_discovery",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",  # noqa
             "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",  # noqa
+            "fixtures.tests.TestCaseFixtureLoadingTests.test_class_fixtures",  # noqa
+            "fixtures_model_package.tests.FixtureTestCase.test_loaddata",  # noqa
             "flatpages_tests.test_csrf.FlatpageCSRFTests.test_view_authenticated_flatpage",  # noqa
             "flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_fallback_authenticated_flatpage",  # noqa
             "flatpages_tests.test_middleware.FlatpageMiddlewareTests.test_view_authenticated_flatpage",  # noqa
             "flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_tag_for_user",  # noqa
             "flatpages_tests.test_templatetags.FlatpageTemplateTagTests.test_get_flatpages_with_prefix_for_user",  # noqa
             "flatpages_tests.test_views.FlatpageViewTests.test_view_authenticated_flatpage",  # noqa
+            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa
+            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
+            "foreign_object.tests.MultiColumnFKTests.test_translations",  # noqa
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_add_GET",  # noqa
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_add_POST",  # noqa
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_GET",  # noqa
             "generic_inline_admin.tests.GenericAdminViewTest.test_basic_edit_POST",  # noqa
-            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_extra",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_extra_param",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_extra",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_max_num",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_get_min_num",  # noqa
+            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_max_num_param",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_min_num_param",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_no_param",  # noqa
             "generic_inline_admin.tests.GenericInlineAdminWithUniqueTogetherTest.test_add",  # noqa
@@ -1342,11 +2144,20 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "get_or_create.tests.GetOrCreateTests.test_get_or_create_invalid_params",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_create_with_duplicate_primary_key",  # noqa
             "get_or_create.tests.GetOrCreateTestsWithManualPKs.test_get_or_create_raises_IntegrityError_plus_traceback",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_create_twice",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_defaults_exact",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_callable_default",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",  # noqa
+            "get_or_create.tests.UpdateOrCreateTests.test_update_with_related_manager",  # noqa
             "i18n.tests.WatchForTranslationChangesTests.test_i18n_app_dirs",  # noqa
+            # Emulator doesn't support views.
+            "inspectdb.tests.InspectDBTransactionalTests.test_include_views",
             "introspection.tests.IntrospectionTests.test_get_constraints",  # noqa
             "introspection.tests.IntrospectionTests.test_get_constraints_index_types",  # noqa
             "introspection.tests.IntrospectionTests.test_get_constraints_indexes_orders",  # noqa
             "introspection.tests.IntrospectionTests.test_get_primary_key_column",  # noqa
+            "introspection.tests.IntrospectionTests.test_table_names_with_views",
             "lookup.tests.LookupTests.test_custom_field_none_rhs",  # noqa
             "lookup.tests.LookupTests.test_custom_lookup_none_rhs",  # noqa
             "lookup.tests.LookupTests.test_escaping",  # noqa
@@ -1495,6 +2306,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "model_fields.test_uuid.TestQuerying.test_exact",  # noqa
             "model_fields.test_uuid.TestQuerying.test_isnull",  # noqa
             "model_fields.test_uuid.TestSaveLoad.test_null_handling",  # noqa
+            "model_inheritance.tests.ModelInheritanceDataTests.test_update_inherited_model",  # noqa
+            "model_inheritance.tests.ModelInheritanceDataTests.test_update_query_counts",  # noqa
+            "model_inheritance.tests.ModelInheritanceTests.test_update_parent_filtering",  # noqa
+            "model_inheritance_regress.tests.ModelInheritanceTest.test_id_field_update_on_ancestor_change",  # noqa
+            "model_inheritance_regress.tests.ModelInheritanceTest.test_model_inheritance",  # noqa
             "multiple_database.tests.FixtureTestCase.test_fixture_loading",  # noqa
             "multiple_database.tests.FixtureTestCase.test_pseudo_empty_fixtures",  # noqa
             "multiple_database.tests.PickleQuerySetTestCase.test_pickling",  # noqa
@@ -1566,6 +2382,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "ordering.tests.OrderingTests.test_reversed_ordering",  # noqa
             "ordering.tests.OrderingTests.test_stop_slicing",  # noqa
             "ordering.tests.OrderingTests.test_stop_start_slicing",  # noqa
+            "proxy_models.tests.ProxyModelAdminTests.test_delete_str_in_model_admin",  # noqa
             "queries.test_bulk_update.BulkUpdateNoteTests.test_batch_size",  # noqa
             "queries.test_bulk_update.BulkUpdateNoteTests.test_functions",  # noqa
             "queries.test_bulk_update.BulkUpdateNoteTests.test_set_field_to_null",  # noqa
@@ -1605,11 +2422,15 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.Queries1Tests.test_error_raised_on_filter_with_dictionary",  # noqa
             "queries.tests.Queries1Tests.test_exclude",  # noqa
             "queries.tests.Queries1Tests.test_exclude_in",  # noqa
+            "queries.tests.Queries1Tests.test_excluded_intermediary_m2m_table_joined",  # noqa
+            "queries.tests.Queries1Tests.test_field_with_filterable",  # noqa
             "queries.tests.Queries1Tests.test_get_clears_ordering",  # noqa
             "queries.tests.Queries1Tests.test_heterogeneous_qs_combination",  # noqa
             "queries.tests.Queries1Tests.test_lookup_constraint_fielderror",  # noqa
+            "queries.tests.Queries1Tests.test_negate_field",  # noqa
             "queries.tests.Queries1Tests.test_nested_exclude",  # noqa
             "queries.tests.Queries1Tests.test_order_by_join_unref",  # noqa
+            "queries.tests.Queries1Tests.test_order_by_rawsql",  # noqa
             "queries.tests.Queries1Tests.test_order_by_tables",  # noqa
             "queries.tests.Queries1Tests.test_reasonable_number_of_subq_aliases",  # noqa
             "queries.tests.Queries1Tests.test_subquery_condition",  # noqa
@@ -1672,6 +2493,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.Queries2Tests.test_ticket4289",  # noqa
             "queries.tests.Queries2Tests.test_ticket7759",  # noqa
             "queries.tests.Queries4Tests.test_combine_join_reuse",  # noqa
+            "queries.tests.Queries4Tests.test_combine_or_filter_reuse",  # noqa
+            "queries.tests.Queries4Tests.test_filter_reverse_non_integer_pk",  # noqa
             "queries.tests.Queries4Tests.test_join_reuse_order",  # noqa
             "queries.tests.Queries4Tests.test_order_by_resetting",  # noqa
             "queries.tests.Queries4Tests.test_order_by_reverse_fk",  # noqa
@@ -1733,7 +2556,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "queries.tests.WeirdQuerysetSlicingTests.test_empty_sliced_subquery_exclude",  # noqa
             "queries.tests.WeirdQuerysetSlicingTests.test_tickets_7698_10202",  # noqa
             "queries.tests.WeirdQuerysetSlicingTests.test_zero_length_values_slicing",  # noqa
-            "foreign_object.tests.MultiColumnFKTests.test_translations",  # noqa
             "schema.tests.SchemaTests.test_add_datefield_and_datetimefield_use_effective_default",  # noqa
             "schema.tests.SchemaTests.test_add_field",  # noqa
             "schema.tests.SchemaTests.test_add_field_binary",  # noqa
@@ -1752,6 +2574,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "schema.tests.SchemaTests.test_alter_auto_field_to_integer_field",  # noqa
             "schema.tests.SchemaTests.test_alter_charfield_to_null",  # noqa
             "schema.tests.SchemaTests.test_alter_field_add_index_to_integerfield",  # noqa
+            "schema.tests.SchemaTests.test_alter_field_default_doesnt_perform_queries",  # noqa
             "schema.tests.SchemaTests.test_alter_field_default_dropped",  # noqa
             "schema.tests.SchemaTests.test_alter_field_fk_keeps_index",  # noqa
             "schema.tests.SchemaTests.test_alter_field_fk_to_o2o",  # noqa
@@ -1820,11 +2643,11 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "select_related_onetoone.tests.ReverseSelectRelatedTestCase.test_nullable_relation",  # noqa
             "select_related_onetoone.tests.ReverseSelectRelatedTestCase.test_self_relation",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_actual_expiry",  # noqa
-            "sessions_tests.tests.CustomDatabaseSessionTests.test_extra_session_field",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_clearsessions_command",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_cycle",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_cycle_with_no_session_cache",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_delete",  # noqa
+            "sessions_tests.tests.CustomDatabaseSessionTests.test_extra_session_field",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_flush",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_invalid_key",  # noqa
             "sessions_tests.tests.CustomDatabaseSessionTests.test_save",  # noqa
@@ -1837,6 +2660,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap",  # noqa
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap_attributes",  # noqa
             "sitemaps_tests.test_generic.GenericViewsSitemapTests.test_generic_sitemap_lastmod",  # noqa
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_index",  # noqa
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_limited",  # noqa
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_alternate_i18n_sitemap_xdefault",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_cached_sitemap_index",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_empty_page",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_empty_sitemap",  # noqa
@@ -1846,6 +2672,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_http.HTTPSitemapTests.test_paged_sitemap",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_requestsite_sitemap",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_custom_sitemap",  # noqa
+            "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_i18n_sitemap_index",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap_index",  # noqa
             "sitemaps_tests.test_http.HTTPSitemapTests.test_simple_sitemap_section",  # noqa
@@ -1878,40 +2705,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_not_detected",  # noqa
             "sitemaps_tests.test_utils.PingGoogleTests.test_something",  # noqa
             "string_lookup.tests.StringLookupTests.test_queries_on_textfields",  # noqa
-            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
-            "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_manytomany",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_relatedonlyfieldlistfilter_underscorelookup_foreignkey",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_none_returning_lookups",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_with_queryset_based_lookups",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_simplelistfilter_without_parameter",  # noqa
-            "admin_filters.tests.ListFiltersTests.test_two_characters_long_field",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_output",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_pks",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_loaddata_verbosity_three",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_loading_and_dumping",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_loading_stdin",  # noqa
-            "fixtures.tests.FixtureLoadingTests.test_output_formats",  # noqa
-            "fixtures_model_package.tests.FixtureTestCase.test_loaddata",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_create_twice",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_defaults_exact",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_update",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_update_callable_default",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",  # noqa
-            "get_or_create.tests.UpdateOrCreateTests.test_update_with_related_manager",  # noqa
-            "model_inheritance_regress.tests.ModelInheritanceTest.test_model_inheritance",  # noqa
-            "model_inheritance_regress.tests.ModelInheritanceTest.test_id_field_update_on_ancestor_change",  # noqa
-            "model_inheritance.tests.ModelInheritanceTests.test_update_parent_filtering",  # noqa
-            "model_inheritance.tests.ModelInheritanceDataTests.test_update_query_counts",  # noqa
-            "model_inheritance.tests.ModelInheritanceDataTests.test_update_inherited_model",  # noqa
             "test_client.tests.ClientTest.test_empty_post",  # noqa
+            "test_client.tests.ClientTest.test_exc_info",  # noqa
+            "test_client.tests.ClientTest.test_exc_info_none",  # noqa
             "test_client.tests.ClientTest.test_exception_following_nested_client_request",  # noqa
             "test_client.tests.ClientTest.test_external_redirect",  # noqa
             "test_client.tests.ClientTest.test_external_redirect_with_fetch_error_msg",  # noqa
+            "test_client.tests.ClientTest.test_follow_307_and_308_get_head_query_string",  # noqa
             "test_client.tests.ClientTest.test_follow_307_and_308_preserves_get_params",  # noqa
             "test_client.tests.ClientTest.test_follow_307_and_308_preserves_post_data",  # noqa
             "test_client.tests.ClientTest.test_follow_307_and_308_preserves_put_body",  # noqa
+            "test_client.tests.ClientTest.test_follow_307_and_308_preserves_query_string",  # noqa
             "test_client.tests.ClientTest.test_follow_307_and_308_redirect",  # noqa
             "test_client.tests.ClientTest.test_follow_redirect",  # noqa
             "test_client.tests.ClientTest.test_follow_relative_redirect",  # noqa
@@ -2025,100 +2829,4 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "validation.tests.GenericIPAddressFieldTests.test_empty_generic_ip_passes",  # noqa
             "validation.tests.GenericIPAddressFieldTests.test_v4_unpack_uniqueness_detection",  # noqa
             "validation.tests.GenericIPAddressFieldTests.test_v6_uniqueness_detection",  # noqa
-            # Check constraints are not supported by Spanner emulator.
-            "constraints.tests.CheckConstraintTests.test_abstract_name",  # noqa
-            "constraints.tests.CheckConstraintTests.test_database_constraint_unicode",  # noqa
-            # Untyped parameters are not supported:
-            # https://github.com/GoogleCloudPlatform/cloud-spanner-emulator#features-and-limitations
-            "admin_changelist.test_date_hierarchy.DateHierarchyTests.test_bounded_params_with_dst_time_zone",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_changelist_search_form_validation",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_clear_all_filters_link",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_clear_all_filters_link_callable_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_clear_all_filters_link",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_inherited_m2m_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_m2m_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_m2m_to_inherited_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_many_to_many_at_second_level_in_search_fields",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_non_unique_related_object_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_non_unique_related_object_in_search_fields",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_through_m2m_at_second_level_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_duplicates_for_through_m2m_in_list_filter",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_no_exists_for_m2m_in_list_filter_without_params",  # noqa
-            "admin_changelist.tests.ChangeListTests.test_total_ordering_optimization_meta_constraints",  # noqa
-            "admin_docs.test_middleware.XViewMiddlewareTest.test_no_auth_middleware",  # noqa
-            "admin_docs.test_views.AdminDocViewDefaultEngineOnly.test_template_detail_path_traversal",  # noqa
-            "admin_inlines.tests.TestInline.test_custom_form_tabular_inline_extra_field_label",  # noqa
-            "admin_inlines.tests.TestInline.test_inlines_singular_heading_one_to_one",  # noqa
-            "admin_inlines.tests.TestInline.test_non_editable_custom_form_tabular_inline_extra_field_label",  # noqa
-            "admin_views.test_multidb.MultiDatabaseTests.test_delete_view",  # noqa
-            "auth_tests.test_auth_backends.AuthenticateTests.test_authenticate_sensitive_variables",  # noqa
-            "auth_tests.test_auth_backends.AuthenticateTests.test_clean_credentials_sensitive_variables",  # noqa
-            "auth_tests.test_auth_backends.AuthenticateTests.test_skips_backends_with_decorated_method",  # noqa
-            "auth_tests.test_auth_backends.BaseBackendTest.test_get_all_permissions",  # noqa
-            "auth_tests.test_auth_backends.BaseBackendTest.test_get_group_permissions",  # noqa
-            "auth_tests.test_auth_backends.BaseBackendTest.test_get_user_permissions",  # noqa
-            "auth_tests.test_auth_backends.BaseBackendTest.test_has_perm",  # noqa
-            "auth_tests.test_auth_backends.CustomPermissionsUserModelBackendTest.test_authentication_without_credentials",  # noqa
-            "auth_tests.test_auth_backends.ExtensionUserModelBackendTest.test_authentication_without_credentials",  # noqa
-            "auth_tests.test_auth_backends.ModelBackendTest.test_authentication_without_credentials",  # noqa
-            "auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password",  # noqa
-            "auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password",  # noqa
-            "auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password",  # noqa
-            "auth_tests.test_basic.BasicTestCase.test_superuser_no_email_or_password",  # noqa
-            "auth_tests.test_decorators.LoginRequiredTestCase.test_callable",  # noqa
-            "auth_tests.test_decorators.LoginRequiredTestCase.test_login_required",  # noqa
-            "auth_tests.test_decorators.LoginRequiredTestCase.test_login_required_next_url",  # noqa
-            "auth_tests.test_decorators.LoginRequiredTestCase.test_view",  # noqa
-            "auth_tests.test_forms.AdminPasswordChangeFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.AuthenticationFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.AuthenticationFormTest.test_username_field_autocapitalize_none",  # noqa
-            "auth_tests.test_forms.PasswordChangeFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.PasswordResetFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.SetPasswordFormTest.test_html_autocomplete_attributes",  # noqa
-            "auth_tests.test_forms.UserChangeFormTest.test_username_field_autocapitalize_none",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_environment_variable_non_interactive",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m_interactive",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_fields_with_m2m_interactive_blank",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_ignore_environment_variable_interactive",  # noqa
-            "auth_tests.test_management.CreatesuperuserManagementCommandTestCase.test_ignore_environment_variable_non_interactive",  # noqa
-            "auth_tests.test_management.GetDefaultUsernameTestCase.test_with_database",  # noqa
-            "auth_tests.test_management.MultiDBCreatesuperuserTestCase.test_createsuperuser_command_suggested_username_with_database_option",  # noqa
-            "auth_tests.test_middleware.TestAuthenticationMiddleware.test_no_session",  # noqa
-            "auth_tests.test_models.UserManagerTestCase.test_runpython_manager_methods",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_backend_without_with_perm",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_basic",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_custom_backend",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_custom_backend_pass_obj",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_invalid_backend_type",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_invalid_permission_name",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_invalid_permission_type",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_multiple_backends",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_backend",  # noqa
-            "auth_tests.test_models.UserWithPermTestCase.test_nonexistent_permission",  # noqa
-            "auth_tests.test_remote_user.AllowAllUsersRemoteUserBackendTest.test_csrf_validation_passes_after_process_request_login",  # noqa
-            "auth_tests.test_remote_user.CustomHeaderRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
-            "auth_tests.test_remote_user.PersistentRemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
-            "auth_tests.test_remote_user.RemoteUserCustomTest.test_csrf_validation_passes_after_process_request_login",  # noqa
-            "auth_tests.test_remote_user.RemoteUserTest.test_csrf_validation_passes_after_process_request_login",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_change_done_view",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_change_view",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_complete_view",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_custom_username_hint",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_invalid_token",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_confirm_view_valid_token",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_done_view",  # noqa
-            "auth_tests.test_templates.AuthTemplateTests.test_password_reset_view",  # noqa
-            "auth_tests.test_tokens.TokenGeneratorTest.test_token_with_different_email",  # noqa
-            "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token",  # noqa
-            "auth_tests.test_views.PasswordResetTest.test_confirm_custom_reset_url_token_link_redirects_to_set_password_page",  # noqa
-            "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",  # noqa
-            "db_functions.comparison.test_cast.CastTests.test_cast_to_duration",  # noqa
-            "fixtures.tests.TestCaseFixtureLoadingTests.test_class_fixtures",  # noqa
-            "generic_inline_admin.tests.GenericInlineAdminParametersTest.test_max_num_param",  # noqa
-            "queries.tests.Queries1Tests.test_excluded_intermediary_m2m_table_joined",  # noqa
-            "queries.tests.Queries1Tests.test_field_with_filterable",  # noqa
-            "queries.tests.Queries1Tests.test_negate_field",  # noqa
-
-
-        )
+            )

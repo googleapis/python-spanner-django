@@ -56,6 +56,7 @@ DATABASES = {
        'PROJECT': "$PROJECT",
        'INSTANCE': "$INSTANCE",
        'NAME': "$TEST_DBNAME_OTHER",
+       'RANDOM_ID_GENERATION_ENABLED': 'True',
    },
 }
 USE_TZ = False

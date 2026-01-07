@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from google.api_core.exceptions import AlreadyExists
 
 from google.cloud.spanner_v1 import Client
 
@@ -29,5 +30,8 @@ if os.getenv(
     config = f"{client.project_name}/instanceConfigs/regional-us-central1"
 
     instance = client.instance("google-cloud-django-backend-tests", config)
-    created_op = instance.create()
-    created_op.result(30)  # block until completion
+    try:
+        created_op = instance.create()
+        created_op.result(30)  # block until completion
+    except AlreadyExists:
+        print("Instance already exists... Skipping creation")

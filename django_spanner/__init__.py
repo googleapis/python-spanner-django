@@ -14,15 +14,17 @@ from uuid import uuid4
 
 RANDOM_ID_GENERATION_ENABLED_SETTING = "RANDOM_ID_GENERATION_ENABLED"
 
-import pkg_resources
 from django.conf.global_settings import DATABASES
 from django.db import DEFAULT_DB_ALIAS
 from google.cloud.spanner_v1 import JsonObject
 from django.db.models.fields import (
     NOT_PROVIDED,
     AutoField,
+    BigAutoField,
     Field,
+    SmallAutoField,
 )
+from django.db.models import JSONField
 
 from .functions import register_functions
 from .lookups import register_lookups
@@ -34,24 +36,14 @@ from .version import __version__
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
 
-USING_DJANGO_3 = False
-if django.VERSION[:2] == (3, 2):
-    USING_DJANGO_3 = True
-
-USING_DJANGO_4 = False
-if django.VERSION[:2] == (4, 2):
-    USING_DJANGO_4 = True
-
-from django.db.models.fields import (
-    SmallAutoField,
-    BigAutoField,
-)
-from django.db.models import JSONField
+USING_DJANGO_5 = False
+if django.VERSION[:1] == (5,):
+    USING_DJANGO_5 = True
 
 USE_EMULATOR = os.getenv("SPANNER_EMULATOR_HOST") is not None
 
-# Only active LTS django versions (3.2.*, 4.2.*) are supported by this library right now.
-SUPPORTED_DJANGO_VERSIONS = [(3, 2), (4, 2)]
+# Only active LTS django versions (5.2.*) are supported by this library right now.
+SUPPORTED_DJANGO_VERSIONS = [(5, 2)]
 
 check_django_compatability(SUPPORTED_DJANGO_VERSIONS)
 register_functions()

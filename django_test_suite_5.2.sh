@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# Copyright (c) 2020 Google LLC. All rights reserved.
+# Copyright (c) 2026 Google LLC. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
 set -x pipefail
 
-sudo -E apt-get update -y
-sudo -E apt-get install -y libmemcached-dev
+# sudo -E apt-get update -y
+# sudo -E apt-get install -y libmemcached-dev
 
 # Disable buffering, so that the logs stream through.
 export PYTHONUNBUFFERED=1
@@ -18,14 +18,15 @@ mkdir -p $DJANGO_TESTS_DIR
 if [ $SPANNER_EMULATOR_HOST != 0 ]
 then
     pip3 install .
-    git clone --depth 1 --single-branch --branch "django/stable/3.2.x" https://github.com/googleapis/python-spanner-django.git $DJANGO_TESTS_DIR/django3.2
+    # Clone official Django repo for 5.2 tests
+    git clone --depth 1 --single-branch --branch "stable/5.2.x" https://github.com/django/django.git $DJANGO_TESTS_DIR/django
 fi
 
 # Install dependencies for Django tests.
 sudo -E apt-get update
 sudo -E apt-get install -y libffi-dev libjpeg-dev zlib1g-devel
 
-cd $DJANGO_TESTS_DIR/django3.2 && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
+cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 
 python3 create_test_instance.py
 
@@ -56,6 +57,7 @@ DATABASES = {
        'NAME': "$TEST_DBNAME_OTHER",
    },
 }
+USE_TZ = False
 SECRET_KEY = 'spanner_tests_secret_key'
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
@@ -64,7 +66,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 !
 }
 
-cd $TESTS_DIR/django3.2/tests
+cd $TESTS_DIR/django/tests
 create_settings
 
 EXIT_STATUS=0

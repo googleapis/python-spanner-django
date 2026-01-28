@@ -9,7 +9,8 @@ import uuid
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django_spanner._opentelemetry_tracing import trace_call
-from django_spanner import USE_EMULATOR, USING_DJANGO_3
+from django.db.models.fields import NOT_PROVIDED
+from django_spanner import USE_EMULATOR
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -117,30 +118,28 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             # Create a unique constraint separately because Spanner doesn't
             # allow them inline on a column.
             if field.unique and not field.primary_key:
-                if USING_DJANGO_3:
-                    self.deferred_sql.append(
-                        self._create_unique_sql(model, [field.column])
-                    )
-                else:
                     self.deferred_sql.append(
                         self._create_unique_sql(model, [field])
                     )
 
+
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:
-            if USING_DJANGO_3:
-                columns = [
-                    model._meta.get_field(field).column for field in fields
-                ]
-            else:
-                columns = [model._meta.get_field(field) for field in fields]
+            columns = [model._meta.get_field(field) for field in fields]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
         constraints = [
             constraint.constraint_sql(model, self)
             for constraint in model._meta.constraints
         ]
         # Make the table
+        if hasattr(model._meta.pk, "columns") and model._meta.pk.columns:
+            primary_key = ", ".join(
+                self.quote_name(column) for column in model._meta.pk.columns
+            )
+        else:
+            primary_key = self.quote_name(model._meta.pk.column)
+
         sql = self.sql_create_table % {
             "table": self.quote_name(model._meta.db_table),
             "definition": ", ".join(
@@ -148,7 +147,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 for constraint in (*column_sqls, *constraints)
                 if constraint
             ),
-            "primary_key": self.quote_name(model._meta.pk.column),
+            "primary_key": primary_key,
         }
         if model._meta.db_tablespace:
             tablespace_sql = self.connection.ops.tablespace_sql(
@@ -290,11 +289,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Create a unique constraint separately because Spanner doesn't allow
         # them inline on a column.
         if field.unique and not field.primary_key:
-            if USING_DJANGO_3:
-                self.deferred_sql.append(
-                    self._create_unique_sql(model, [field.column])
-                )
-            else:
                 self.deferred_sql.append(
                     self._create_unique_sql(model, [field])
                 )
@@ -389,6 +383,22 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             null = True
         if not null and not exclude_not_null:
             sql += " NOT NULL"
+        
+        from django.db.models.fields import NOT_PROVIDED
+        if field.db_default is not None and field.db_default is not NOT_PROVIDED:
+            from django.db.models.expressions import Expression
+            if isinstance(field.db_default, Expression):
+                 default_sql, default_params = self.compile(field.db_default)
+            else:
+                 default_sql, default_params = self.quote_value(field.db_default), []
+            sql += " DEFAULT (%s)" % default_sql
+            params.extend(default_params)
+        
+        if getattr(field, "generated", False):
+            expression_sql, expression_params = self.compile(field.expression)
+            sql += " GENERATED ALWAYS AS (%s) STORED" % expression_sql
+            params.extend(expression_params)
+
         # Optionally add the tablespace if it's an implicitly indexed column
         tablespace = field.db_tablespace or model._meta.db_tablespace
         if (
@@ -401,6 +411,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             )
         # Return the sql
         return sql, params
+
+    def compile(self, expression):
+        return expression.as_sql(
+            self.connection.ops.compiler("SQLCompiler")(
+                self.connection.ops, self.connection, "default"
+            ),
+            self.connection,
+        )
 
     def add_index(self, model, index):
         """Add index to model's table.
@@ -556,25 +574,15 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         expressions=None,
     ):
         # Inline constraints aren't supported, so create the index separately.
-        if USING_DJANGO_3:
-            sql = self._create_unique_sql(
-                model,
-                fields,
-                name=name,
-                condition=condition,
-                include=include,
-                opclasses=opclasses,
-            )
-        else:
-            sql = self._create_unique_sql(
-                model,
-                fields,
-                name=name,
-                condition=condition,
-                include=include,
-                opclasses=opclasses,
-                expressions=expressions,
-            )
+        sql = self._create_unique_sql(
+            model,
+            fields,
+            name=name,
+            condition=condition,
+            include=include,
+            opclasses=opclasses,
+            expressions=expressions,
+        )
         if sql:
             self.deferred_sql.append(sql)
         return None

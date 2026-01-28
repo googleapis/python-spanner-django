@@ -384,6 +384,19 @@ def substr(self, compiler, connection, **extra_context):
 def register_functions():
     """Register the above methods with the corersponding Django classes."""
     Cast.as_spanner = cast
+    Cast.as_postgresql = cast
+
+    try:
+        from django.db.models.functions import JSONArray
+
+        def json_array(self, compiler, connection, **extra_context):
+            return self.as_sql(
+                compiler, connection, template="[%(expressions)s]", **extra_context
+            )
+
+        JSONArray.as_spanner = json_array
+    except ImportError:
+        pass
     Chr.as_spanner = chr_
     ConcatPair.as_spanner = concatpair
     Cot.as_spanner = cot

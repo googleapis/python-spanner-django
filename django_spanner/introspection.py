@@ -185,10 +185,16 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 ccu ON tc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
                 tc.TABLE_NAME=@table_name AND tc.CONSTRAINT_TYPE='PRIMARY KEY' AND tc.TABLE_SCHEMA=@schema_name
+            ORDER BY
+                ccu.ORDINAL_POSITION
             """,
             params={"schema_name": schema_name, "table_name": table_name},
         )
-        return results[0][0] if results else None
+        if not results:
+            return None
+        if len(results) > 1:
+            return tuple(row[0] for row in results)
+        return results[0][0]
 
     def get_constraints(self, cursor, table_name):
         """Retrieve the Spanner Table column constraints.

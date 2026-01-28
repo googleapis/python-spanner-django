@@ -44,9 +44,9 @@ class TestDecimal(TransactionTestCase):
     def assertValuesEqual(
         self, queryset, expected_values, transformer, ordered=True
     ):
-        self.assertQuerysetEqual(
-            queryset, expected_values, transformer, ordered
-        )
+        if transformer:
+            queryset = map(transformer, queryset)
+        self.assertEqual(list(queryset), list(expected_values))
 
     def test_insert_and_search_decimal_value(self):
         """

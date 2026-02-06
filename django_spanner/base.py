@@ -182,7 +182,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """
         conn_params.pop("instance", None)
         conn_params.pop("instance_id", None)
-        return self.Database.connect(self.instance, **conn_params)
+        # Ensure client is initialized
+        instance = self.instance
+        return self.Database.connect(
+            instance.instance_id,
+            client=instance._client,
+            **conn_params,
+        )
 
     def init_connection_state(self):
         """Initialize the state of the existing connection."""

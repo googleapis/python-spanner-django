@@ -8,7 +8,7 @@ import unittest
 from django.test import TransactionTestCase
 from django.db import connection
 from django_spanner import USE_EMULATOR
-from django_spanner import USING_DJANGO_3
+
 from tests.system.django_spanner.utils import (
     setup_instance,
     teardown_instance,
@@ -16,8 +16,7 @@ from tests.system.django_spanner.utils import (
     teardown_database,
 )
 
-if USING_DJANGO_3:
-    from .models import Detail
+from .models import Detail
 
 
 @unittest.skipIf(USE_EMULATOR, "Jsonfield is not implemented in emulator.")

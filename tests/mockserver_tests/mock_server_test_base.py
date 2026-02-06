@@ -15,7 +15,7 @@
 import os
 import unittest
 
-from django.db import connection, connections
+from django.db import connections
 from google.cloud.spanner_dbapi.parsed_statement import AutocommitDmlMode
 import google.cloud.spanner_v1.types.type as spanner_type
 import google.cloud.spanner_v1.types.result_set as result_set

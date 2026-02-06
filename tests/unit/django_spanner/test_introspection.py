@@ -11,7 +11,6 @@ from google.cloud.spanner_dbapi.cursor import ColumnDetails
 from google.cloud.spanner_v1 import TypeCode
 from tests.unit.django_spanner.simple_test import SpannerSimpleTestClass
 from unittest import mock
-from django_spanner import USING_DJANGO_3
 
 
 class TestUtils(SpannerSimpleTestClass):
@@ -131,7 +130,7 @@ class TestUtils(SpannerSimpleTestClass):
         )
         self.assertEqual(
             primary_key,
-            "PK_column",
+            ("PK_column",),
         )
 
     def test_get_primary_key_column_returns_none(self):

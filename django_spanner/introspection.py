@@ -11,7 +11,6 @@ from django.db.backends.base.introspection import (
 )
 from django.db.models import Index
 from google.cloud.spanner_v1 import TypeCode
-from django_spanner import USE_EMULATOR
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
@@ -188,7 +187,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             """,
             params={"schema_name": schema_name, "table_name": table_name},
         )
-        return results[0][0] if results else None
+        return tuple(row[0] for row in results) if results else None
 
     def get_constraints(self, cursor, table_name):
         """Retrieve the Spanner Table column constraints.

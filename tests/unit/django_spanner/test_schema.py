@@ -20,7 +20,6 @@ from tests.unit.django_spanner.test__opentelemetry_tracing import (
     DATABASE_ID,
 )
 
-
 BASE_ATTRIBUTES = {
     "db.type": "spanner",
     "db.engine": "django_spanner",
@@ -145,6 +144,7 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor.execute = mock.MagicMock()
             new_field = IntegerField(null=True)
             new_field.set_attributes_from_name("age")
+            new_field.model = Author
             schema_editor.add_field(Author, new_field)
 
             schema_editor.execute.assert_called_once_with(
@@ -160,6 +160,7 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor._constraint_names = mock.MagicMock()
             remove_field = IntegerField(unique=True)
             remove_field.set_attributes_from_name("num")
+            remove_field.model = Author
             schema_editor.remove_field(Author, remove_field)
 
             schema_editor.execute.assert_called_once_with(
@@ -198,6 +199,7 @@ class TestUtils(SpannerSimpleTestClass):
 
             remove_field = IntegerField(unique=True)
             remove_field.set_attributes_from_name("num")
+            remove_field.model = Author
             schema_editor.remove_field(Author, remove_field)
 
             calls = [
@@ -237,6 +239,7 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor.execute = mock.MagicMock()
             new_field = IntegerField()
             new_field.set_attributes_from_name("num")
+            new_field.model = Author
             sql, params = schema_editor.column_sql(Author, new_field)
             self.assertEqual(sql, "INT64 NOT NULL")
             self.assertEqual(params, [])
@@ -249,6 +252,7 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor.execute = mock.MagicMock()
             new_field = IntegerField(null=True)
             new_field.set_attributes_from_name("num")
+            new_field.model = Author
             sql, params = schema_editor.column_sql(Author, new_field)
             self.assertEqual(sql, "INT64")
             self.assertEqual(params, [])
@@ -289,8 +293,10 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor.execute = mock.MagicMock()
             old_field = IntegerField()
             old_field.set_attributes_from_name("num")
+            old_field.model = Author
             new_field = IntegerField()
             new_field.set_attributes_from_name("author_num")
+            new_field.model = Author
             schema_editor.alter_field(Author, old_field, new_field)
 
             schema_editor.execute.assert_called_once_with(
@@ -320,8 +326,10 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor._constraint_names = constraint_names
             old_field = IntegerField(null=True, db_index=True)
             old_field.set_attributes_from_name("num")
+            old_field.model = Author
             new_field = IntegerField(db_index=True)
             new_field.set_attributes_from_name("author_num")
+            new_field.model = Author
             schema_editor.alter_field(Author, old_field, new_field)
 
             calls = [
@@ -383,8 +391,10 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor._constraint_names = constraint_names
             old_field = IntegerField(null=True)
             old_field.set_attributes_from_name("num")
+            old_field.model = Author
             new_field = IntegerField()
             new_field.set_attributes_from_name("author_num")
+            new_field.model = Author
             with self.assertRaises(NotSupportedError):
                 schema_editor.alter_field(Author, old_field, new_field)
 
@@ -401,8 +411,10 @@ class TestUtils(SpannerSimpleTestClass):
             schema_editor._constraint_names = constraint_names
             old_field = IntegerField(null=True, db_index=True)
             old_field.set_attributes_from_name("num")
+            old_field.model = Author
             new_field = IntegerField()
             new_field.set_attributes_from_name("author_num")
+            new_field.model = Author
             with self.assertRaises(NotSupportedError):
                 schema_editor.alter_field(Author, old_field, new_field)
 

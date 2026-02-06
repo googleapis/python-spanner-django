@@ -139,7 +139,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         # Cloud Spanner doesn't support TRUNCATE so DELETE instead.
         # A dummy WHERE clause is required.
         if tables:
-            delete_sql = "%s %s %%s" % (
+            delete_sql = "%s %s %%s WHERE true" % (
                 style.SQL_KEYWORD("DELETE"),
                 style.SQL_KEYWORD("FROM"),
             )

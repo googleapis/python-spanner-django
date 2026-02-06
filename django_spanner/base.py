@@ -19,6 +19,11 @@ from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
 
 
+# Global cache for Spanner client to prevent multiple initializations
+# which can cause OpenTelemetry 'MeterProvider override' crashes.
+_SPANNER_CLIENT_CACHE = None
+
+
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = "spanner"
     display_name = "Cloud Spanner"
@@ -112,6 +117,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     ops_class = DatabaseOperations
     client_class = DatabaseClient
 
+
     @property
     def instance(self):
         """Reference to a Cloud Spanner Instance containing the Database.
@@ -119,16 +125,19 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         :rtype: :class:`~google.cloud.spanner_v1.instance.Instance`
         :returns: A new instance owned by the existing Spanner Client.
         """
+        global _SPANNER_CLIENT_CACHE
+
         if "client" in self.settings_dict["OPTIONS"]:
             return self.settings_dict["OPTIONS"]["client"].instance(
                 self.settings_dict["INSTANCE"]
             )
-        if not hasattr(self, "_client"):
-            self._client = spanner.Client(
+        
+        if _SPANNER_CLIENT_CACHE is None:
+            _SPANNER_CLIENT_CACHE = spanner.Client(
                 project=os.environ["GOOGLE_CLOUD_PROJECT"]
             )
-            self._instance = self._client.instance(self.settings_dict["INSTANCE"])
-        return self._instance
+        
+        return _SPANNER_CLIENT_CACHE.instance(self.settings_dict["INSTANCE"])
 
     @property
     def allow_transactions_in_auto_commit(self):

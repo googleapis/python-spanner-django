@@ -181,6 +181,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                  doesn't exist.
         """
         conn_params.pop("instance", None)
+        conn_params.pop("instance_id", None)
         return self.Database.connect(self.instance, **conn_params)
 
     def init_connection_state(self):

@@ -46,6 +46,7 @@ TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}
 
 create_settings() {
     cat << ! > "$SETTINGS_FILE.py"
+import django_spanner
 DATABASES = {
    'default': {
        'ENGINE': 'django_spanner',

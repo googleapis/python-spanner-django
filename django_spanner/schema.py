@@ -8,8 +8,9 @@ import uuid
 
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.models.fields import NOT_PROVIDED
 from django_spanner._opentelemetry_tracing import trace_call
-from django_spanner import USE_EMULATOR, USING_DJANGO_3
+from django_spanner import USE_EMULATOR
 
 
 class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
@@ -114,32 +115,37 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             column_sqls.append(
                 "%s %s" % (self.quote_name(field.column), definition)
             )
-            # Create a unique constraint separately because Spanner doesn't
             # allow them inline on a column.
             if field.unique and not field.primary_key:
-                if USING_DJANGO_3:
-                    self.deferred_sql.append(
-                        self._create_unique_sql(model, [field.column])
-                    )
-                else:
-                    self.deferred_sql.append(
-                        self._create_unique_sql(model, [field])
-                    )
+                self.deferred_sql.append(
+                    self._create_unique_sql(model, [field])
+                )
 
         # Add any unique_togethers (always deferred, as some fields might be
         # created afterwards, like geometry fields with some backends)
         for fields in model._meta.unique_together:
-            if USING_DJANGO_3:
-                columns = [
-                    model._meta.get_field(field).column for field in fields
-                ]
-            else:
-                columns = [model._meta.get_field(field) for field in fields]
+            columns = [model._meta.get_field(field) for field in fields]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
         constraints = [
             constraint.constraint_sql(model, self)
             for constraint in model._meta.constraints
         ]
+        if model._meta.pk.is_relation:
+            pk_column = self.quote_name(model._meta.pk.column)
+        else:
+            # Handle CompositePrimaryKey
+            # In Django 5.2+, model._meta.pk might be a CompositePrimaryKey.
+            # We assume regular fields have .column, composite have .columns (or similar mechanism).
+            # Actually, standard Django Field has .column.
+            # If it is a CompositePrimaryKey, it won't have a single .column.
+            # We check if it relies on multiple columns.
+            columns = (
+                model._meta.pk.columns
+                if hasattr(model._meta.pk, "columns")
+                else [model._meta.pk.column]
+            )
+            pk_column = ", ".join(self.quote_name(col) for col in columns)
+
         # Make the table
         sql = self.sql_create_table % {
             "table": self.quote_name(model._meta.db_table),
@@ -148,7 +154,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 for constraint in (*column_sqls, *constraints)
                 if constraint
             ),
-            "primary_key": self.quote_name(model._meta.pk.column),
+            "primary_key": pk_column,
         }
         if model._meta.db_tablespace:
             tablespace_sql = self.connection.ops.tablespace_sql(
@@ -290,14 +296,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Create a unique constraint separately because Spanner doesn't allow
         # them inline on a column.
         if field.unique and not field.primary_key:
-            if USING_DJANGO_3:
-                self.deferred_sql.append(
-                    self._create_unique_sql(model, [field.column])
-                )
-            else:
-                self.deferred_sql.append(
-                    self._create_unique_sql(model, [field])
-                )
+            self.deferred_sql.append(self._create_unique_sql(model, [field]))
         # Add any FK constraints later
         if (
             field.remote_field
@@ -399,6 +398,20 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             sql += " %s" % self.connection.ops.tablespace_sql(
                 tablespace, inline=True
             )
+
+        # Handle GeneratedField
+        if getattr(field, "generated", False):
+            sql += " GENERATED ALWAYS AS (%s) STORED" % field.generated_sql(
+                self.connection
+            )
+
+        # Handle db_default
+        db_default = getattr(field, "db_default", None)
+        if db_default is not None and db_default is not NOT_PROVIDED:
+            default_sql = self.db_default_sql(field)
+            if default_sql:
+                sql += " DEFAULT %s" % default_sql
+
         # Return the sql
         return sql, params
 
@@ -556,29 +569,28 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         expressions=None,
     ):
         # Inline constraints aren't supported, so create the index separately.
-        if USING_DJANGO_3:
-            sql = self._create_unique_sql(
-                model,
-                fields,
-                name=name,
-                condition=condition,
-                include=include,
-                opclasses=opclasses,
-            )
-        else:
-            sql = self._create_unique_sql(
-                model,
-                fields,
-                name=name,
-                condition=condition,
-                include=include,
-                opclasses=opclasses,
-                expressions=expressions,
-            )
+        sql = self._create_unique_sql(
+            model,
+            fields,
+            name=name,
+            condition=condition,
+            include=include,
+            opclasses=opclasses,
+            expressions=expressions,
+        )
         if sql:
             self.deferred_sql.append(sql)
         return None
 
     def skip_default(self, field):
-        """Cloud Spanner doesn't support column defaults."""
+        """
+        Cloud Spanner doesn't support column defaults, except for
+        GeneratedFields or when db_default is explicitly set (if supported).
+        """
+        # Django 5.0+ GeneratedField
+        if getattr(field, "generated", False):
+            return False
+        # Django 5.0+ db_default
+        if getattr(field, "db_default", None) is not None:
+            return False
         return True

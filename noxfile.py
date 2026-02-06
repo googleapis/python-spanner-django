@@ -15,7 +15,7 @@ import shutil
 
 import nox
 
-BLACK_VERSION = "black==22.3.0"
+BLACK_VERSION = "black>=24.0.0"
 BLACK_PATHS = [
     "docs",
     "django_spanner",
@@ -26,8 +26,8 @@ BLACK_PATHS = [
 
 MOCKSERVER_TEST_PYTHON_VERSION = "3.12"
 DEFAULT_PYTHON_VERSION = "3.8"
-SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10"]
+SYSTEM_TEST_PYTHON_VERSIONS = ["3.8", "3.12"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10", "3.12"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -67,7 +67,7 @@ def lint_setup_py(session):
     )
 
 
-def default(session, django_version="3.2"):
+def default(session, django_version="5.2"):
     # Install all test dependencies, then install this package in-place.
     session.install(
         "setuptools",
@@ -97,16 +97,15 @@ def default(session, django_version="3.2"):
         "--cov-fail-under=75",
         os.path.join("tests", "unit"),
         *session.posargs,
+        env={"GOOGLE_CLOUD_PROJECT": "test-project"},
     )
 
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 3.2")
+    print("Unit tests with django 5.2")
     default(session)
-    print("Unit tests with django 4.2")
-    default(session, django_version="4.2")
 
 
 @nox.session(python=MOCKSERVER_TEST_PYTHON_VERSION)
@@ -114,7 +113,7 @@ def mockserver(session):
     # Install all test dependencies, then install this package in-place.
     session.install(
         "setuptools",
-        "django~=4.2",
+        "django~=5.2",
         "mock",
         "mock-import",
         "pytest",
@@ -135,7 +134,7 @@ def mockserver(session):
     )
 
 
-def system_test(session, django_version="3.2"):
+def system_test(session, django_version="5.2"):
     """Run the system test suite."""
     constraints_path = str(
         CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
@@ -147,12 +146,6 @@ def system_test(session, django_version="3.2"):
     if os.environ.get("RUN_SYSTEM_TESTS", "true") == "false":
         session.skip("RUN_SYSTEM_TESTS is set to false, skipping")
     # Sanity check: Only run tests if the environment variable is set.
-    if not os.environ.get(
-        "GOOGLE_APPLICATION_CREDENTIALS", ""
-    ) and not os.environ.get("SPANNER_EMULATOR_HOST", ""):
-        session.skip(
-            "Credentials or emulator host must be set via environment variable"
-        )
 
     system_test_exists = os.path.exists(system_test_path)
     system_test_folder_exists = os.path.exists(system_test_folder_path)
@@ -185,10 +178,8 @@ def system_test(session, django_version="3.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    print("System tests with django 3.2")
+    print("System tests with django 5.2")
     system_test(session)
-    print("System tests with django 4.2")
-    system_test(session, django_version="4.2")
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
@@ -222,7 +213,7 @@ def docs(session):
         "sphinx==4.5.0",
         "alabaster",
         "recommonmark",
-        "django==3.2",
+        "django==5.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)
@@ -259,7 +250,7 @@ def docfx(session):
         "gcp-sphinx-docfx-yaml",
         "alabaster",
         "recommonmark",
-        "django==3.2",
+        "django==5.2",
     )
 
     shutil.rmtree(os.path.join("docs", "_build"), ignore_errors=True)

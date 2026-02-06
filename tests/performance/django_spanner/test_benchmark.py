@@ -169,18 +169,14 @@ class SpannerBenchmarkTest:
     def _create_table(self):
         """Create a table for performace testing."""
         conn = spanner_dbapi.connect(INSTANCE_ID, DATABASE_NAME)
-        conn.database.update_ddl(
-            [
-                """
+        conn.database.update_ddl(["""
 CREATE TABLE Author (
     id INT64,
     first_name STRING(20),
     last_name STRING(20),
     rating STRING(50),
 ) PRIMARY KEY (id)
-        """
-            ]
-        ).result(120)
+        """]).result(120)
 
         conn.close()
 

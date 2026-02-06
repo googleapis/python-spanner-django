@@ -76,19 +76,22 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def bulk_batch_size(self, fields, objs):
         """
-        Override the base class method. Returns the maximum number of the
-        query parameters.
+        Override the base class method. Returns the maximum number of objects
+        that can be batched in a single query.
 
         :type fields: list
-        :param fields: Currently not used.
+        :param fields: List of fields to be inserted.
 
         :type objs: list
-        :param objs: Currently not used.
+        :param objs: List of objects to be inserted.
 
         :rtype: int
-        :returns: The maximum number of query parameters (constant).
+        :returns: The maximum number of objects (row counts).
         """
-        return self.connection.features.max_query_params
+        max_params = self.connection.features.max_query_params
+        if not fields:
+            return max_params
+        return max_params // len(fields)
 
     def bulk_insert_sql(self, fields, placeholder_rows):
         """

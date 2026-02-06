@@ -126,10 +126,12 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         for fields in model._meta.unique_together:
             columns = [model._meta.get_field(field) for field in fields]
             self.deferred_sql.append(self._create_unique_sql(model, columns))
-        constraints = [
-            constraint.constraint_sql(model, self)
-            for constraint in model._meta.constraints
-        ]
+        constraints = []
+        for constraint in model._meta.constraints:
+            if isinstance(constraint, django.db.models.UniqueConstraint):
+                self.deferred_sql.append(constraint.create_sql(model, self))
+            else:
+                constraints.append(constraint.constraint_sql(model, self))
         if model._meta.pk.is_relation:
             pk_column = self.quote_name(model._meta.pk.column)
         else:
@@ -557,30 +559,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             "constraint": self.sql_check_constraint % {"check": check},
         }
 
-    def _unique_sql(
-        self,
-        model,
-        fields,
-        name,
-        condition=None,
-        deferrable=None,  # Spanner does not require this parameter
-        include=None,
-        opclasses=None,
-        expressions=None,
-    ):
-        # Inline constraints aren't supported, so create the index separately.
-        sql = self._create_unique_sql(
-            model,
-            fields,
-            name=name,
-            condition=condition,
-            include=include,
-            opclasses=opclasses,
-            expressions=expressions,
-        )
-        if sql:
-            self.deferred_sql.append(sql)
-        return None
+
 
     def skip_default(self, field):
         """

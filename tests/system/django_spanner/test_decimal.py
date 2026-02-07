@@ -44,7 +44,7 @@ class TestDecimal(TransactionTestCase):
     def assertValuesEqual(
         self, queryset, expected_values, transformer, ordered=True
     ):
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             queryset, expected_values, transformer, ordered
         )
 

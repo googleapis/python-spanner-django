@@ -25,9 +25,9 @@ BLACK_PATHS = [
 ]
 
 MOCKSERVER_TEST_PYTHON_VERSION = "3.12"
-DEFAULT_PYTHON_VERSION = "3.8"
-SYSTEM_TEST_PYTHON_VERSIONS = ["3.8", "3.12"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10", "3.12"]
+DEFAULT_PYTHON_VERSION = "3.10"
+SYSTEM_TEST_PYTHON_VERSIONS = ["3.12"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.10", "3.12"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -195,7 +195,7 @@ def cover(session):
     session.run("coverage", "erase")
 
 
-@nox.session(python="3.9")
+@nox.session(python="3.10")
 def docs(session):
     """Build the docs for this library."""
 

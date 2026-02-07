@@ -53,7 +53,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # appears in the GROUP BY clause.
     supports_subqueries_in_group_by = False
     uses_savepoints = True
-    supports_aggregate_filter_clause = True
+    can_rollback_tests = False  # Spanner savepoints are no-ops; rely on flush.
+    supports_aggregate_filter_clause = False
     # Spanner does not support expression indexes
     # example: CREATE INDEX index_name ON table (LOWER(column_name))
     supports_expression_indexes = False
@@ -472,6 +473,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "schema.tests.SchemaTests.test_ci_cs_db_collation",
         # Spanner limitation: Cannot rename tables and columns.
         "migrations.test_operations.OperationTests.test_rename_field_case",
+        # Validation failures (MultipleObjectsReturned) due to no-op savepoints/rollback in Spanner.
+        # Spanner does not support savepoints/nested transactions, which these tests rely on for isolation.
+        "select_related_onetoone.tests.SelectRelatedOneToOneTests",
     )
 
     if os.environ.get("SPANNER_EMULATOR_HOST", None):

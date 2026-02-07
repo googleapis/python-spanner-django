@@ -150,6 +150,64 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return []
 
+    def execute_sql_flush(self, sql_list):
+        """Execute a list of SQL statements to flush the database.
+
+        Cloud Spanner doesn't support disabling foreign key checks, so we use a
+        retry mechanism to handle deletion order. We try to delete from all tables;
+        if some fail due to foreign key constraints, we retry them in subsequent
+        passes. As long as we make progress (delete at least one table) in each
+        pass, we continue.
+        """
+        if not sql_list:
+            return
+
+        # Ensure we are in autocommit mode or commit explicitly if needed
+        was_autocommit = self.connection.get_autocommit()
+        if not was_autocommit:
+            self.connection.set_autocommit(True)
+
+        try:
+            with self.connection.cursor() as cursor:
+                # We might need several passes if there is a deep dependency chain
+                remaining_sql = list(sql_list)
+                
+                # Safety valve: 10 passes should be enough for any reasonable schema depth
+                max_passes = 10 
+                pass_count = 0
+
+                while remaining_sql:
+                    pass_count += 1
+                    failed_sql = []
+                    progress = False
+                    last_exception = None
+
+                    if pass_count > max_passes:
+                         # We are stuck in a cycle or too deep
+                         if last_exception:
+                             raise last_exception
+                         raise DatabaseError("Max passes reached in execute_sql_flush without clearing all tables.")
+
+                    for sql in remaining_sql:
+                        try:
+                            cursor.execute(sql)
+                            progress = True
+                        except Exception as e:
+                            # We catch Exception because Spanner might raise various errors
+                            # (Aborted, FailedPrecondition, IntegrityError, etc.)
+                            failed_sql.append(sql)
+                            last_exception = e
+
+                    # If no progress and still have failed SQL, we are stuck
+                    if not progress and failed_sql:
+                        raise last_exception
+
+                    remaining_sql = failed_sql
+
+        finally:
+            if not was_autocommit:
+                self.connection.set_autocommit(False)
+
     def adapt_datefield_value(self, value):
         """Cast date argument into Spanner DB API DateStr format.
 
@@ -678,3 +736,21 @@ class DatabaseOperations(BaseDatabaseOperations):
             # from Cloud Spanner.
             limit -= offset
         return limit, offset
+
+    def savepoint_create_sql(self, sid):
+        """
+        Return the SQL for creating a savepoint.
+        """
+        return "SELECT 1"
+
+    def savepoint_commit_sql(self, sid):
+        """
+        Return the SQL for committing a savepoint.
+        """
+        return "SELECT 1"
+
+    def savepoint_rollback_sql(self, sid):
+        """
+        Return the SQL for rolling back to a savepoint.
+        """
+        return "SELECT 1"

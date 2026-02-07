@@ -182,6 +182,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """
         conn_params.pop("instance", None)
         conn_params.pop("instance_id", None)
+        conn_params.pop("client", None)
         # Ensure client is initialized
         instance = self.instance
         return self.Database.connect(
@@ -244,21 +245,3 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         else:
             # transactions in autocommit mode for Django 3.2.
             self.connection.cursor().execute("SELECT 1")
-
-    def savepoint_create_sql(self, sid):
-        """
-        Return the SQL for creating a savepoint.
-        """
-        return "SELECT 1"
-
-    def savepoint_commit_sql(self, sid):
-        """
-        Return the SQL for committing a savepoint.
-        """
-        return "SELECT 1"
-
-    def savepoint_rollback_sql(self, sid):
-        """
-        Return the SQL for rolling back to a savepoint.
-        """
-        return "SELECT 1"

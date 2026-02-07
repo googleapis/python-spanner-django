@@ -242,7 +242,23 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if self.allow_transactions_in_auto_commit:
             self.connection.cursor().execute("BEGIN")
         else:
-            # This won't start a transaction and was a bug in Spanner Django 3.2 version.
-            # Set ALLOW_TRANSACTIONS_IN_AUTO_COMMIT = True in your settings.py file to enable
             # transactions in autocommit mode for Django 3.2.
             self.connection.cursor().execute("SELECT 1")
+
+    def savepoint_create_sql(self, sid):
+        """
+        Return the SQL for creating a savepoint.
+        """
+        return "SELECT 1"
+
+    def savepoint_commit_sql(self, sid):
+        """
+        Return the SQL for committing a savepoint.
+        """
+        return "SELECT 1"
+
+    def savepoint_rollback_sql(self, sid):
+        """
+        Return the SQL for rolling back to a savepoint.
+        """
+        return "SELECT 1"

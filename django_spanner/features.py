@@ -52,7 +52,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # Spanner does not support SELECTing an arbitrary expression that also
     # appears in the GROUP BY clause.
     supports_subqueries_in_group_by = False
-    uses_savepoints = False
+    uses_savepoints = True
+    supports_aggregate_filter_clause = True
     # Spanner does not support expression indexes
     # example: CREATE INDEX index_name ON table (LOWER(column_name))
     supports_expression_indexes = False

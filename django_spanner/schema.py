@@ -424,9 +424,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Handle db_default
         db_default = getattr(field, "db_default", None)
         if db_default is not None and db_default is not NOT_PROVIDED:
-            default_sql = self.db_default_sql(field)
+            default_sql, default_params = self.db_default_sql(field)
             if default_sql:
-                sql += " DEFAULT %s" % default_sql
+                sql += " DEFAULT (%s)" % default_sql
+                params.extend(default_params)
 
         # Return the sql
         return sql, params
@@ -462,7 +463,12 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # A more complete implementation isn't currently required.
         if isinstance(value, str):
             return "'%s'" % value.replace("'", "''")
+        if isinstance(value, bool):
+            return "TRUE" if value else "FALSE"
         return str(value)
+
+    def prepare_default(self, value):
+        return self.quote_value(value)
 
     def _alter_field(
         self,

@@ -34,7 +34,7 @@ python3 create_test_instance.py
 TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a") + time.time_ns() % 26)+os.urandom(10).hex())')}
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
 INSTANCE=${SPANNER_TEST_INSTANCE:-spanner-django-python-systest}
-PROJECT=${PROJECT_ID}
+PROJECT=${PROJECT_ID:-$GOOGLE_CLOUD_PROJECT}
 SETTINGS_FILE="$TEST_DBNAME-settings"
 TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}
 

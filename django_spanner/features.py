@@ -23,6 +23,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     has_case_insensitive_like = False
     # https://cloud.google.com/spanner/quotas#query_limits
     max_query_params = 900
+    # Spanner does not support parameterized defaults in DDL
+    requires_literal_defaults = True
+
     if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
         supports_foreign_keys = False
     else:
@@ -62,6 +65,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Django tests that aren't supported by Spanner.
     skip_tests = (
+        # AutoFields are assigned a random value on instantiation in this backend.
+        "empty.tests.EmptyModelTests.test_empty",
+        "many_to_one_null.tests.ManyToOneNullTests.test_unsaved",
         # Spanner does not support very long FK name: 400 Foreign Key name not valid
         "backends.tests.FkConstraintsTests.test_check_constraints",
         # No foreign key ON DELETE CASCADE in Spanner.
@@ -72,6 +78,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         # django_spanner monkey patches AutoField to have a default value.
         "basic.tests.ModelTest.test_hash",
+        # view_tests.tests.test_defaults.DefaultsTests fails with IntegrityError (Site ID collision)
+        "view_tests.tests.test_defaults.DefaultsTests",
         "custom_managers.tests.CustomManagerTests.test_slow_removal_through_specified_fk_related_manager",
         "custom_managers.tests.CustomManagerTests.test_slow_removal_through_default_fk_related_manager",
         "generic_relations.test_forms.GenericInlineFormsetTests.test_options",
@@ -398,12 +406,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # Spanner does not support deferred unique constraints
         "migrations.test_operations.OperationTests.test_create_model_with_deferred_unique_constraint",
         # Spanner does not support JSON object query on fields.
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_empty",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_basic",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_expressions",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_empty_json_object",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_nested_json_object",
-        "db_functions.comparison.test_json_object.JSONObjectTests.test_textfield",
+
         # Spanner does not support iso_week_day but week_day is supported.
         "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
         "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
@@ -1781,15 +1784,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_https.HTTPSDetectionSitemapTests.test_sitemap_section_with_https_request",  # noqa
             "sitemaps_tests.test_https.HTTPSSitemapTests.test_secure_sitemap_index",  # noqa
             "sitemaps_tests.test_https.HTTPSSitemapTests.test_secure_sitemap_section",  # noqa
-            "sitemaps_tests.test_management.PingGoogleTests.test_args",  # noqa
-            "sitemaps_tests.test_management.PingGoogleTests.test_default",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_exact_url",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_global",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_index",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_insecure",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_no_sites",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_get_sitemap_full_url_not_detected",  # noqa
-            "sitemaps_tests.test_utils.PingGoogleTests.test_something",  # noqa
+
+
             "string_lookup.tests.StringLookupTests.test_queries_on_textfields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa

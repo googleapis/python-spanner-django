@@ -6,7 +6,7 @@ from google.api_core.exceptions import NotFound
 
 def create_instance():
     project = os.environ.get("GOOGLE_CLOUD_PROJECT", "emulator-test-project")
-    instance_id = "spanner-django-python-systest"
+    instance_id = os.environ.get("SPANNER_TEST_INSTANCE", "spanner-django-python-systest")
     
     print(f"Checking instance {project}/{instance_id}...")
     client = spanner.Client(project=project)

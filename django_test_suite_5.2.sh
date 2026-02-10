@@ -6,8 +6,6 @@
 
 set -x pipefail
 
-
-
 # Disable buffering, so that the logs stream through.
 export PYTHONUNBUFFERED=1
 
@@ -16,20 +14,16 @@ mkdir -p $DJANGO_TESTS_DIR
 
 pip3 install .
 # Clone Django 5.2 (assuming stable/5.2.x exists, update if needed)
-# Using official Django repo? Or the fork?
-# The previous script used googleapis/python-spanner-django which is WEIRD if it really is this repo.
-# But maybe it's a mistake in my understanding.
-# To be safe, I'll use https://github.com/django/django.git and branch stable/5.2.x
-# If 5.2.x doesn't exist yet, we might use main.
 if [ ! -d "$DJANGO_TESTS_DIR/django" ]; then
     git clone --depth 1 --single-branch --branch "stable/5.2.x" https://github.com/django/django.git $DJANGO_TESTS_DIR/django
 fi
 
-
-
 cd $DJANGO_TESTS_DIR/django && pip3 install -e . && pip3 install -r tests/requirements/py3.txt; cd ../../
 pip3 install google-cloud-testutils
-export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+# Only add the current directory (project root) to PYTHONPATH so django_spanner is importable.
+# Do NOT add django_tests_dir, as it causes 'django' to be imported as a namespace package.
+export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/$DJANGO_TESTS_DIR/django
 
 python3 create_test_instance.py
 
@@ -39,7 +33,7 @@ python3 create_test_instance.py
 # cleanup the created database.
 TEST_DBNAME=${SPANNER_TEST_DB:-$(python3 -c 'import os, time; print(chr(ord("a") + time.time_ns() % 26)+os.urandom(10).hex())')}
 TEST_DBNAME_OTHER="$TEST_DBNAME-ot"
-INSTANCE=${SPANNER_TEST_INSTANCE:-django-tests}
+INSTANCE=${SPANNER_TEST_INSTANCE:-spanner-django-python-systest}
 PROJECT=${PROJECT_ID}
 SETTINGS_FILE="$TEST_DBNAME-settings"
 TESTS_DIR=${DJANGO_TESTS_DIR:-django_tests}

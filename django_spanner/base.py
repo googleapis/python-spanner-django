@@ -18,7 +18,6 @@ from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
 
-
 # Global cache for Spanner client to prevent multiple initializations
 # which can cause OpenTelemetry 'MeterProvider override' crashes.
 _SPANNER_CLIENT_CACHE = None
@@ -117,7 +116,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     ops_class = DatabaseOperations
     client_class = DatabaseClient
 
-
     @property
     def instance(self):
         """Reference to a Cloud Spanner Instance containing the Database.
@@ -131,12 +129,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             return self.settings_dict["OPTIONS"]["client"].instance(
                 self.settings_dict["INSTANCE"]
             )
-        
+
         if _SPANNER_CLIENT_CACHE is None:
             _SPANNER_CLIENT_CACHE = spanner.Client(
                 project=os.environ["GOOGLE_CLOUD_PROJECT"]
             )
-        
+
         return _SPANNER_CLIENT_CACHE.instance(self.settings_dict["INSTANCE"])
 
     @property

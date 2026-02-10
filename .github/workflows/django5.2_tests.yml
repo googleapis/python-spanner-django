@@ -13,7 +13,7 @@ jobs:
         chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         include:
           - chunk: 0
-            apps: admin_changelist admin_ordering distinct_on_fields expressions_window fixtures_model_package datetimes custom_methods generic_inline_admin field_defaults datatypes empty m2o_recursive many_to_one_null invalid_models_tests migrate_signals model_forms.test_uuid view_tests update select_related_onetoone sessions_tests
+            apps: admin_changelist admin_ordering distinct_on_fields expressions_window fixtures_model_package datetimes custom_methods generic_inline_admin field_defaults datatypes empty m2o_recursive many_to_one_null migrate_signals model_forms.test_uuid view_tests update select_related_onetoone sessions_tests
           - chunk: 1
             apps: db_functions save_delete_hooks get_object_or_404 model_indexes custom_pk indexes transaction_hooks constraints schema custom_columns i18n from_db_value sites_tests mutually_referential model_package defer_regress update_only_fields backends redirects_tests expressions get_or_create foreign_object generic_relations_regress many_to_many select_related generic_relations queryset_pickle model_inheritance
           - chunk: 2

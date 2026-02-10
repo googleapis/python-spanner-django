@@ -6,6 +6,7 @@
 import os
 import uuid
 
+import django
 from django.db import NotSupportedError
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.models.fields import NOT_PROVIDED
@@ -403,9 +404,22 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
         # Handle GeneratedField
         if getattr(field, "generated", False):
-            sql += " GENERATED ALWAYS AS (%s) STORED" % field.generated_sql(
+            generated_sql, generated_params = field.generated_sql(
                 self.connection
             )
+            quoted_params = []
+            for p in generated_params:
+                if isinstance(p, str):
+                    quoted_params.append(
+                        "'%s'" % p.replace("\\", "\\\\").replace("'", "\\'")
+                    )
+                elif isinstance(p, bool):
+                    quoted_params.append("TRUE" if p else "FALSE")
+                elif p is None:
+                    quoted_params.append("NULL")
+                else:
+                    quoted_params.append(str(p))
+            sql += " AS (%s) STORED" % (generated_sql % tuple(quoted_params))
 
         # Handle db_default
         db_default = getattr(field, "db_default", None)
@@ -558,8 +572,6 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             "name": self.quote_name(name),
             "constraint": self.sql_check_constraint % {"check": check},
         }
-
-
 
     def skip_default(self, field):
         """

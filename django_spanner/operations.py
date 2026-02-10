@@ -25,6 +25,20 @@ from google.cloud.spanner_dbapi.parse_utils import (
 class DatabaseOperations(BaseDatabaseOperations):
     """A Spanner-specific version of Django database operations."""
 
+    # Cloud Spanner only supports INT64, so all integer fields can hold
+    # 64-bit values.
+    integer_field_ranges = {
+        "SmallIntegerField": (-9223372036854775808, 9223372036854775807),
+        "IntegerField": (-9223372036854775808, 9223372036854775807),
+        "BigIntegerField": (-9223372036854775808, 9223372036854775807),
+        "PositiveBigIntegerField": (0, 9223372036854775807),
+        "PositiveSmallIntegerField": (0, 9223372036854775807),
+        "PositiveIntegerField": (0, 9223372036854775807),
+        "SmallAutoField": (-9223372036854775808, 9223372036854775807),
+        "AutoField": (-9223372036854775808, 9223372036854775807),
+        "BigAutoField": (-9223372036854775808, 9223372036854775807),
+    }
+
     cast_data_types = {"CharField": "STRING", "TextField": "STRING"}
     cast_char_field_without_max_length = "STRING"
     compiler_module = "django_spanner.compiler"
@@ -171,9 +185,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             with self.connection.cursor() as cursor:
                 # We might need several passes if there is a deep dependency chain
                 remaining_sql = list(sql_list)
-                
+
                 # Safety valve: 10 passes should be enough for any reasonable schema depth
-                max_passes = 10 
+                max_passes = 10
                 pass_count = 0
 
                 while remaining_sql:
@@ -183,10 +197,12 @@ class DatabaseOperations(BaseDatabaseOperations):
                     last_exception = None
 
                     if pass_count > max_passes:
-                         # We are stuck in a cycle or too deep
-                         if last_exception:
-                             raise last_exception
-                         raise DatabaseError("Max passes reached in execute_sql_flush without clearing all tables.")
+                        # We are stuck in a cycle or too deep
+                        if last_exception:
+                            raise last_exception
+                        raise DatabaseError(
+                            "Max passes reached in execute_sql_flush without clearing all tables."
+                        )
 
                     for sql in remaining_sql:
                         try:

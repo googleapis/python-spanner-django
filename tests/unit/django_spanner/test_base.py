@@ -12,11 +12,14 @@ class TestBase(SpannerSimpleTestClass):
     def test_property_instance(self):
         # Reset global cache to ensure we test the creation logic
         import django_spanner.base
+
         django_spanner.base._SPANNER_CLIENT_CACHE = None
-        
+
         with mock.patch("django_spanner.base.spanner") as mock_spanner:
             mock_spanner.Client = mock_client = mock.MagicMock()
-            mock_client.return_value.instance = mock_instance = mock.MagicMock()
+            mock_client.return_value.instance = mock_instance = (
+                mock.MagicMock()
+            )
             _ = self.db_wrapper.instance
             # Instance should be called on the return value of Client()
             self.assertTrue(mock_instance.called)

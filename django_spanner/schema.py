@@ -426,8 +426,20 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         if db_default is not None and db_default is not NOT_PROVIDED:
             default_sql, default_params = self.db_default_sql(field)
             if default_sql:
-                sql += " DEFAULT (%s)" % default_sql
-                params.extend(default_params)
+                # Spanner DDL doesn't support parameters, so we must inline them.
+                quoted_params = []
+                for p in default_params:
+                    if isinstance(p, str):
+                        quoted_params.append(
+                            "'%s'" % p.replace("\\", "\\\\").replace("'", "\\'")
+                        )
+                    elif isinstance(p, bool):
+                        quoted_params.append("TRUE" if p else "FALSE")
+                    elif p is None:
+                        quoted_params.append("NULL")
+                    else:
+                        quoted_params.append(str(p))
+                sql += " DEFAULT (%s)" % (default_sql % tuple(quoted_params))
 
         # Return the sql
         return sql, params

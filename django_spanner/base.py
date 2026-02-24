@@ -178,6 +178,25 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         :raises: :class:`ValueError` in case the given instance/database
                  doesn't exist.
         """
+        # Patch AutoFields if they haven't been patched yet.
+        from django.apps import apps
+        from django.db.models.fields import (
+            NOT_PROVIDED,
+            AutoField,
+            BigAutoField,
+            SmallAutoField,
+        )
+        from django_spanner import gen_rand_int64
+
+        try:
+            for model in apps.get_models():
+                for field in model._meta.fields:
+                    if isinstance(field, (AutoField, SmallAutoField, BigAutoField)):
+                        if getattr(field, "default", NOT_PROVIDED) == NOT_PROVIDED:
+                            field.default = gen_rand_int64
+        except Exception:
+            pass
+
         conn_params.pop("instance", None)
         conn_params.pop("instance_id", None)
         conn_params.pop("client", None)

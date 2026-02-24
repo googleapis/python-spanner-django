@@ -25,6 +25,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     max_query_params = 900
     # Spanner does not support parameterized defaults in DDL
     requires_literal_defaults = True
+    bare_select_suffix = " FROM (SELECT 1)"
 
     if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
         supports_foreign_keys = False
@@ -58,6 +59,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     uses_savepoints = True
     can_rollback_tests = False  # Spanner savepoints are no-ops; rely on flush.
     supports_aggregate_filter_clause = False
+    supports_slicing_ordering_in_compound = True
     # Spanner does not support expression indexes
     # example: CREATE INDEX index_name ON table (LOWER(column_name))
     supports_expression_indexes = False
@@ -406,7 +408,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # Spanner does not support deferred unique constraints
         "migrations.test_operations.OperationTests.test_create_model_with_deferred_unique_constraint",
         # Spanner does not support JSON object query on fields.
-
         # Spanner does not support iso_week_day but week_day is supported.
         "timezones.tests.LegacyDatabaseTests.test_query_datetime_lookups",
         "timezones.tests.NewDatabaseTests.test_query_datetime_lookups",
@@ -435,7 +436,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         # Spanner supports order by id, but it's does not work the same way as
         # an auto increment field.
         "model_forms.test_modelchoicefield.ModelChoiceFieldTests.test_choice_iterator_passes_model_to_widget",
-        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
         "ordering.tests.OrderingTests.test_order_by_self_referential_fk",
         "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
         "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
@@ -462,6 +462,16 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         "timezones.tests.NewDatabaseTests.test_query_convert_timezones",
         # Spanner doesn't support random ordering.
         "aggregation.tests.AggregateTestCase.test_aggregation_random_ordering",
+        # Spanner uses random 64-bit integers for AutoField, which is incompatible
+        # with tests that assume sequential IDs or order by PK for determinism.
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_empty_slice",
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_select_related_and_order",
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_with_values_list_and_order",
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_qs_with_subcompound_qs",
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_multiple_models_with_values_list_and_datetime_annotations",
+        "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_multiple_models_with_values_and_datetime_annotations",
+        "queries.test_query.TestQuery.test_negated_nullable",
+        "queries.test_iterator.QuerySetIteratorTests",
         # Tests that require transactions.
         "test_utils.tests.CaptureOnCommitCallbacksTests.test_execute",
         "test_utils.tests.CaptureOnCommitCallbacksTests.test_no_arguments",
@@ -1784,8 +1794,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "sitemaps_tests.test_https.HTTPSDetectionSitemapTests.test_sitemap_section_with_https_request",  # noqa
             "sitemaps_tests.test_https.HTTPSSitemapTests.test_secure_sitemap_index",  # noqa
             "sitemaps_tests.test_https.HTTPSSitemapTests.test_secure_sitemap_section",  # noqa
-
-
             "string_lookup.tests.StringLookupTests.test_queries_on_textfields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model_without_fields",  # noqa
             "force_insert_update.tests.InheritanceTests.test_force_update_on_inherited_model",  # noqa

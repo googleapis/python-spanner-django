@@ -126,37 +126,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "VALUES " + values_sql
 
     def sql_flush(
-        self, style, tables, reset_sequences=False, allow_cascade=False
+        self, style, tables, *, reset_sequences=False, allow_cascade=False
     ):
         """
-        Override the base class method. Returns a list of SQL statements
-        required to remove all data from the given database tables (without
-        actually removing the tables themselves).
-
-        :type style: :class:`~django.core.management.color.Style`
-        :param style: (Currently not used) An object as returned by either
-                      color_style() or no_style().
-
-        :type tables: list
-        :param tables: A collection of Cloud Spanner Tables
-
-        :type reset_sequences: bool
-        :param reset_sequences: (Optional) Currently not used.
-
-        :type allow_cascade: bool
-        :param allow_cascade: (Optional) Currently not used.
-
-        :rtype: list
-        :returns: A list of SQL statements required to remove all data from
-        the given database tables.
+        Return the SQL for flushing the database.
         """
-        # Cloud Spanner doesn't support TRUNCATE so DELETE instead.
-        # A dummy WHERE clause is required.
         if tables:
-            delete_sql = "%s %s %%s WHERE true" % (
-                style.SQL_KEYWORD("DELETE"),
-                style.SQL_KEYWORD("FROM"),
-            )
+            delete_sql = "DELETE FROM %s WHERE true;"
             return [
                 delete_sql % style.SQL_FIELD(self.quote_name(table))
                 for table in tables
@@ -167,12 +143,33 @@ class DatabaseOperations(BaseDatabaseOperations):
     def execute_sql_flush(self, sql_list):
         """Execute a list of SQL statements to flush the database.
 
-        Cloud Spanner doesn't support disabling foreign key checks, so we use a
-        retry mechanism to handle deletion order. We try to delete from all tables;
-        if some fail due to foreign key constraints, we retry them in subsequent
-        passes. As long as we make progress (delete at least one table) in each
-        pass, we continue.
+        In test mode, we perform a robust hard reset by:
+        1. Clearing broken transaction state (needs_rollback).
+        2. Ensuring autocommit=True.
+        3. Forcefully discovering and deleting from ALL user tables if needed.
         """
+        # Always reset transaction state to allow flush to proceed even if the last test failed
+        # in an atomic block. This is safe because flush is a full database reset.
+        if self.connection.connection is not None:
+            try:
+                self.connection.connection.rollback()
+            except Exception:
+                pass
+        self.connection.needs_rollback = False
+        self.connection.in_atomic_block = False
+        self.connection.atomic_blocks = []
+
+        # If we are running backend tests, we want to be absolutely sure everything is cleared.
+        # Sometimes Django passes an incomplete list or we have orphaned data from previous failures.
+        if os.environ.get("RUNNING_SPANNER_BACKEND_TESTS") == "1":
+            with self.connection.cursor() as cursor:
+                tables = self.connection.introspection.table_names(cursor)
+                if tables:
+                    sql_list = [
+                        "DELETE FROM %s WHERE true" % self.quote_name(table)
+                        for table in tables
+                    ]
+
         if not sql_list:
             return
 

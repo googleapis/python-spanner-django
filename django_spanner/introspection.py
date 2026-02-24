@@ -33,7 +33,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         FROM
             information_schema.tables AS t
         WHERE
-            t.table_catalog = '' and t.table_schema = @schema_name
+            t.table_catalog = '' AND COALESCE(t.table_schema, '') = COALESCE(@schema_name, '')
     """
 
     def get_field_type(self, data_type, description):
@@ -150,7 +150,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.UNIQUE_CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_SCHEMA=@schema_name AND tc.TABLE_NAME=@view_name
+                COALESCE(tc.TABLE_SCHEMA, '') = COALESCE(@schema_name, '') AND tc.TABLE_NAME=@view_name
             """,
             params={"schema_name": schema_name, "view_name": table_name},
         )
@@ -183,7 +183,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             AS
                 ccu ON tc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_NAME=@table_name AND tc.CONSTRAINT_TYPE='PRIMARY KEY' AND tc.TABLE_SCHEMA=@schema_name
+                tc.TABLE_NAME=@table_name AND tc.CONSTRAINT_TYPE='PRIMARY KEY' AND COALESCE(tc.TABLE_SCHEMA, '') = COALESCE(@schema_name, '')
             """,
             params={"schema_name": schema_name, "table_name": table_name},
         )
@@ -211,7 +211,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 CONSTRAINT_NAME, COLUMN_NAME
             FROM
                 INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE
-               WHERE TABLE_NAME=@table AND TABLE_SCHEMA=@schema_name""",
+               WHERE TABLE_NAME=@table AND COALESCE(TABLE_SCHEMA, '') = COALESCE(@schema_name, '')""",
             params={"table": table_name, "schema_name": schema_name},
         )
         for constraint, column_name in constraint_columns:
@@ -237,7 +237,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             FROM
                 INFORMATION_SCHEMA.TABLE_CONSTRAINTS
             WHERE
-                TABLE_NAME=@table AND TABLE_SCHEMA=@schema_name""",
+                TABLE_NAME=@table AND COALESCE(TABLE_SCHEMA, '') = COALESCE(@schema_name, '')""",
             params={"table": table_name, "schema_name": schema_name},
         )
         for constraint, constraint_type in constraint_types:
@@ -279,9 +279,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             RIGHT JOIN
                 INFORMATION_SCHEMA.INDEX_COLUMNS AS idx_col
             ON
-                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME=@table AND idx_col.TABLE_SCHEMA=idx.TABLE_SCHEMA
+                idx_col.INDEX_NAME = idx.INDEX_NAME AND idx_col.TABLE_NAME=@table AND COALESCE(idx_col.TABLE_SCHEMA, '') = COALESCE(idx.TABLE_SCHEMA, '')
             WHERE
-                idx.TABLE_NAME=@table AND idx.TABLE_SCHEMA=@schema_name
+                idx.TABLE_NAME=@table AND COALESCE(idx.TABLE_SCHEMA, '') = COALESCE(@schema_name, '')
             ORDER BY
                 idx_col.ORDINAL_POSITION
             """,
@@ -342,7 +342,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             ON
                 rc.CONSTRAINT_NAME = ccu.CONSTRAINT_NAME
             WHERE
-                tc.TABLE_NAME=@table AND tc.TABLE_SCHEMA=@schema_name
+                tc.TABLE_NAME=@table AND COALESCE(tc.TABLE_SCHEMA, '') = COALESCE(@schema_name, '')
             """,
             params={"table": table_name, "schema_name": schema_name},
         )
@@ -350,4 +350,4 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return key_columns
 
     def _get_schema_name(self, cursor):
-        return cursor.connection.current_schema
+        return cursor.connection.current_schema or ""

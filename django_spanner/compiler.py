@@ -22,26 +22,6 @@ class SQLCompiler(BaseSQLCompiler):
     """
 
     def get_combinator_sql(self, combinator, all):
-        """Override the native Django method.
-
-        Copied from the base class except for:
-            combinator_sql += ' ALL' if all else ' DISTINCT'
-        Cloud Spanner requires ALL or DISTINCT.
-
-        :type combinator: str
-        :param combinator: A type of the combinator for the operation.
-
-        :type all: bool
-        :param all: Bool option for the SQL statement.
-
-        :rtype: tuple
-        :returns: A tuple containing SQL statement(s) with some additional
-                  parameters.
-        """
-        # This method copies the complete code of this overridden method from
-        # Django core and modify it for Spanner by adding one line
-        # This method copies the complete code of this overridden method from
-        # Django core and modify it for Spanner by adding one line
         features = self.connection.features
         compilers = [
             query.get_compiler(self.using, self.connection, self.elide_empty)
@@ -57,69 +37,34 @@ class SQLCompiler(BaseSQLCompiler):
                     raise DatabaseError(
                         "ORDER BY not allowed in subqueries of compound statements."
                     )
-        elif self.query.is_sliced and combinator == "union":
-            for compiler in compilers:
-                # A sliced union cannot have its parts elided as some of them
-                # might be sliced as well and in the event where only a single
-                # part produces a non-empty resultset it might be impossible to
-                # generate valid SQL.
-                compiler.elide_empty = False
-        parts = ()
+        parts = []
+        empty_compiler = None
         for compiler in compilers:
             try:
-                # If the columns list is limited, then all combined queries
-                # must have the same columns list. Set the selects defined on
-                # the query on all combined queries, if not already set.
-                if (
-                    not compiler.query.values_select
-                    and self.query.values_select
-                ):
-                    compiler.query = compiler.query.clone()
-                    compiler.query.set_values(
-                        (
-                            *self.query.extra_select,
-                            *self.query.values_select,
-                            *self.query.annotation_select,
-                        )
-                    )
-                part_sql, part_args = compiler.as_sql(with_col_aliases=True)
-                if compiler.query.combinator:
-                    # Wrap in a subquery if wrapping in parentheses isn't
-                    # supported.
-                    if not features.supports_parentheses_in_compound:
-                        part_sql = "SELECT * FROM ({})".format(part_sql)
-                    # Add parentheses when combining with compound query if not
-                    # already added for all compound queries.
-                    elif (
-                        self.query.subquery
-                        or not features.supports_slicing_ordering_in_compound
-                    ):
-                        part_sql = "({})".format(part_sql)
-                elif (
-                    self.query.subquery
-                    and features.supports_slicing_ordering_in_compound
-                ):
-                    part_sql = "({})".format(part_sql)
-                parts += ((part_sql, part_args),)
+                # Use Django 5.2's combinator part SQL generation which handles column ordering correctly
+                parts.append(self._get_combinator_part_sql(compiler))
             except EmptyResultSet:
                 # Omit the empty queryset with UNION and with DIFFERENCE if the
                 # first queryset is nonempty.
-                if combinator == "union" or (
-                    combinator == "difference" and parts
-                ):
+                if combinator == "union" or (combinator == "difference" and parts):
+                    empty_compiler = compiler
                     continue
                 raise
         if not parts:
             raise EmptyResultSet
+        elif len(parts) == 1 and combinator == "union" and self.query.is_sliced:
+            # A sliced union cannot be composed of a single component because
+            # in the event the later is also sliced it might result in invalid
+            # SQL due to the usage of multiple LIMIT clauses. Prevent that from
+            # happening by always including an empty resultset query to force
+            # the creation of an union.
+            empty_compiler.elide_empty = False
+            parts.append(self._get_combinator_part_sql(empty_compiler))
         combinator_sql = self.connection.ops.set_operators[combinator]
-        # This is the only line that is changed from the Django core
-        # implementation of this method
+        # Spanner requires ALL or DISTINCT for all set operators (UNION, INTERSECT, EXCEPT)
         combinator_sql += " ALL" if all else " DISTINCT"
         braces = "{}"
-        if (
-            not self.query.subquery
-            and features.supports_slicing_ordering_in_compound
-        ):
+        if not self.query.subquery and features.supports_slicing_ordering_in_compound:
             braces = "({})"
         sql_parts, args_parts = zip(
             *((braces.format(sql), args) for sql, args in parts)

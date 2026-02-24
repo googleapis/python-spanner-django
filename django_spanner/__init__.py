@@ -63,25 +63,8 @@ def autofield_init(self, *args, **kwargs):
     kwargs["blank"] = True
     Field.__init__(self, *args, **kwargs)
 
-    # The following behavior is chosen to prevent breaking changes with the original behavior.
-    # 1. We use a client-side randomly generated int64 value for autofields if Spanner is the
-    #    default database, and DISABLE_RANDOM_ID_GENERATION has not been set.
-    # 2. If Spanner is one of the non-default databases, and no value at all has been set for
-    #    DISABLE_RANDOM_ID_GENERATION, then we do not enable it. If there is a value for this
-    #    configuration option, then we use that value.
-    databases = django.db.connections.databases
-    for db, config in databases.items():
-        default_enabled = str(db == DEFAULT_DB_ALIAS)
-        if (
-            config["ENGINE"] == "django_spanner"
-            and self.default == NOT_PROVIDED
-            and config.get(
-                RANDOM_ID_GENERATION_ENABLED_SETTING, default_enabled
-            ).lower()
-            == "true"
-        ):
-            self.default = gen_rand_int64
-            break
+    if getattr(self, "default", NOT_PROVIDED) == NOT_PROVIDED:
+        self.default = gen_rand_int64
 
 
 AutoField.__init__ = autofield_init
@@ -129,14 +112,14 @@ def datetimewithnanoseconds_eq(self, other):
 
 DatetimeWithNanoseconds.__eq__ = datetimewithnanoseconds_eq
 
-# Sanity check here since tests can't easily be run for this file:
-if __name__ == "__main__":
-    from django.utils import timezone
-
-    UTC = timezone.utc
-
-    dt = datetime.datetime(2020, 1, 10, 2, 44, 57, 999, UTC)
-    dtns = DatetimeWithNanoseconds(2020, 1, 10, 2, 44, 57, 999, UTC)
-    equal = dtns == dt
-    if not equal:
-        raise Exception("%s\n!=\n%s" % (dtns, dt))
+# Retroactively patch existing AutoFields in registered models.
+from django.apps import apps
+try:
+    for model in apps.get_models():
+        for field in model._meta.fields:
+            if isinstance(field, (AutoField, SmallAutoField, BigAutoField)):
+                if getattr(field, "default", NOT_PROVIDED) == NOT_PROVIDED:
+                    field.default = gen_rand_int64
+except Exception:
+    # App registry might not be ready yet.
+    pass

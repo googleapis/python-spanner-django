@@ -469,7 +469,7 @@ class TestUtils(SpannerSimpleTestClass):
         ] = "false"
         field = AutoField(name="field_name")
         assert gen_rand_int64 != field.default
-        # Because we're delegating ID generation back to the database backend, 
+        # Because we're delegating ID generation back to the database backend,
         # Django needs to be able to retrieve the assigned ID.
         assert field.db_returning is True
         del connections.settings["default"]["RANDOM_ID_GENERATION_ENABLED"]

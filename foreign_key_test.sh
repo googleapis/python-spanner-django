@@ -1,4 +1,4 @@
-pip install django==3.2
+pip install setuptools django==3.2
 
 mkdir django_test
 cd django_test

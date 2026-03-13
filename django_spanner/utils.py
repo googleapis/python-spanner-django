@@ -15,7 +15,7 @@ def check_django_compatability(supported_django_versions):
     version of Django. For example, django-spanner is compatible
     with Django 2.2.y and 3.2.z
     """
-    from . import __version__
+    from .version import __version__
 
     if django.VERSION[:2] not in supported_django_versions:
         raise ImproperlyConfigured(

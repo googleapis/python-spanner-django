@@ -13,6 +13,7 @@
 # limitations under the License.
 from google.cloud.spanner_v1 import (
     BatchCreateSessionsRequest,
+    CreateSessionRequest,
     ExecuteSqlRequest,
     CommitRequest,
 )
@@ -35,10 +36,15 @@ class TestBasics(MockServerTestBase):
             result_list.append(row)
             self.assertEqual(row[0], 1)
         self.assertEqual(len(result_list), 1)
-        requests = self.spanner_service.requests
-        self.assertEqual(len(requests), 2)
-        self.assertIsInstance(requests[0], BatchCreateSessionsRequest)
-        self.assertIsInstance(requests[1], ExecuteSqlRequest)
+        requests = [
+            r
+            for r in self.spanner_service.requests
+            if not isinstance(
+                r, (BatchCreateSessionsRequest, CreateSessionRequest)
+            )
+        ]
+        self.assertEqual(len(requests), 1)
+        self.assertIsInstance(requests[0], ExecuteSqlRequest)
 
     def test_select1(self):
         add_select1_result()
@@ -58,10 +64,15 @@ class TestBasics(MockServerTestBase):
         )
         singers = Singer.objects.all()
         self.assertEqual(len(singers), 2)
-        requests = self.spanner_service.requests
-        self.assertEqual(len(requests), 2)
-        self.assertIsInstance(requests[0], BatchCreateSessionsRequest)
-        self.assertIsInstance(requests[1], ExecuteSqlRequest)
+        requests = [
+            r
+            for r in self.spanner_service.requests
+            if not isinstance(
+                r, (BatchCreateSessionsRequest, CreateSessionRequest)
+            )
+        ]
+        self.assertEqual(len(requests), 1)
+        self.assertIsInstance(requests[0], ExecuteSqlRequest)
 
     def test_django_select_singer_using_other_db(self):
         add_singer_query_result(
@@ -69,10 +80,15 @@ class TestBasics(MockServerTestBase):
         )
         singers = Singer.objects.using("secondary").all()
         self.assertEqual(len(singers), 2)
-        requests = self.spanner_service.requests
-        self.assertEqual(len(requests), 2)
-        self.assertIsInstance(requests[0], BatchCreateSessionsRequest)
-        self.assertIsInstance(requests[1], ExecuteSqlRequest)
+        requests = [
+            r
+            for r in self.spanner_service.requests
+            if not isinstance(
+                r, (BatchCreateSessionsRequest, CreateSessionRequest)
+            )
+        ]
+        self.assertEqual(len(requests), 1)
+        self.assertIsInstance(requests[0], ExecuteSqlRequest)
 
     def test_insert_singer(self):
         add_update_count(
@@ -83,16 +99,21 @@ class TestBasics(MockServerTestBase):
         )
         singer = Singer(first_name="test", last_name="test")
         singer.save()
-        requests = self.spanner_service.requests
-        self.assertEqual(len(requests), 3)
-        self.assertIsInstance(requests[0], BatchCreateSessionsRequest)
-        self.assertIsInstance(requests[1], ExecuteSqlRequest)
-        self.assertIsInstance(requests[2], CommitRequest)
+        requests = [
+            r
+            for r in self.spanner_service.requests
+            if not isinstance(
+                r, (BatchCreateSessionsRequest, CreateSessionRequest)
+            )
+        ]
+        self.assertEqual(len(requests), 2)
+        self.assertIsInstance(requests[0], ExecuteSqlRequest)
+        self.assertIsInstance(requests[1], CommitRequest)
         # The ExecuteSqlRequest should have 3 parameters:
         # 1. first_name
         # 2. last_name
         # 3. client-side auto-generated primary key
-        self.assertEqual(len(requests[1].params), 3)
+        self.assertEqual(len(requests[0].params), 3)
 
     def test_insert_singer_with_disabled_random_primary_key(self):
         for db, config in DATABASES.items():
@@ -114,16 +135,21 @@ class TestBasics(MockServerTestBase):
             )
             singer = LocalSinger(first_name="test", last_name="test")
             singer.save()
-            requests = self.spanner_service.requests
-            self.assertEqual(len(requests), 3)
-            self.assertIsInstance(requests[0], BatchCreateSessionsRequest)
-            self.assertIsInstance(requests[1], ExecuteSqlRequest)
-            self.assertIsInstance(requests[2], CommitRequest)
+            requests = [
+                r
+                for r in self.spanner_service.requests
+                if not isinstance(
+                    r, (BatchCreateSessionsRequest, CreateSessionRequest)
+                )
+            ]
+            self.assertEqual(len(requests), 2)
+            self.assertIsInstance(requests[0], ExecuteSqlRequest)
+            self.assertIsInstance(requests[1], CommitRequest)
             # The ExecuteSqlRequest should have 2 parameters:
             # 1. first_name
             # 2. last_name
             # There should be no client-side auto-generated primary key.
-            self.assertEqual(len(requests[1].params), 2)
+            self.assertEqual(len(requests[0].params), 2)
         finally:
             for db, config in DATABASES.items():
                 if config["ENGINE"] == "django_spanner":

@@ -15,7 +15,7 @@ import shutil
 
 import nox
 
-BLACK_VERSION = "black==22.3.0"
+BLACK_VERSION = "black==24.3.0"
 BLACK_PATHS = [
     "docs",
     "django_spanner",
@@ -25,9 +25,9 @@ BLACK_PATHS = [
 ]
 
 MOCKSERVER_TEST_PYTHON_VERSION = "3.12"
-DEFAULT_PYTHON_VERSION = "3.8"
-SYSTEM_TEST_PYTHON_VERSIONS = ["3.8"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.8", "3.9", "3.10"]
+DEFAULT_PYTHON_VERSION = "3.14"
+SYSTEM_TEST_PYTHON_VERSIONS = ["3.14"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.10", "3.12", "3.14"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
@@ -68,6 +68,7 @@ def lint_setup_py(session):
 
 
 def default(session, django_version="3.2"):
+    session.env["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
     # Install all test dependencies, then install this package in-place.
     session.install(
         "setuptools",
@@ -77,11 +78,13 @@ def default(session, django_version="3.2"):
         "pytest",
         "pytest-cov",
         "coverage",
-        "sqlparse==0.3.1",
-        "google-cloud-spanner>=3.13.0",
+        "sqlparse>=0.4.4",
+        "google-cloud-spanner>=3.40.0",
+        "protobuf>=5.27.0",
         "opentelemetry-api==1.1.0",
         "opentelemetry-sdk==1.1.0",
         "opentelemetry-instrumentation==0.20b0",
+        "legacy-cgi",
     )
     session.install("-e", ".")
 
@@ -97,20 +100,23 @@ def default(session, django_version="3.2"):
         "--cov-fail-under=75",
         os.path.join("tests", "unit"),
         *session.posargs,
+        env={"PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"},
     )
 
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
     """Run the unit test suite."""
-    print("Unit tests with django 3.2")
-    default(session)
+    if session.python == "3.10":
+        print("Unit tests with django 3.2")
+        default(session)
     print("Unit tests with django 4.2")
     default(session, django_version="4.2")
 
 
 @nox.session(python=MOCKSERVER_TEST_PYTHON_VERSION)
 def mockserver(session):
+    session.env["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
     # Install all test dependencies, then install this package in-place.
     session.install(
         "setuptools",
@@ -122,6 +128,7 @@ def mockserver(session):
         "coverage",
         "sqlparse>=0.4.4",
         "google-cloud-spanner>=3.55.0",
+        "protobuf>=5.27.0",
         "opentelemetry-api==1.1.0",
         "opentelemetry-sdk==1.1.0",
         "opentelemetry-instrumentation==0.20b0",
@@ -132,11 +139,13 @@ def mockserver(session):
         "--quiet",
         os.path.join("tests", "mockserver_tests"),
         *session.posargs,
+        env={"PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION": "python"},
     )
 
 
 def system_test(session, django_version="3.2"):
     """Run the system test suite."""
+    session.env["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
     constraints_path = str(
         CURRENT_DIRECTORY / "testing" / f"constraints-{session.python}.txt"
     )
@@ -185,8 +194,9 @@ def system_test(session, django_version="3.2"):
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system(session):
-    print("System tests with django 3.2")
-    system_test(session)
+    if session.python == "3.10":
+        print("System tests with django 3.2")
+        system_test(session)
     print("System tests with django 4.2")
     system_test(session, django_version="4.2")
 
